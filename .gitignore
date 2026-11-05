@@ -1,0 +1,25 @@
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment & Secrets
+.env
+.env.local
+
+# Data storage & SQLite databases
+data/
+*.db
+*.sqlite3
+
+# Distribution / Packaging
+build/
+dist/
+*.egg-info/
+

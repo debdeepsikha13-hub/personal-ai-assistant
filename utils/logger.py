@@ -1,0 +1,24 @@
+"""
+Logging and Telemetry Utility.
+==============================
+Provides structured and clean logging for agent execution, tool calls, and errors.
+"""
+
+import logging
+import sys
+
+
+def setup_logger(name: str = "assistant", level: int = logging.INFO) -> logging.Logger:
+    """Configures and returns a standardized logger."""
+    logger = logging.getLogger(name)
+    if not logger.handlers:
+        handler = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter(
+            fmt="%(asctime)s [%(levelname)s] %(message)s",
+            datefmt="%H:%M:%S"
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    logger.setLevel(level)
+    return logger
+

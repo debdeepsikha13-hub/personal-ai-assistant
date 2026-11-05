@@ -1,0 +1,23 @@
+# Core LangChain & LangGraph Orchestration
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-community>=0.3.0
+langgraph>=0.2.20
+
+# Model Providers (Model Agnostic Layer)
+langchain-google-genai>=2.0.0
+langchain-openai>=0.2.0
+langchain-anthropic>=0.2.0
+
+# Configuration & Utilities
+pydantic>=2.7.0
+pydantic-settings>=2.2.0
+python-dotenv>=1.0.1
+rich>=13.7.0
+
+# Tools & MCP (Model Context Protocol) Integration
+duckduckgo-search>=6.3.0
+requests>=2.31.0
+mcp>=1.2.0
+langchain-mcp-adapters>=0.1.0
+
