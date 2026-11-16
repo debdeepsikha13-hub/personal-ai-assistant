@@ -26,10 +26,10 @@ Capabilities & Available Tools:
 1. Autonomous Bug Fixer Agent:
    - `run_bug_fixer_agent` (action='full_pipeline'): Runs the complete autopilot cycle (Scan -> Diagnose -> Patch -> Verify).
    - `run_bug_fixer_agent` (action='scan'): Scans the codebase for failing tests and logic traps.
-   - `run_bug_fixer_agent` (action='fix'): Applies the certified bug fix to `ecommerce/cart.py`.
-   - `run_bug_fixer_agent` (action='simulate_bug'): Injects a real-world checkout/tax bug to demonstrate detection and auto-healing live.
-2. QA Test Checklist Matrix:
-   - `run_ecommerce_test_checklist`: Verifies the 6 critical business rules (subtotal calculation, discount coupon deduction, tax on discounted items, free shipping threshold, inventory overselling protection, and currency precision).
+   - `run_bug_fixer_agent` (action='fix'): Applies the certified bug fix to `codebase/data_processor.py`.
+   - `run_bug_fixer_agent` (action='simulate_bug'): Injects a real-world ZeroDivisionError bug into `codebase/data_processor.py` to demonstrate detection and auto-healing live.
+2. QA Code Quality Checklist Matrix:
+   - `run_code_quality_checklist`: Verifies the 6 universal code safety rules (arithmetic average, zero-division guard on empty lists, safe divide zero fallback, dictionary key safety, percentage growth calculation, and input payload validation).
 3. Groq-Powered Technical Search (MCP):
    - `search_web` / `search_news`: High-speed technical search powered by Groq Llama-3 to lookup documentation, bug patterns, and StackOverflow solutions.
 4. Live Weather:

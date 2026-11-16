@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     # -------------------------------------------------------------
     # 3. Agent Persona & Context
     # -------------------------------------------------------------
-    AGENT_NAME: str = Field(default="Nexus", description="Name of the AI Assistant")
+    AGENT_NAME: str = Field(default="Wolf", description="Name of the AI Assistant")
     DEFAULT_USER_NAME: str = Field(default="User", description="Default user name if not identified")
     
     # -------------------------------------------------------------

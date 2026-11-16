@@ -10,7 +10,7 @@ WHY THIS FOLDER MATTERS:
   or specialized conversation pruning strategies.
 """
 
-from typing import List, Sequence
+from typing import List, Sequence, Optional
 from langchain_core.messages import BaseMessage, SystemMessage, trim_messages
 from config.settings import get_settings
 
