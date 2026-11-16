@@ -113,7 +113,7 @@ def run_bug_fixer_agent(action: str = "full_pipeline") -> str:
 
 
 @tool
-def run_ecommerce_test_checklist() -> str:
+def run_code_quality_checklist() -> str:
     """
     Runs the comprehensive QA Code Quality Checklist.
     Validates arithmetic, zero division handling, dictionary key safety, and input sanitization.
@@ -136,3 +136,7 @@ def run_ecommerce_test_checklist() -> str:
         lines.append(f"\n❌ {tests['failed_count']} checklist items failed. Call `run_bug_fixer_agent` to fix.")
         
     return "\n".join(lines)
+
+
+# Backwards compatibility alias
+run_ecommerce_test_checklist = run_code_quality_checklist
