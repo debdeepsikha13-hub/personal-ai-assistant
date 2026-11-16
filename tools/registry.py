@@ -14,22 +14,33 @@ HOW TO ADD A NEW TOOL:
 from typing import List
 from langchain_core.tools import BaseTool
 
-# Import core tools for the Auto-Dev & Bug Fixer Agent
+# 1. Native Assistant Tools (Weather, Math Calculator, Notes, Memory)
+from tools.weather_tool import get_weather
+from tools.calculator_tool import calculate
 from tools.memory_tool import remember_user_fact, get_user_facts
+from tools.notes_tool import save_note, list_notes
+
+# 2. Autonomous E-Commerce Bug Fixer & QA Tools
 from tools.bug_fixer_tool import run_bug_fixer_agent, run_ecommerce_test_checklist
 
-# Import MCP Multi-Server tool loader (GitHub & Groq Web Search)
+# 3. Import MCP Multi-Server tool loader (GitHub, Groq Web Search, PC Specs, Statistics)
 from mcp_service.manager import get_mcp_tools_sync
 from utils.logger import setup_logger
 
 logger = setup_logger("tool_registry")
 
-# Streamlined Auto-Dev tools
+# Unified suite of tools
 _NATIVE_TOOLS: List[BaseTool] = [
-    run_bug_fixer_agent,
-    run_ecommerce_test_checklist,
+    # Assistant & Utilities
+    get_weather,
+    calculate,
+    save_note,
+    list_notes,
     remember_user_fact,
-    get_user_facts
+    get_user_facts,
+    # Software Engineering & Bug Remediation
+    run_bug_fixer_agent,
+    run_ecommerce_test_checklist
 ]
 
 
