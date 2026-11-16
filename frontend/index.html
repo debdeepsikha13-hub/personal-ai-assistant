@@ -537,10 +537,11 @@
         if (toolsRes.ok) {
           const toolsData = await toolsRes.json();
           const tContainer = document.getElementById("tools-list-container");
-          tContainer.innerHTML = toolsData.tools.map(t => `
+          const toolsList = Array.isArray(toolsData) ? toolsData : (toolsData.tools || []);
+          tContainer.innerHTML = toolsList.map(t => `
             <div class="p-2 rounded bg-slate-950/70 border border-white/5 flex items-center justify-between">
               <span class="text-sky-300 font-semibold">${escapeHtml(t.name)}</span>
-              <span class="text-[10px] text-zinc-500 uppercase">${escapeHtml(t.source)}</span>
+              <span class="text-[10px] text-zinc-500 uppercase">${escapeHtml(t.type || t.source || 'tool')}</span>
             </div>
           `).join("");
         }
@@ -654,11 +655,6 @@
         console.error("Action error:", err);
       }
     }
-        appendAgentMessage(reportMsg, []);
-      } catch (err) {
-        console.error("Action error:", err);
-      }
-    }
 
     // Send Quick Prompt into Chat
     function sendQuickPrompt(promptText) {
@@ -745,9 +741,9 @@
       let toolHtml = "";
       if (toolCalls && toolCalls.length > 0) {
         const pills = toolCalls.map(tc => {
-          const toolName = tc.tool || "Tool";
+          const toolName = tc.name || tc.tool || "Tool";
           const toolArgs = JSON.stringify(tc.args || {}, null, 2);
-          const toolResult = typeof tc.result === "string" ? tc.result : JSON.stringify(tc.result || {}, null, 2);
+          const toolResult = tc.result !== undefined ? (typeof tc.result === "string" ? tc.result : JSON.stringify(tc.result, null, 2)) : "Executed successfully";
 
           return `
             <details class="text-[11px] border border-sky-500/20 rounded-lg overflow-hidden bg-slate-950/60 transition mb-1.5 group">
