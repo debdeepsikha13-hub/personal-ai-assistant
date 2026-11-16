@@ -150,7 +150,7 @@
       <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/5">
         <span class="text-zinc-500">TARGET:</span>
         <span class="text-sky-300 font-semibold flex items-center gap-1">
-          <i data-lucide="folder-code" class="w-3.5 h-3.5 text-sky-400"></i> ecommerce/cart.py
+          <i data-lucide="folder-code" class="w-3.5 h-3.5 text-sky-400"></i> codebase/data_processor.py
         </span>
       </div>
 
@@ -191,28 +191,28 @@
 
     <div class="flex items-center gap-2 overflow-x-auto">
       <!-- 1. Autopilot Full Pipeline -->
-      <button onclick="triggerBugAction('full_pipeline', '⚡ Running Autopilot: Code Scan ➔ Root Cause Diagnosis ➔ Groq Research ➔ Code Patch ➔ Test Verification...')" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-sky-600/25 transition">
+      <button onclick="triggerBugAction('full_pipeline', '⚡ Running Autopilot: Code Scan ➔ Traceback Diagnosis ➔ Patch Synthesis ➔ Quality Verification...')" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-sky-600/25 transition">
         <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Autopilot: Fix & Certify
       </button>
 
       <!-- 2. Simulate Real Bug -->
-      <button onclick="triggerBugAction('simulate_bug', '⚠️ Injected real-world tax & discount calculation bug into ecommerce/cart.py. Notice the QA Matrix update!')" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition">
-        <i data-lucide="bug" class="w-3.5 h-3.5 text-amber-400"></i> Simulate Real Bug
+      <button onclick="triggerBugAction('simulate_bug', '⚠️ Injected ZeroDivisionError bug into codebase/data_processor.py. Notice the QA Matrix update!')" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition">
+        <i data-lucide="bug" class="w-3.5 h-3.5 text-amber-400"></i> Simulate Code Bug
       </button>
 
       <!-- 3. Scan Codebase -->
-      <button onclick="triggerBugAction('scan', '🔍 Scanning e-commerce codebase and analyzing test assertions for failures...')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-sky-400/40 text-sky-200 flex items-center gap-1.5 transition">
+      <button onclick="triggerBugAction('scan', '🔍 Scanning codebase and analyzing test assertions for failures...')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-sky-400/40 text-sky-200 flex items-center gap-1.5 transition">
         <i data-lucide="search" class="w-3.5 h-3.5 text-sky-400"></i> Scan for Bugs
       </button>
 
       <!-- 4. Run QA Checklist -->
-      <button onclick="sendQuickPrompt('Run the full e-commerce QA test checklist.')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-emerald-400/40 text-emerald-200 flex items-center gap-1.5 transition">
+      <button onclick="sendQuickPrompt('Run the full code quality test checklist.')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-emerald-400/40 text-emerald-200 flex items-center gap-1.5 transition">
         <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i> Run QA Checklist
       </button>
 
-      <!-- 5. Groq Technical Search -->
-      <button onclick="sendQuickPrompt('Search technical documentation for Python ecommerce sales tax calculation before vs after discount')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-purple-400/40 text-purple-200 flex items-center gap-1.5 transition">
-        <i data-lucide="globe" class="w-3.5 h-3.5 text-purple-400"></i> Groq Tech Search
+      <!-- 5. Tech Search -->
+      <button onclick="sendQuickPrompt('Search technical documentation for Python ZeroDivisionError handling and safe division patterns')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-purple-400/40 text-purple-200 flex items-center gap-1.5 transition">
+        <i data-lucide="globe" class="w-3.5 h-3.5 text-purple-400"></i> Tech Web Search
       </button>
 
       <!-- 6. Kolkata Weather -->
@@ -287,7 +287,7 @@
                     <i data-lucide="wrench" class="w-3.5 h-3.5 text-sky-400"></i> Autonomous Bug Fixer
                   </div>
                   <div class="text-zinc-400 text-[11px]">
-                    Monitors our sample store in <code class="text-sky-300">ecommerce/cart.py</code>. If checkout or tax logic breaks, I diagnose the root cause, research fixes, and patch the file to pass all 6 QA tests!
+                    Monitors Python code in <code class="text-sky-300">codebase/data_processor.py</code>. If a ZeroDivisionError, null reference, or boundary flaw occurs, I diagnose the root cause, apply a code patch, and pass all 6 QA tests!
                   </div>
                 </div>
 
@@ -296,14 +296,14 @@
                     <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i> Full Assistant Suite
                   </div>
                   <div class="text-zinc-400 text-[11px]">
-                    Live weather for Kolkata, Windows PC hardware monitor (CPU/RAM/Disk), Groq-accelerated technical web search, GitHub repos, and persistent memory.
+                    Live weather for Kolkata, Windows PC hardware monitor (CPU/RAM/Disk), technical web search, GitHub repos, and persistent memory.
                   </div>
                 </div>
               </div>
 
               <div class="p-2.5 rounded-xl bg-slate-900/90 border border-amber-500/20 text-[11px] font-mono space-y-1">
                 <div class="text-amber-300 font-bold">👉 How to test the Bug Fixer Agent live:</div>
-                <div class="text-zinc-400">1. Click <strong class="text-amber-400">"Simulate Real Bug"</strong> above to inject a checkout tax flaw. The QA Matrix will turn <span class="text-red-400 font-bold">RED (FAIL ❌)</span>.</div>
+                <div class="text-zinc-400">1. Click <strong class="text-amber-400">"Simulate Code Bug"</strong> above to inject a ZeroDivisionError flaw. The QA Matrix will turn <span class="text-red-400 font-bold">RED (FAIL ❌)</span>.</div>
                 <div class="text-zinc-400">2. Click <strong class="text-sky-400">"Autopilot: Fix & Certify"</strong> to watch Wolf autonomously diagnose, patch, and restore all 6 tests to <span class="text-emerald-400 font-bold">GREEN (PASS ✅)</span>!</div>
               </div>
             </div>
@@ -393,10 +393,10 @@
           </div>
 
           <div id="diff-viewer" class="rounded-xl bg-slate-950 p-3 border border-white/5 font-mono text-[11px] space-y-1 overflow-x-auto">
-            <div class="text-zinc-500">// ecommerce/cart.py (Lines 105-110)</div>
-            <div class="diff-added">+ taxable_amount = max(0.0, subtotal - discount)</div>
-            <div class="diff-added">+ return round(taxable_amount * self.TAX_RATE, 2)</div>
-            <div class="text-zinc-400 text-[10px] pt-1 italic">✓ Certified: Tax computed strictly on discounted subtotal.</div>
+            <div class="text-zinc-500">// codebase/data_processor.py (calculate_average)</div>
+            <div class="diff-added">+ if not numbers: return 0.0</div>
+            <div class="diff-added">+ return round(sum(numbers) / len(numbers), 2)</div>
+            <div class="text-emerald-400 text-[10px] pt-1 italic">✓ Certified: ZeroDivisionError guard active for empty inputs.</div>
           </div>
         </div>
 
@@ -576,10 +576,10 @@
         diffStatusPill.innerText = "Bug Active in Code";
 
         diffViewer.innerHTML = `
-          <div class="text-zinc-500">// ecommerce/cart.py (calculate_tax)</div>
-          <div class="diff-deleted">- # BUG: Calculating tax on pre-discount amount!</div>
-          <div class="diff-deleted">- return round(subtotal * self.TAX_RATE, 2)</div>
-          <div class="text-red-400 text-[10px] pt-1 italic font-semibold">❌ Flaw: Tax applied to raw subtotal, overcharging customer by ignoring discount.</div>
+          <div class="text-zinc-500">// codebase/data_processor.py (calculate_average)</div>
+          <div class="diff-deleted">- # BUG: Missing empty list guard -> ZeroDivisionError!</div>
+          <div class="diff-deleted">- return round(sum(numbers) / len(numbers), 2)</div>
+          <div class="text-red-400 text-[10px] pt-1 italic font-semibold">❌ Flaw: len(numbers) is 0 on empty input, crashing with ZeroDivisionError: division by zero.</div>
         `;
       } else {
         healthBadge.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5";
@@ -589,10 +589,10 @@
         diffStatusPill.innerText = "Certified Master";
 
         diffViewer.innerHTML = `
-          <div class="text-zinc-500">// ecommerce/cart.py (calculate_tax)</div>
-          <div class="diff-added">+ taxable_amount = max(0.0, subtotal - discount)</div>
-          <div class="diff-added">+ return round(taxable_amount * self.TAX_RATE, 2)</div>
-          <div class="text-emerald-400 text-[10px] pt-1 italic">✓ Certified: Tax computed strictly on discounted subtotal.</div>
+          <div class="text-zinc-500">// codebase/data_processor.py (calculate_average)</div>
+          <div class="diff-added">+ if not numbers: return 0.0</div>
+          <div class="diff-added">+ return round(sum(numbers) / len(numbers), 2)</div>
+          <div class="text-emerald-400 text-[10px] pt-1 italic">✓ Certified: ZeroDivisionError guard active for empty inputs.</div>
         `;
       }
 
@@ -619,12 +619,12 @@
     }
 
     function formatTestTitle(testId) {
-      if (testId.includes("1_subtotal")) return "Subtotal Calculation";
-      if (testId.includes("2_discount")) return "Discount Coupon (SAVE20)";
-      if (testId.includes("3_tax")) return "Tax on Discounted Total";
-      if (testId.includes("4_free_shipping")) return "Free Shipping Threshold";
-      if (testId.includes("5_inventory")) return "Inventory Oversell Lock";
-      if (testId.includes("6_currency")) return "Currency Precision & Rounding";
+      if (testId.includes("1_average")) return "Arithmetic Average";
+      if (testId.includes("2_empty")) return "ZeroDivisionError Guard";
+      if (testId.includes("3_safe")) return "Safe Divide Fallback";
+      if (testId.includes("4_record")) return "Dictionary Key Safety";
+      if (testId.includes("5_percentage")) return "Zero-Baseline Growth";
+      if (testId.includes("6_user")) return "Input Payload Validation";
       return testId;
     }
 
@@ -642,14 +642,19 @@
 
         let reportMsg = "";
         if (action === "simulate_bug") {
-          reportMsg = "⚠️ **Real-World E-Commerce Bug Injected!**\n- Target: `ecommerce/cart.py` -> `calculate_tax()`\n- Impact: Overcharging customers by applying tax before promo discounts.\n- **Test [CHECKLIST-3] is now FAILING (❌)**. Click **'Autopilot: Fix & Certify'** to heal it!";
+          reportMsg = "⚠️ **ZeroDivisionError Bug Injected into Codebase!**\n- Target: `codebase/data_processor.py` -> `calculate_average()`\n- Impact: Code crashes with `ZeroDivisionError: division by zero` whenever numbers list is empty.\n- **Test [CHECKLIST-2] is now FAILING (❌)**. Click **'Autopilot: Fix & Certify'** to heal it!";
         } else if (action === "scan") {
           reportMsg = data.result.bug_found 
             ? `🚨 **Bug Found**: ${data.result.diagnosis.bug_title}\n- File: \`${data.result.diagnosis.file}\`\n- Severity: **${data.result.diagnosis.severity}**\n- Impact: ${data.result.diagnosis.impact}`
             : "✅ **Code Scan Clean**: All 6 QA checklist tests are passing!";
         } else if (action === "full_pipeline") {
-          reportMsg = "🎉 **Autonomous Bug Fixer Finished**:\n1. 🔍 Discovered failing tax calculation flaw.\n2. ⚡ Researched logic fix via Groq.\n3. 🛠️ Applied verified patch to `ecommerce/cart.py`.\n4. 📋 **100% QA Checklist Verified**: All 6/6 tests PASSING.";
+          reportMsg = "🎉 **Autonomous Bug Fixer Finished**:\n1. 🔍 Discovered failing `ZeroDivisionError` bug.\n2. 🛠️ Applied verified guard patch to `codebase/data_processor.py`.\n3. 📋 **100% QA Checklist Verified**: All 6/6 tests PASSING.";
         }
+        appendAgentMessage(reportMsg, []);
+      } catch (err) {
+        console.error("Action error:", err);
+      }
+    }
         appendAgentMessage(reportMsg, []);
       } catch (err) {
         console.error("Action error:", err);

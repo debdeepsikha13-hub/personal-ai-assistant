@@ -180,8 +180,8 @@ async def api_chat(request):
 
 async def api_bug_status(request):
     """Return live codebase status, active bugs, and test checklist matrix."""
-    from core.bug_fixer_agent import ECommerceBugFixerAgent
-    agent = ECommerceBugFixerAgent()
+    from core.bug_fixer_agent import GeneralCodeBugFixerAgent
+    agent = GeneralCodeBugFixerAgent()
     scan = await asyncio.to_thread(agent.scan_for_bugs)
     tests = await asyncio.to_thread(agent.run_tests)
     return JSONResponse({
@@ -193,8 +193,8 @@ async def api_bug_status(request):
 
 async def api_bug_action(request):
     """Execute autonomous bug fixer action (scan, fix, simulate_bug, full_pipeline)."""
-    from core.bug_fixer_agent import ECommerceBugFixerAgent
-    agent = ECommerceBugFixerAgent()
+    from core.bug_fixer_agent import GeneralCodeBugFixerAgent
+    agent = GeneralCodeBugFixerAgent()
     try:
         body = await request.json()
         action = body.get("action", "full_pipeline")
@@ -202,7 +202,7 @@ async def api_bug_action(request):
         action = "full_pipeline"
 
     if action == "simulate_bug":
-        res = await asyncio.to_thread(agent.inject_demo_bug, "tax_bug")
+        res = await asyncio.to_thread(agent.inject_demo_bug, "zero_division")
     elif action == "fix":
         res = await asyncio.to_thread(agent.apply_fix)
     elif action == "scan":
