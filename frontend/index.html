@@ -146,11 +146,11 @@
     </div>
 
     <!-- Live Telemetry Ribbon -->
-    <div class="hidden lg:flex items-center space-x-6 text-xs font-mono">
+    <div class="hidden lg:flex items-center space-x-3 text-xs font-mono">
       <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/5">
         <span class="text-zinc-500">TARGET:</span>
         <span class="text-sky-300 font-semibold flex items-center gap-1">
-          <i data-lucide="folder-code" class="w-3.5 h-3.5 text-sky-400"></i> codebase/data_processor.py
+          <i data-lucide="file-code" class="w-3.5 h-3.5 text-sky-400"></i> data_processor.py
         </span>
       </div>
 
@@ -162,15 +162,26 @@
       </div>
 
       <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/5">
-        <span class="text-zinc-500">INFERENCE:</span>
-        <span class="text-amber-300 font-semibold flex items-center gap-1">
-          <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i> Groq Llama-3 / Sub-Second
+        <span class="text-zinc-500">MODEL:</span>
+        <span id="telemetry-model-badge" class="text-amber-300 font-semibold flex items-center gap-1">
+          <i data-lucide="cpu" class="w-3.5 h-3.5 text-amber-400"></i> Gemini Flash-Lite
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/5">
+        <span class="text-zinc-500">MCP:</span>
+        <span class="text-purple-300 font-semibold flex items-center gap-1">
+          <i data-lucide="plug-2" class="w-3.5 h-3.5 text-purple-400"></i> 4 Stdio Active
         </span>
       </div>
     </div>
 
     <!-- Action Bar Buttons -->
     <div class="flex items-center space-x-2">
+      <a href="https://github.com/debdeepsikha13-hub/personal-ai-assistant" target="_blank" title="View Source on GitHub" class="px-3 py-1.5 text-xs rounded-xl bg-slate-800/90 hover:bg-slate-700 text-sky-300 border border-sky-500/20 flex items-center gap-1.5 transition font-mono">
+        <i data-lucide="github" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">GitHub</span>
+      </a>
       <button onclick="refreshCodebaseStatus()" title="Refresh QA Matrix" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-zinc-300 border border-white/10 transition">
         <i data-lucide="refresh-cw" class="w-4 h-4"></i>
       </button>
@@ -347,14 +358,17 @@
     <!-- RIGHT STAGE: The Developer Cockpit & Live QA Matrix (40%) -->
     <aside class="w-[420px] glass-panel flex flex-col justify-between hidden lg:flex z-10 shrink-0">
       
-      <!-- Cockpit Header & Tab Switcher -->
+      <!-- Cockpit Header & Tab Switcher (3-Pillar Enterprise View) -->
       <div class="p-3 border-b border-white/5 flex items-center justify-between">
         <div class="flex items-center gap-1 p-1 rounded-xl bg-slate-900/90 border border-white/5 text-xs">
-          <button id="tab-qa-btn" onclick="switchRightTab('qa')" class="px-3 py-1 rounded-lg font-semibold bg-sky-600 text-white transition flex items-center gap-1.5 shadow">
+          <button id="tab-qa-btn" onclick="switchRightTab('qa')" class="px-2.5 py-1 rounded-lg font-semibold bg-sky-600 text-white transition flex items-center gap-1.5 shadow text-[11px]">
             <i data-lucide="check-square" class="w-3.5 h-3.5"></i> QA Matrix
           </button>
-          <button id="tab-memory-btn" onclick="switchRightTab('memory')" class="px-3 py-1 rounded-lg font-semibold text-zinc-400 hover:text-white transition flex items-center gap-1.5">
-            <i data-lucide="brain" class="w-3.5 h-3.5 text-pink-400"></i> Memory & Tools
+          <button id="tab-arch-btn" onclick="switchRightTab('arch')" class="px-2.5 py-1 rounded-lg font-semibold text-zinc-400 hover:text-white transition flex items-center gap-1.5 text-[11px]">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-400"></i> Architecture
+          </button>
+          <button id="tab-memory-btn" onclick="switchRightTab('memory')" class="px-2.5 py-1 rounded-lg font-semibold text-zinc-400 hover:text-white transition flex items-center gap-1.5 text-[11px]">
+            <i data-lucide="cpu" class="w-3.5 h-3.5 text-pink-400"></i> MCP & Memory
           </button>
         </div>
         <span id="matrix-pass-rate" class="px-2 py-0.5 text-[11px] font-mono rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
@@ -402,7 +416,7 @@
         <!-- Autonomous Pipeline Architecture Diagram -->
         <div class="mt-4 pt-3 border-t border-white/5 space-y-2">
           <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-            <i data-lucide="cpu" class="w-3.5 h-3.5 text-amber-400"></i> Autonomous Auto-Dev Engine
+            <i data-lucide="cpu" class="w-3.5 h-3.5 text-amber-400"></i> Autonomous Auto-Dev Pipeline
           </span>
 
           <div class="p-3 rounded-xl bg-slate-900/60 border border-white/5 space-y-2 text-[11px] font-mono text-zinc-400">
@@ -416,7 +430,7 @@
             </div>
             <div class="flex items-center justify-between text-zinc-300">
               <span>3. Tech Solution Research</span>
-              <span class="text-amber-400">Groq Llama-3 MCP</span>
+              <span class="text-amber-400">FastMCP Intelligence</span>
             </div>
             <div class="flex items-center justify-between text-zinc-300">
               <span>4. Patch Synthesis & Git</span>
@@ -426,6 +440,121 @@
               <span>5. QA Checklist Certify</span>
               <span class="text-emerald-400">100% Pass Threshold</span>
             </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB 2: System Architecture & Data Flow Blueprint -->
+      <div id="panel-arch-tab" class="flex-1 overflow-y-auto p-4 space-y-3.5 hidden">
+        <div class="flex items-center justify-between border-b border-white/5 pb-2">
+          <span class="text-xs font-bold text-sky-300 uppercase tracking-wider flex items-center gap-1.5 font-mono">
+            <i data-lucide="git-merge" class="w-3.5 h-3.5 text-sky-400"></i> 6-Pillar Architecture Blueprint
+          </span>
+          <span class="px-2 py-0.5 rounded text-[10px] bg-sky-500/20 text-sky-300 font-mono">Enterprise Spec</span>
+        </div>
+
+        <!-- Pillar 1: ASGI Interface Layer -->
+        <div class="p-3 rounded-xl bg-slate-900/80 border border-sky-500/20 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-sky-300 flex items-center gap-1.5 font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> 1. ASGI Web Server Layer
+            </span>
+            <span class="text-[10px] font-mono text-zinc-500">Starlette + Uvicorn</span>
+          </div>
+          <p class="text-[11px] text-zinc-400">
+            Non-blocking async HTTP/REST gateway. Dispatches heavy agent graph operations onto background worker thread pools (<code class="text-sky-300 font-mono">asyncio.to_thread</code>).
+          </p>
+          <div class="flex items-center gap-2 pt-1 text-[10px] font-mono text-zinc-500">
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-sky-400">app.py</span>
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-indigo-400">frontend/app.py</span>
+          </div>
+        </div>
+
+        <!-- Pillar 2: LangGraph StateGraph -->
+        <div class="p-3 rounded-xl bg-slate-900/80 border border-indigo-500/20 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5 font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> 2. LangGraph StateGraph Loop
+            </span>
+            <span class="text-[10px] font-mono text-zinc-500">LangGraph v0.2</span>
+          </div>
+          <p class="text-[11px] text-zinc-400">
+            Cyclic decision flow: <code class="text-indigo-300 font-mono">START ➔ agent ➔ tools_condition ➔ tools ➔ agent ➔ END</code>. Includes single-turn loop synthesizer protection.
+          </p>
+          <div class="flex items-center gap-2 pt-1 text-[10px] font-mono text-zinc-500">
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-indigo-400">core/graph.py</span>
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-purple-400">core/agent.py</span>
+          </div>
+        </div>
+
+        <!-- Pillar 3: Model-Agnostic LLM Factory -->
+        <div class="p-3 rounded-xl bg-slate-900/80 border border-amber-500/20 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5 font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> 3. Model-Agnostic Factory
+            </span>
+            <span class="text-[10px] font-mono text-zinc-500">BaseChatModel</span>
+          </div>
+          <p class="text-[11px] text-zinc-400">
+            Decoupled LLM instantiation supporting Google Gemini, Groq (LLaMA 3.3 70B), OpenAI, Anthropic Claude, and local Ollama without modifying agent logic.
+          </p>
+          <div class="flex items-center gap-2 pt-1 text-[10px] font-mono text-zinc-500">
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-amber-400">llm/factory.py</span>
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-zinc-400">config/settings.py</span>
+          </div>
+        </div>
+
+        <!-- Pillar 4: Multi-MCP Microservices -->
+        <div class="p-3 rounded-xl bg-slate-900/80 border border-purple-500/20 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-purple-300 flex items-center gap-1.5 font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span> 4. FastMCP Protocol Bridge
+            </span>
+            <span class="text-[10px] font-mono text-emerald-400">4 Stdio Servers</span>
+          </div>
+          <p class="text-[11px] text-zinc-400">
+            4 independent microservices communicating over stdio JSON-RPC 2.0: System Diagnostics, GitHub Read-Only, High-Speed Web Search, and Advanced Statistics.
+          </p>
+          <div class="flex items-center gap-1.5 pt-1 text-[10px] font-mono text-zinc-500 flex-wrap">
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-purple-400">system_server</span>
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-teal-400">github_server</span>
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-sky-400">search_server</span>
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-amber-400">math_server</span>
+          </div>
+        </div>
+
+        <!-- Pillar 5: Conversation & Memory Layer -->
+        <div class="p-3 rounded-xl bg-slate-900/80 border border-pink-500/20 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-pink-300 flex items-center gap-1.5 font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-pink-400"></span> 5. Context & Memory Isolation
+            </span>
+            <span class="text-[10px] font-mono text-zinc-500">Multi-Session</span>
+          </div>
+          <p class="text-[11px] text-zinc-400">
+            <code class="text-pink-300 font-mono">trim_messages</code> guards context limits, <code class="text-pink-300 font-mono">MemorySaver</code> isolates threads by thread_id, and <code class="text-pink-300 font-mono">user_profile.json</code> persists facts across reboots.
+          </p>
+          <div class="flex items-center gap-2 pt-1 text-[10px] font-mono text-zinc-500">
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-pink-400">memory/checkpointer.py</span>
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-rose-400">memory/context_manager.py</span>
+          </div>
+        </div>
+
+        <!-- Pillar 6: Autonomous Remediation Engine -->
+        <div class="p-3 rounded-xl bg-slate-900/80 border border-emerald-500/20 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5 font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 6. Autonomous Code Doctor
+            </span>
+            <span class="text-[10px] font-mono text-emerald-400">6 QA Rules</span>
+          </div>
+          <p class="text-[11px] text-zinc-400">
+            AST scanner, traceback extractor, automated code patcher, and test suite executor certifying 100% pass rates on <code class="text-emerald-300 font-mono">codebase/data_processor.py</code>.
+          </p>
+          <div class="flex items-center gap-2 pt-1 text-[10px] font-mono text-zinc-500">
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-emerald-400">core/bug_fixer_agent.py</span>
+            <span class="px-1.5 py-0.5 rounded bg-black/40 text-cyan-400">codebase/test_data_processor.py</span>
           </div>
         </div>
 
@@ -492,24 +621,51 @@
       lucide.createIcons();
       refreshCodebaseStatus();
       fetchMemoryProfile();
+      fetchStatusTelemetry();
     });
+
+    async function fetchStatusTelemetry() {
+      try {
+        const res = await fetch("/api/status");
+        if (!res.ok) return;
+        const data = await res.json();
+        const modelBadge = document.getElementById("telemetry-model-badge");
+        if (modelBadge && data.model) {
+          modelBadge.innerHTML = `<i data-lucide="cpu" class="w-3.5 h-3.5 text-amber-400"></i> ${escapeHtml(data.provider.toUpperCase())} (${escapeHtml(data.model)})`;
+          lucide.createIcons();
+        }
+      } catch (e) {
+        console.error("Telemetry error:", e);
+      }
+    }
 
     function switchRightTab(tab) {
       const panelQa = document.getElementById("panel-qa-tab");
+      const panelArch = document.getElementById("panel-arch-tab");
       const panelMemory = document.getElementById("panel-memory-tab");
       const tabQaBtn = document.getElementById("tab-qa-btn");
+      const tabArchBtn = document.getElementById("tab-arch-btn");
       const tabMemoryBtn = document.getElementById("tab-memory-btn");
+
+      // Hide all panels
+      panelQa.classList.add("hidden");
+      panelArch.classList.add("hidden");
+      panelMemory.classList.add("hidden");
+
+      // Reset button styles
+      tabQaBtn.className = "px-2.5 py-1 rounded-lg font-semibold text-zinc-400 hover:text-white transition flex items-center gap-1.5 text-[11px]";
+      tabArchBtn.className = "px-2.5 py-1 rounded-lg font-semibold text-zinc-400 hover:text-white transition flex items-center gap-1.5 text-[11px]";
+      tabMemoryBtn.className = "px-2.5 py-1 rounded-lg font-semibold text-zinc-400 hover:text-white transition flex items-center gap-1.5 text-[11px]";
 
       if (tab === 'qa') {
         panelQa.classList.remove("hidden");
-        panelMemory.classList.add("hidden");
-        tabQaBtn.className = "px-3 py-1 rounded-lg font-semibold bg-sky-600 text-white transition flex items-center gap-1.5 shadow";
-        tabMemoryBtn.className = "px-3 py-1 rounded-lg font-semibold text-zinc-400 hover:text-white transition flex items-center gap-1.5";
+        tabQaBtn.className = "px-2.5 py-1 rounded-lg font-semibold bg-sky-600 text-white transition flex items-center gap-1.5 shadow text-[11px]";
+      } else if (tab === 'arch') {
+        panelArch.classList.remove("hidden");
+        tabArchBtn.className = "px-2.5 py-1 rounded-lg font-semibold bg-indigo-600 text-white transition flex items-center gap-1.5 shadow text-[11px]";
       } else {
-        panelQa.classList.add("hidden");
         panelMemory.classList.remove("hidden");
-        tabMemoryBtn.className = "px-3 py-1 rounded-lg font-semibold bg-pink-600 text-white transition flex items-center gap-1.5 shadow";
-        tabQaBtn.className = "px-3 py-1 rounded-lg font-semibold text-zinc-400 hover:text-white transition flex items-center gap-1.5";
+        tabMemoryBtn.className = "px-2.5 py-1 rounded-lg font-semibold bg-pink-600 text-white transition flex items-center gap-1.5 shadow text-[11px]";
         fetchMemoryProfile();
       }
       lucide.createIcons();
