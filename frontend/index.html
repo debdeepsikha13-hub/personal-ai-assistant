@@ -182,64 +182,63 @@
   </header>
 
   <!-- ========================================================== -->
-  <!-- COMMAND LAUNCHPAD (One-Click Operations)                   -->
+  <!-- COMMAND LAUNCHPAD (Scrollable One-Click Operations)        -->
   <!-- ========================================================== -->
-  <div class="px-6 py-2.5 bg-slate-950/80 border-b border-white/5 flex items-center justify-between gap-3 overflow-x-auto text-xs whitespace-nowrap z-10 shrink-0">
-    <div class="flex items-center gap-2 text-zinc-400 font-mono text-[11px] uppercase tracking-wider shrink-0">
+  <div class="px-6 py-2.5 bg-slate-950/90 border-b border-white/5 flex items-center gap-2.5 overflow-x-auto text-xs whitespace-nowrap z-10 shrink-0 select-none">
+    <div class="flex items-center gap-1.5 text-zinc-400 font-mono text-[11px] uppercase tracking-wider shrink-0 pr-1">
       <i data-lucide="terminal" class="w-3.5 h-3.5 text-sky-400"></i> Commands:
     </div>
 
-    <div class="flex items-center gap-2 overflow-x-auto">
-      <!-- 1. Autopilot Full Pipeline -->
-      <button onclick="triggerBugAction('full_pipeline', '⚡ Running Autopilot: Code Scan ➔ Traceback Diagnosis ➔ Patch Synthesis ➔ Quality Verification...')" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-sky-600/25 transition">
-        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Autopilot: Fix & Certify
-      </button>
+    <!-- 1. Autopilot Full Pipeline -->
+    <button onclick="triggerBugAction('full_pipeline', '⚡ Running Autopilot: Code Scan ➔ Traceback Diagnosis ➔ Patch Synthesis ➔ Quality Verification...')" class="shrink-0 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-sky-600/25 transition">
+      <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Autopilot: Fix & Certify
+    </button>
 
-      <!-- 2. Simulate Real Bug -->
-      <button onclick="triggerBugAction('simulate_bug', '⚠️ Injected ZeroDivisionError bug into codebase/data_processor.py. Notice the QA Matrix update!')" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition">
-        <i data-lucide="bug" class="w-3.5 h-3.5 text-amber-400"></i> Simulate Code Bug
-      </button>
+    <!-- 2. Simulate Real Bug -->
+    <button onclick="triggerBugAction('simulate_bug', '⚠️ Injected ZeroDivisionError bug into codebase/data_processor.py. Notice the QA Matrix update!')" class="shrink-0 px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition">
+      <i data-lucide="bug" class="w-3.5 h-3.5 text-amber-400"></i> Simulate Code Bug
+    </button>
 
-      <!-- 3. Scan Codebase -->
-      <button onclick="triggerBugAction('scan', '🔍 Scanning codebase and analyzing test assertions for failures...')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-sky-400/40 text-sky-200 flex items-center gap-1.5 transition">
-        <i data-lucide="search" class="w-3.5 h-3.5 text-sky-400"></i> Scan for Bugs
-      </button>
+    <!-- 3. Scan Codebase -->
+    <button onclick="triggerBugAction('scan', '🔍 Scanning codebase and analyzing test assertions for failures...')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-sky-400/40 text-sky-200 flex items-center gap-1.5 transition">
+      <i data-lucide="search" class="w-3.5 h-3.5 text-sky-400"></i> Scan for Bugs
+    </button>
 
-      <!-- 4. Run QA Checklist -->
-      <button onclick="sendQuickPrompt('Run the full code quality test checklist.')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-emerald-400/40 text-emerald-200 flex items-center gap-1.5 transition">
-        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i> Run QA Checklist
-      </button>
+    <!-- 4. Run QA Checklist -->
+    <button onclick="sendQuickPrompt('Run the full code quality test checklist.')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-emerald-400/40 text-emerald-200 flex items-center gap-1.5 transition">
+      <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i> Run QA Checklist
+    </button>
 
-      <!-- 5. Tech Search -->
-      <button onclick="sendQuickPrompt('Search technical documentation for Python ZeroDivisionError handling and safe division patterns')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-purple-400/40 text-purple-200 flex items-center gap-1.5 transition">
-        <i data-lucide="globe" class="w-3.5 h-3.5 text-purple-400"></i> Tech Web Search
-      </button>
+    <!-- 5. Tech Search -->
+    <button onclick="sendQuickPrompt('Search technical documentation for Python ZeroDivisionError handling and safe division patterns')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-purple-400/40 text-purple-200 flex items-center gap-1.5 transition">
+      <i data-lucide="globe" class="w-3.5 h-3.5 text-purple-400"></i> Tech Web Search
+    </button>
 
-      <!-- 6. Kolkata Weather -->
-      <button onclick="sendQuickPrompt('What is the weather today in Kolkata?')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-amber-400/40 text-amber-200 flex items-center gap-1.5 transition">
-        <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-amber-400"></i> Kolkata Weather
-      </button>
+    <!-- 6. Kolkata Weather -->
+    <button onclick="sendQuickPrompt('What is the weather today in Kolkata?')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-amber-400/40 text-amber-200 flex items-center gap-1.5 transition">
+      <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-amber-400"></i> Kolkata Weather
+    </button>
 
-      <!-- 7. PC Hardware Specs -->
-      <button onclick="sendQuickPrompt('Check my system specs, CPU, RAM, and disk storage using MCP.')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-sky-400/40 text-sky-200 flex items-center gap-1.5 transition">
-        <i data-lucide="cpu" class="w-3.5 h-3.5 text-sky-400"></i> PC Hardware Specs
-      </button>
+    <!-- 7. PC Hardware Specs -->
+    <button onclick="sendQuickPrompt('Check my system specs, CPU, RAM, and disk storage using MCP.')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-sky-400/40 text-sky-200 flex items-center gap-1.5 transition">
+      <i data-lucide="cpu" class="w-3.5 h-3.5 text-sky-400"></i> PC Hardware Specs
+    </button>
 
-      <!-- 8. GitHub Inspector -->
-      <button onclick="sendQuickPrompt('List my repositories using your GitHub MCP tool.')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-teal-400/40 text-teal-200 flex items-center gap-1.5 transition">
-        <i data-lucide="git-branch" class="w-3.5 h-3.5 text-teal-400"></i> GitHub Repos
-      </button>
+    <!-- 8. GitHub Inspector -->
+    <button onclick="sendQuickPrompt('List my repositories using your GitHub MCP tool.')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-teal-400/40 text-teal-200 flex items-center gap-1.5 transition">
+      <i data-lucide="git-branch" class="w-3.5 h-3.5 text-teal-400"></i> GitHub Repos
+    </button>
 
-      <!-- 9. Math Calculator -->
-      <button onclick="sendQuickPrompt('Calculate statistics for [12, 45, 67, 89, 23, 56, 78] using MCP tool.')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-indigo-400/40 text-indigo-200 flex items-center gap-1.5 transition">
-        <i data-lucide="calculator" class="w-3.5 h-3.5 text-indigo-400"></i> Math & Stats
-      </button>
+    <!-- 9. Math Calculator -->
+    <button onclick="sendQuickPrompt('Calculate statistics for [12, 45, 67, 89, 23, 56, 78] using MCP tool.')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-indigo-400/40 text-indigo-200 flex items-center gap-1.5 transition">
+      <i data-lucide="calculator" class="w-3.5 h-3.5 text-indigo-400"></i> Math & Stats
+    </button>
 
-      <!-- 10. Long-Term Memory -->
-      <button onclick="sendQuickPrompt('Remember that my project is Wolf and my active repository is personal-ai-assistant.')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-pink-400/40 text-pink-200 flex items-center gap-1.5 transition">
-        <i data-lucide="bookmark" class="w-3.5 h-3.5 text-pink-400"></i> Save Memory
-      </button>
-    </div>
+    <!-- 10. Long-Term Memory -->
+    <button onclick="sendQuickPrompt('Remember that my project is Wolf and my active repository is personal-ai-assistant.')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-pink-400/40 text-pink-200 flex items-center gap-1.5 mr-6 transition">
+      <i data-lucide="bookmark" class="w-3.5 h-3.5 text-pink-400"></i> Save Memory
+    </button>
+  </div>
   </div>
 
   <!-- ========================================================== -->

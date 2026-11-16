@@ -71,3 +71,4 @@ class DataProcessor:
             "score": score,
             "is_passing": score >= 50.0
         }
+
