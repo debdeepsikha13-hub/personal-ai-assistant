@@ -3,692 +3,422 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WOLF // Autonomous AI Software Engineer & Bug Fixer Agent</title>
+  <title>Wolf // Autonomous Software Engineering Assistant</title>
   <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Marked.js for Markdown rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    /* Sleek custom scrollbars */
+    /* Custom sleek scrollbars */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-    /* Dynamic Theme Design System */
-    :root {
-      --bg-color: #040711;
-      --grid-line: rgba(56, 189, 248, 0.07);
-      --accent-primary: #38bdf8;
-      --accent-glow: rgba(56, 189, 248, 0.28);
-      --panel-bg: rgba(9, 14, 27, 0.88);
-      --panel-border: rgba(56, 189, 248, 0.18);
-    }
-
-    body.theme-matrix {
-      --bg-color: #020c06;
-      --grid-line: rgba(16, 185, 129, 0.09);
-      --accent-primary: #10b981;
-      --accent-glow: rgba(16, 185, 129, 0.32);
-      --panel-bg: rgba(5, 18, 12, 0.88);
-      --panel-border: rgba(16, 185, 129, 0.22);
-    }
-
-    body.theme-amethyst {
-      --bg-color: #090314;
-      --grid-line: rgba(168, 85, 247, 0.09);
-      --accent-primary: #a855f7;
-      --accent-glow: rgba(168, 85, 247, 0.32);
-      --panel-bg: rgba(16, 8, 28, 0.88);
-      --panel-border: rgba(168, 85, 247, 0.22);
-    }
-
-    /* Cyber Blueprint Grid + Aurora Glow Background */
+    /* Minimalist Swiss Engineering Canvas */
     body {
-      background-color: var(--bg-color);
+      background-color: #f8fafc;
       background-image: 
-        linear-gradient(var(--grid-line) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
-        radial-gradient(circle at 15% 10%, var(--accent-glow) 0%, transparent 45%),
-        radial-gradient(circle at 85% 90%, rgba(99, 102, 241, 0.15) 0%, transparent 45%),
-        radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.7) 0%, transparent 75%);
-      background-size: 28px 28px, 28px 28px, 100% 100%, 100% 100%, 100% 100%;
-      background-attachment: fixed;
-      color: #f1f5f9;
-      transition: background-color 0.4s ease, border-color 0.4s ease;
+        radial-gradient(#e2e8f0 1px, transparent 1px),
+        radial-gradient(#e2e8f0 1px, #f8fafc 1px);
+      background-size: 24px 24px;
+      background-position: 0 0, 12px 12px;
+      color: #0f172a;
     }
 
-    .glass-panel {
-      background: var(--panel-bg);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border: 1px solid var(--panel-border);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-      transition: background 0.4s ease, border-color 0.4s ease;
+    .studio-panel {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
     }
 
-    .glass-header {
-      background: rgba(6, 10, 20, 0.92);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--panel-border);
+    .card-hover {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-hover:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
-    .cockpit-card {
-      background: rgba(16, 23, 41, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .cockpit-card:hover {
-      border-color: var(--accent-primary);
-      background: rgba(22, 33, 58, 0.95);
-      box-shadow: 0 4px 20px var(--accent-glow);
-      transform: translateY(-1.5px);
-    }
-
+    /* GitHub-style Clean Diff */
     .diff-deleted {
-      background: rgba(239, 68, 68, 0.2);
-      color: #fca5a5;
-      border-left: 3px solid #ef4444;
+      background-color: #fff1f2;
+      color: #be123c;
+      border-left: 3px solid #f43f5e;
       padding: 3px 8px;
-      font-family: monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 11px;
     }
     .diff-added {
-      background: rgba(34, 197, 94, 0.2);
-      color: #86efac;
-      border-left: 3px solid #22c55e;
+      background-color: #ecfdf5;
+      color: #047857;
+      border-left: 3px solid #10b981;
       padding: 3px 8px;
-      font-family: monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 11px;
     }
 
-    .agent-bubble {
-      background: rgba(12, 18, 32, 0.92);
-      border: 1px solid var(--panel-border);
-      backdrop-filter: blur(14px);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    /* Clean typography */
+    .prose code { 
+      background: #f1f5f9; 
+      color: #0f172a; 
+      padding: 2px 5px; 
+      border-radius: 4px; 
+      font-size: 0.88em; 
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
+      border: 1px solid #e2e8f0;
     }
-
-    .user-bubble {
-      background: linear-gradient(135deg, #2563eb 0%, #0284c7 100%);
-      box-shadow: 0 4px 18px rgba(37, 99, 235, 0.3);
+    .prose pre { 
+      background: #0f172a; 
+      color: #f8fafc; 
+      padding: 12px 14px; 
+      border-radius: 10px; 
+      overflow-x: auto; 
+      margin: 8px 0; 
+      font-size: 12px;
     }
-
-    /* Laser Scanner Beam */
-    @keyframes laserSweep {
-      0% { top: 0%; opacity: 0; }
-      15% { opacity: 1; }
-      85% { opacity: 1; }
-      100% { top: 100%; opacity: 0; }
-    }
-    .scanner-beam {
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #38bdf8, #818cf8, transparent);
-      box-shadow: 0 0 14px #38bdf8, 0 0 28px #818cf8;
-      pointer-events: none;
-      z-index: 30;
-      animation: laserSweep 1.8s ease-in-out infinite;
-    }
-
-    .prose code { background: rgba(30, 41, 59, 0.85); padding: 2px 6px; border-radius: 4px; font-size: 0.88em; color: #38bdf8; font-family: monospace; }
-    .prose pre { background: #060911; padding: 12px; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.18); overflow-x: auto; margin: 8px 0; }
   </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden font-sans antialiased text-sm">
 
   <!-- ========================================================== -->
-  <!-- TOP CONTROL DECK: Brand, Status Ribbon, Telemetry          -->
+  <!-- TOP HEADER: Clean Minimalist Studio Bar                    -->
   <!-- ========================================================== -->
-  <header class="h-16 glass-header flex items-center justify-between px-6 z-20 shrink-0">
+  <header class="h-16 bg-white border-b border-slate-200/90 flex items-center justify-between px-6 z-20 shrink-0 shadow-sm">
     
-    <!-- Wolf Brand & Logo -->
-    <div class="flex items-center space-x-3.5">
-      <!-- High-Tech Cyber Wolf Vector Logo -->
-      <div class="w-10 h-10 rounded-xl bg-slate-900 border border-cyan-500/40 p-1 flex items-center justify-center shadow-lg shadow-cyan-500/20 relative group">
-        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
-          <defs>
-            <linearGradient id="wolfShield" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#0f172a"/>
-              <stop offset="50%" stop-color="#1e1b4b"/>
-              <stop offset="100%" stop-color="#090d16"/>
-            </linearGradient>
-            <linearGradient id="cyberCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#38bdf8"/>
-              <stop offset="100%" stop-color="#6366f1"/>
-            </linearGradient>
-            <filter id="eyeGlow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
-            </filter>
-          </defs>
-          <!-- Hex Shield Outline -->
-          <polygon points="50,4 92,25 92,75 50,96 8,75 8,25" fill="url(#wolfShield)" stroke="url(#cyberCyan)" stroke-width="2.5"/>
-          <!-- Left Ear -->
-          <polygon points="28,26 18,5 42,22" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
-          <polygon points="27,24 21,9 38,22" fill="url(#cyberCyan)" opacity="0.6"/>
-          <!-- Right Ear -->
-          <polygon points="72,26 82,5 58,22" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
-          <polygon points="73,24 79,9 62,22" fill="url(#cyberCyan)" opacity="0.6"/>
-          <!-- Forehead Plates -->
-          <polygon points="50,22 36,36 50,48 64,36" fill="#1e1b4b" stroke="#818cf8" stroke-width="1"/>
-          <!-- Cheeks / Ruff -->
-          <polygon points="36,36 16,48 26,64 38,54" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
-          <polygon points="64,36 84,48 74,64 62,54" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
-          <!-- Snout & Bridge -->
-          <polygon points="50,48 40,64 50,82 60,64" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
-          <polygon points="50,78 46,84 54,84" fill="#38bdf8"/>
-          <!-- Glowing Cyber Eyes -->
-          <polygon points="35,46 45,47 38,51" fill="#38bdf8" filter="url(#eyeGlow)"/>
-          <polygon points="35,46 45,47 38,51" fill="#ffffff"/>
-          <polygon points="65,46 55,47 62,51" fill="#38bdf8" filter="url(#eyeGlow)"/>
-          <polygon points="65,46 55,47 62,51" fill="#ffffff"/>
+    <!-- Wolf Brand & Identity -->
+    <div class="flex items-center space-x-3">
+      <!-- Minimalist Wolf Logo Icon -->
+      <div class="w-9 h-9 rounded-xl bg-slate-900 p-1 flex items-center justify-center shadow-sm">
+        <svg viewBox="0 0 100 100" class="w-full h-full">
+          <polygon points="50,4 92,25 92,75 50,96 8,75 8,25" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+          <polygon points="28,26 18,5 42,22" fill="#1e293b" stroke="#38bdf8"/>
+          <polygon points="72,26 82,5 58,22" fill="#1e293b" stroke="#38bdf8"/>
+          <polygon points="50,22 36,36 50,48 64,36" fill="#0f172a"/>
+          <polygon points="50,48 40,64 50,82 60,64" fill="#1e293b" stroke="#38bdf8"/>
+          <polygon points="35,46 45,47 38,51" fill="#38bdf8"/>
+          <polygon points="65,46 55,47 62,51" fill="#38bdf8"/>
         </svg>
-        <span class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-900 animate-pulse"></span>
       </div>
 
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="font-extrabold text-base tracking-wider bg-gradient-to-r from-sky-400 via-indigo-300 to-white bg-clip-text text-transparent">
-            WOLF
+          <h1 class="font-bold text-base tracking-tight text-slate-900">
+            Wolf
           </h1>
-          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/20 font-semibold">
-            AUTO-DEV v2.4
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold border border-slate-200">
+            Autonomous Engineer
           </span>
         </div>
-        <p class="text-[11px] text-zinc-400 font-mono">Autonomous AI Bug Hunter & Repository Auto-Healer</p>
+        <p class="text-[11px] text-slate-500">Autonomous Bug Hunting & Personal AI Assistant</p>
       </div>
     </div>
 
-    <!-- Live Telemetry Ribbon -->
-    <div class="hidden lg:flex items-center space-x-3 text-xs font-mono">
-      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/5">
-        <span class="text-zinc-500">TARGET:</span>
-        <span class="text-sky-300 font-semibold flex items-center gap-1">
-          <i data-lucide="file-code" class="w-3.5 h-3.5 text-sky-400"></i> data_processor.py
-        </span>
+    <!-- Right Controls: Status & GitHub Link Only (Zero Clutter) -->
+    <div class="flex items-center space-x-3">
+      <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="system-status-text">Operational</span>
       </div>
 
-      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/5">
-        <span class="text-zinc-500">HEALTH:</span>
-        <span id="health-status-badge" class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ALL 6 TESTS PASSING
-        </span>
-      </div>
-
-      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/5">
-        <span class="text-zinc-500">MODEL:</span>
-        <span id="telemetry-model-badge" class="text-amber-300 font-semibold flex items-center gap-1">
-          <i data-lucide="cpu" class="w-3.5 h-3.5 text-amber-400"></i> Gemini Flash-Lite
-        </span>
-      </div>
-
-      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/5">
-        <span class="text-zinc-500">MCP:</span>
-        <span class="text-purple-300 font-semibold flex items-center gap-1">
-          <i data-lucide="plug-2" class="w-3.5 h-3.5 text-purple-400"></i> 4 Stdio Active
-        </span>
-      </div>
-    </div>
-
-    <!-- Action Bar Buttons -->
-    <div class="flex items-center space-x-2">
-      <!-- Live Theme Cycler -->
-      <button onclick="cycleTheme()" id="theme-btn" title="Cycle Visual Theme (Cyber / Matrix / Amethyst)" class="px-3 py-1.5 text-xs rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-amber-500/20 flex items-center gap-1.5 transition font-mono shadow-sm">
-        <i data-lucide="palette" class="w-3.5 h-3.5 text-amber-400"></i>
-        <span id="theme-label" class="hidden sm:inline">Theme: Cyber</span>
-      </button>
-
-      <a href="https://github.com/debdeepsikha13-hub/personal-ai-assistant" target="_blank" title="View Source on GitHub" class="px-3 py-1.5 text-xs rounded-xl bg-slate-800/90 hover:bg-slate-700 text-sky-300 border border-sky-500/20 flex items-center gap-1.5 transition font-mono">
+      <a 
+        href="https://github.com/debdeepsikha13-hub/personal-ai-assistant" 
+        target="_blank" 
+        class="px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium flex items-center gap-1.5 transition"
+      >
         <i data-lucide="github" class="w-3.5 h-3.5"></i>
-        <span class="hidden sm:inline">GitHub</span>
+        <span>Repository</span>
       </a>
-      <button onclick="refreshCodebaseStatus()" title="Refresh QA Matrix" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-zinc-300 border border-white/10 transition">
-        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-      </button>
-      <button onclick="clearChatConsole()" class="px-3 py-1.5 text-xs rounded-xl bg-slate-800/80 hover:bg-slate-700 text-zinc-300 border border-white/10 flex items-center gap-1.5 transition">
-        <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400"></i> Clear Log
-      </button>
     </div>
 
   </header>
 
   <!-- ========================================================== -->
-  <!-- COMMAND LAUNCHPAD (Scrollable One-Click Operations)        -->
+  <!-- COMMAND LAUNCHPAD: Quick Operations                        -->
   <!-- ========================================================== -->
-  <div class="px-6 py-2.5 bg-slate-950/90 border-b border-white/5 flex items-center gap-2.5 overflow-x-auto text-xs whitespace-nowrap z-10 shrink-0 select-none">
-    <div class="flex items-center gap-1.5 text-zinc-400 font-mono text-[11px] uppercase tracking-wider shrink-0 pr-1">
-      <i data-lucide="terminal" class="w-3.5 h-3.5 text-sky-400"></i> Commands:
-    </div>
+  <div class="px-6 py-2.5 bg-white border-b border-slate-200/80 flex items-center gap-2 overflow-x-auto text-xs whitespace-nowrap z-10 shrink-0 select-none shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+    <span class="text-slate-400 font-medium text-[11px] uppercase tracking-wider shrink-0 pr-1 flex items-center gap-1">
+      <i data-lucide="terminal" class="w-3.5 h-3.5 text-slate-500"></i> Actions:
+    </span>
 
     <!-- 1. Autopilot Full Pipeline -->
-    <button onclick="triggerBugAction('full_pipeline', '⚡ Running Autopilot: Code Scan ➔ Traceback Diagnosis ➔ Patch Synthesis ➔ Quality Verification...')" class="shrink-0 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-sky-600/25 transition">
-      <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Autopilot: Fix & Certify
+    <button onclick="triggerBugAction('full_pipeline', '⚡ Running Autopilot: Scan ➔ Diagnose ➔ Patch ➔ Verify tests...')" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium flex items-center gap-1.5 transition shadow-sm">
+      <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+      <span>Autopilot: Fix & Certify</span>
     </button>
 
     <!-- 2. Simulate Real Bug -->
-    <button onclick="triggerBugAction('simulate_bug', '⚠️ Injected ZeroDivisionError bug into codebase/data_processor.py. Notice the QA Matrix update!')" class="shrink-0 px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition">
-      <i data-lucide="bug" class="w-3.5 h-3.5 text-amber-400"></i> Simulate Code Bug
+    <button onclick="triggerBugAction('simulate_bug', '⚠️ Injected ZeroDivisionError bug into codebase/data_processor.py. Notice QA Matrix update!')" class="shrink-0 px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-medium flex items-center gap-1.5 transition">
+      <i data-lucide="bug" class="w-3.5 h-3.5 text-rose-500"></i>
+      <span>Simulate Code Bug</span>
     </button>
 
     <!-- 3. Scan Codebase -->
-    <button onclick="triggerBugAction('scan', '🔍 Scanning codebase and analyzing test assertions for failures...')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-sky-400/40 text-sky-200 flex items-center gap-1.5 transition">
-      <i data-lucide="search" class="w-3.5 h-3.5 text-sky-400"></i> Scan for Bugs
+    <button onclick="triggerBugAction('scan', '🔍 Scanning codebase for logic traps and test failures...')" class="shrink-0 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium flex items-center gap-1.5 transition">
+      <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500"></i>
+      <span>Scan Codebase</span>
     </button>
 
     <!-- 4. Run QA Checklist -->
-    <button onclick="sendQuickPrompt('Run the full code quality test checklist.')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-emerald-400/40 text-emerald-200 flex items-center gap-1.5 transition">
-      <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i> Run QA Checklist
+    <button onclick="sendQuickPrompt('Run the full code quality test checklist.')" class="shrink-0 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium flex items-center gap-1.5 transition">
+      <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i>
+      <span>Run QA Checklist</span>
     </button>
 
     <!-- 5. Tech Search -->
-    <button onclick="sendQuickPrompt('Search technical documentation for Python ZeroDivisionError handling and safe division patterns')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-purple-400/40 text-purple-200 flex items-center gap-1.5 transition">
-      <i data-lucide="globe" class="w-3.5 h-3.5 text-purple-400"></i> Tech Web Search
+    <button onclick="sendQuickPrompt('Search technical documentation for Python ZeroDivisionError handling and safe division patterns')" class="shrink-0 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium flex items-center gap-1.5 transition">
+      <i data-lucide="globe" class="w-3.5 h-3.5 text-blue-500"></i>
+      <span>Tech Search</span>
     </button>
 
-    <!-- 6. Kolkata Weather -->
-    <button onclick="sendQuickPrompt('What is the weather today in Kolkata?')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-amber-400/40 text-amber-200 flex items-center gap-1.5 transition">
-      <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-amber-400"></i> Kolkata Weather
+    <!-- 6. PC Hardware Specs -->
+    <button onclick="sendQuickPrompt('Check my system specs, CPU, RAM, and disk storage using MCP.')" class="shrink-0 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium flex items-center gap-1.5 transition">
+      <i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-500"></i>
+      <span>PC Specs</span>
     </button>
 
-    <!-- 7. PC Hardware Specs -->
-    <button onclick="sendQuickPrompt('Check my system specs, CPU, RAM, and disk storage using MCP.')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-sky-400/40 text-sky-200 flex items-center gap-1.5 transition">
-      <i data-lucide="cpu" class="w-3.5 h-3.5 text-sky-400"></i> PC Hardware Specs
+    <!-- 7. GitHub Inspector -->
+    <button onclick="sendQuickPrompt('List my repositories using your GitHub MCP tool.')" class="shrink-0 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium flex items-center gap-1.5 transition">
+      <i data-lucide="git-branch" class="w-3.5 h-3.5 text-slate-600"></i>
+      <span>GitHub Repos</span>
     </button>
 
-    <!-- 8. GitHub Inspector -->
-    <button onclick="sendQuickPrompt('List my repositories using your GitHub MCP tool.')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-teal-400/40 text-teal-200 flex items-center gap-1.5 transition">
-      <i data-lucide="git-branch" class="w-3.5 h-3.5 text-teal-400"></i> GitHub Repos
+    <!-- 8. Math Calculator -->
+    <button onclick="sendQuickPrompt('Calculate statistics for [12, 45, 67, 89, 23, 56, 78] using MCP tool.')" class="shrink-0 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium flex items-center gap-1.5 transition">
+      <i data-lucide="calculator" class="w-3.5 h-3.5 text-violet-500"></i>
+      <span>Math & Stats</span>
     </button>
 
-    <!-- 9. Math Calculator -->
-    <button onclick="sendQuickPrompt('Calculate statistics for [12, 45, 67, 89, 23, 56, 78] using MCP tool.')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-indigo-400/40 text-indigo-200 flex items-center gap-1.5 transition">
-      <i data-lucide="calculator" class="w-3.5 h-3.5 text-indigo-400"></i> Math & Stats
+    <!-- 9. Kolkata Weather -->
+    <button onclick="sendQuickPrompt('What is the weather today in Kolkata?')" class="shrink-0 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium flex items-center gap-1.5 transition">
+      <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-amber-500"></i>
+      <span>Weather</span>
     </button>
 
     <!-- 10. Long-Term Memory -->
-    <button onclick="sendQuickPrompt('Remember that my project is Wolf and my active repository is personal-ai-assistant.')" class="shrink-0 px-3 py-1.5 rounded-lg cockpit-card hover:border-pink-400/40 text-pink-200 flex items-center gap-1.5 mr-6 transition">
-      <i data-lucide="bookmark" class="w-3.5 h-3.5 text-pink-400"></i> Save Memory
+    <button onclick="sendQuickPrompt('Remember that my project is Wolf and my active repository is personal-ai-assistant.')" class="shrink-0 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium flex items-center gap-1.5 mr-6 transition">
+      <i data-lucide="bookmark" class="w-3.5 h-3.5 text-pink-500"></i>
+      <span>Save Memory</span>
     </button>
-  </div>
   </div>
 
   <!-- ========================================================== -->
-  <!-- MAIN WORKSPACE: Dual Stage (Console & Developer Cockpit)   -->
+  <!-- MAIN WORKSPACE: Dual Stage (Conversation & Code Studio)    -->
   <!-- ========================================================== -->
   <div class="flex-1 flex overflow-hidden">
 
-    <!-- LEFT STAGE: The Auto-Dev Interactive Console (60%) -->
-    <section class="flex-1 flex flex-col h-full bg-transparent border-r border-white/5 min-w-[360px]">
+    <!-- LEFT STAGE: Conversational Engineering Stream (60%) -->
+    <section class="flex-1 flex flex-col h-full bg-slate-50/70 border-r border-slate-200 min-w-[360px]">
       
-      <!-- Sub-Header Console HUD (Mission Control Bar) -->
-      <div class="px-6 py-2 border-b border-white/5 bg-slate-950/60 backdrop-blur-md flex items-center justify-between text-[11px] font-mono select-none">
-        <div class="flex items-center gap-3 text-zinc-400">
-          <span class="flex items-center gap-1.5 text-sky-400 font-semibold">
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
-            </span>
-            <span>KERNEL v2.4</span>
-          </span>
-          <span class="text-zinc-600">•</span>
-          <span>SESSION: <span id="hud-thread-id" class="text-zinc-300">wolf-session</span></span>
-          <span class="text-zinc-600 hidden sm:inline">•</span>
-          <span class="hidden sm:inline">PID: <span class="text-zinc-300">21996</span></span>
-        </div>
-
-        <div class="flex items-center gap-4 text-zinc-400">
-          <!-- Animated ECG Heartbeat Wave -->
-          <div class="hidden md:flex items-center gap-1.5 text-[10px] text-emerald-400">
-            <svg class="w-16 h-3 text-emerald-400 animate-pulse" viewBox="0 0 100 20">
-              <path d="M0,10 L30,10 L35,2 L40,18 L45,6 L50,14 L55,10 L100,10" fill="none" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            <span class="font-bold">AST RUNNER</span>
-          </div>
-          <span class="text-zinc-600 hidden sm:inline">•</span>
-          <span>LATENCY: <span id="hud-latency" class="text-amber-400 font-semibold">~340ms</span></span>
-        </div>
-      </div>
-
       <!-- Messages & Log Stream -->
-      <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-5">
+      <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4">
         
-        <!-- Welcome Autonomous Mission Banner -->
-        <div class="flex items-start gap-3.5 max-w-3xl">
-          <div class="w-9 h-9 rounded-xl bg-slate-900 border border-sky-500/30 p-1 shrink-0 flex items-center justify-center shadow-md shadow-sky-500/10">
-            <svg viewBox="0 0 100 100" class="w-full h-full">
-              <polygon points="50,4 92,25 92,75 50,96 8,75 8,25" fill="#0f172a" stroke="#38bdf8" stroke-width="3"/>
-              <polygon points="28,26 18,5 42,22" fill="#1e293b" stroke="#38bdf8"/>
-              <polygon points="72,26 82,5 58,22" fill="#1e293b" stroke="#38bdf8"/>
-              <polygon points="50,22 36,36 50,48 64,36" fill="#1e1b4b"/>
-              <polygon points="50,48 40,64 50,82 60,64" fill="#1e293b" stroke="#38bdf8"/>
-              <polygon points="35,46 45,47 38,51" fill="#38bdf8"/>
-              <polygon points="65,46 55,47 62,51" fill="#38bdf8"/>
-            </svg>
+        <!-- Welcome Hero Card -->
+        <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-3 max-w-2xl">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white">
+              <i data-lucide="shield-alert" class="w-4 h-4 text-sky-400"></i>
+            </div>
+            <div>
+              <h2 class="text-sm font-semibold text-slate-900">Wolf Autonomous Engineering Agent</h2>
+              <p class="text-xs text-slate-500">Operating on behalf of the developer</p>
+            </div>
           </div>
 
-          <div class="space-y-1.5">
-            <div class="flex items-center gap-2">
-              <span class="font-bold text-xs text-sky-400">WOLF AUTO-DEV ENGINE</span>
-              <span class="text-[10px] text-zinc-500 font-mono">Mission: Autonomous Bug Remediation</span>
-            </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            In modern development, codebases accumulate bugs and regressions that developers cannot manually triage by hand. 
+            I act as your autonomous engineering agent: scanning repositories, discovering root causes, retrieving fixes using multi-MCP intelligence, applying code patches, and certifying the production QA Checklist.
+          </p>
 
-            <div class="p-4 rounded-2xl rounded-tl-none agent-bubble text-zinc-200 leading-relaxed space-y-2.5 text-xs">
-              <div class="font-semibold text-zinc-100 flex items-center gap-2 text-sm">
-                <span>🐺 Welcome! I am WOLF</span>
-              </div>
-              <p>
-                I am your hybrid <strong>Autonomous Software Engineer & Personal AI Assistant</strong>. I combine daily assistant tools with an autonomous bug-fixing engine that works directly on behalf of developers.
-              </p>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
-                <div class="p-2.5 rounded-xl bg-slate-900/80 border border-sky-500/20 space-y-1">
-                  <div class="text-sky-300 font-bold flex items-center gap-1.5">
-                    <i data-lucide="wrench" class="w-3.5 h-3.5 text-sky-400"></i> Autonomous Bug Fixer
-                  </div>
-                  <div class="text-zinc-400 text-[11px]">
-                    Monitors Python code in <code class="text-sky-300">codebase/data_processor.py</code>. If a ZeroDivisionError, null reference, or boundary flaw occurs, I diagnose the root cause, apply a code patch, and pass all 6 QA tests!
-                  </div>
-                </div>
-
-                <div class="p-2.5 rounded-xl bg-slate-900/80 border border-purple-500/20 space-y-1">
-                  <div class="text-purple-300 font-bold flex items-center gap-1.5">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i> Full Assistant Suite
-                  </div>
-                  <div class="text-zinc-400 text-[11px]">
-                    Live weather for Kolkata, Windows PC hardware monitor (CPU/RAM/Disk), technical web search, GitHub repos, and persistent memory.
-                  </div>
-                </div>
-              </div>
-
-              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-amber-500/20 text-[11px] font-mono space-y-1">
-                <div class="text-amber-300 font-bold">👉 How to test the Bug Fixer Agent live:</div>
-                <div class="text-zinc-400">1. Click <strong class="text-amber-400">"Simulate Code Bug"</strong> above to inject a ZeroDivisionError flaw. The QA Matrix will turn <span class="text-red-400 font-bold">RED (FAIL ❌)</span>.</div>
-                <div class="text-zinc-400">2. Click <strong class="text-sky-400">"Autopilot: Fix & Certify"</strong> to watch Wolf autonomously diagnose, patch, and restore all 6 tests to <span class="text-emerald-400 font-bold">GREEN (PASS ✅)</span>!</div>
-              </div>
-            </div>
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Target: <code class="font-mono text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded">codebase/data_processor.py</code></span>
+            <span class="text-emerald-600 font-medium flex items-center gap-1">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 6 QA Tests Ready
+            </span>
           </div>
         </div>
 
       </div>
 
-      <!-- Terminal Input Console -->
-      <footer class="p-4 border-t border-white/5 bg-slate-950/80 backdrop-blur-md">
-        <form id="chat-form" onsubmit="handleSend(event)" class="relative flex items-center">
-          <div class="absolute left-4 text-sky-400 font-mono text-xs font-bold flex items-center gap-1 pointer-events-none">
-            <span>wolf</span><span class="text-zinc-600">@</span><span class="text-indigo-400">dev</span><span class="text-zinc-500">:~$</span>
-          </div>
-
+      <!-- Modern Floating Input Bar -->
+      <footer class="p-4 bg-white border-t border-slate-200">
+        <form id="chat-form" onsubmit="handleSend(event)" class="relative flex items-center max-w-3xl mx-auto">
           <input 
             type="text" 
             id="user-input" 
-            placeholder="Type a command (e.g. 'Fix the bug and verify tests', 'Scan repository', or search error with Groq)..." 
+            placeholder="Type a task or command (e.g. 'Fix the bug and verify tests', 'Check PC specs', 'Search documentation')..." 
             autocomplete="off"
-            class="w-full pl-28 pr-28 py-3 rounded-xl bg-slate-900/90 border border-white/10 text-xs font-mono text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition shadow-inner"
+            class="w-full pl-4 pr-24 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-slate-400 focus:bg-white transition shadow-inner"
           />
 
           <button 
             type="submit" 
             id="send-btn"
-            class="absolute right-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-sky-600/30 transition disabled:opacity-50"
+            class="absolute right-2 px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium flex items-center gap-1.5 transition shadow-sm disabled:opacity-50"
           >
-            <span>Execute</span>
-            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            <span>Send</span>
+            <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
           </button>
         </form>
-
-        <div class="flex items-center justify-between text-[11px] text-zinc-500 mt-2 px-1 font-mono">
-          <span>Target: <strong class="text-zinc-400">codebase/data_processor.py</strong></span>
-          <span>Wolf Autonomous AI Agent • LangGraph • Groq • FastMCP</span>
-        </div>
       </footer>
 
     </section>
 
-    <!-- RIGHT STAGE: The Developer Cockpit & Live QA Matrix (40%) -->
-    <aside class="w-[420px] glass-panel flex flex-col justify-between hidden lg:flex z-10 shrink-0 relative overflow-hidden">
-      <!-- Live Laser Scanner Beam -->
-      <div id="scanner-laser" class="scanner-beam hidden"></div>
+    <!-- RIGHT STAGE: Code Quality Studio & System Inspector (40%) -->
+    <aside class="w-[420px] studio-panel flex flex-col justify-between hidden lg:flex z-10 shrink-0">
       
-      <!-- Cockpit Header & Tab Switcher (3-Pillar Enterprise View) -->
-      <div class="p-3 border-b border-white/5 flex items-center justify-between">
-        <div class="flex items-center gap-1 p-1 rounded-xl bg-slate-900/90 border border-white/5 text-xs">
-          <button id="tab-qa-btn" onclick="switchRightTab('qa')" class="px-2.5 py-1 rounded-lg font-semibold bg-sky-600 text-white transition flex items-center gap-1.5 shadow text-[11px]">
-            <i data-lucide="check-square" class="w-3.5 h-3.5"></i> QA Matrix
+      <!-- Studio Tabs Header -->
+      <div class="p-3 border-b border-slate-200 flex items-center justify-between bg-white">
+        <div class="flex items-center gap-1 p-1 rounded-xl bg-slate-100 text-xs">
+          <button id="tab-qa-btn" onclick="switchRightTab('qa')" class="px-3 py-1 rounded-lg font-semibold bg-white text-slate-900 transition flex items-center gap-1.5 shadow-sm text-xs">
+            <i data-lucide="check-square" class="w-3.5 h-3.5 text-emerald-600"></i> QA Matrix
           </button>
-          <button id="tab-arch-btn" onclick="switchRightTab('arch')" class="px-2.5 py-1 rounded-lg font-semibold text-zinc-400 hover:text-white transition flex items-center gap-1.5 text-[11px]">
-            <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-400"></i> Architecture
+          <button id="tab-arch-btn" onclick="switchRightTab('arch')" class="px-3 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 text-xs">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-600"></i> Architecture
           </button>
-          <button id="tab-memory-btn" onclick="switchRightTab('memory')" class="px-2.5 py-1 rounded-lg font-semibold text-zinc-400 hover:text-white transition flex items-center gap-1.5 text-[11px]">
-            <i data-lucide="cpu" class="w-3.5 h-3.5 text-pink-400"></i> MCP & Memory
+          <button id="tab-memory-btn" onclick="switchRightTab('memory')" class="px-3 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 text-xs">
+            <i data-lucide="cpu" class="w-3.5 h-3.5 text-pink-600"></i> Memory & Tools
           </button>
         </div>
-        <span id="matrix-pass-rate" class="px-2 py-0.5 text-[11px] font-mono rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+
+        <span id="matrix-pass-rate" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
           6/6 Passed (100%)
         </span>
       </div>
 
       <!-- TAB 1: QA Checklist & Code Diff -->
-      <div id="panel-qa-tab" class="flex-1 overflow-y-auto p-4 space-y-2.5">
+      <div id="panel-qa-tab" class="flex-1 overflow-y-auto p-4 space-y-3">
         
-        <!-- Checklist Cards (Dynamically refreshed) -->
-        <div id="checklist-cards-container" class="space-y-2 text-xs font-mono">
-          <!-- Populated by JavaScript -->
-          <div class="p-3 rounded-xl cockpit-card flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <span class="text-emerald-400 font-bold">✅</span>
-              <div>
-                <div class="text-zinc-200 font-semibold">Subtotal Calculation</div>
-                <div class="text-[10px] text-zinc-400">Sums item price * quantity accurately</div>
-              </div>
-            </div>
-            <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300">PASS</span>
+        <!-- Checklist Cards Container -->
+        <div class="space-y-1.5">
+          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Production Quality Checklist</div>
+          <div id="checklist-cards-container" class="space-y-2 text-xs">
+            <!-- Dynamically populated by JavaScript -->
           </div>
         </div>
 
-        <!-- Code Patch Inspector (Before vs After Diff) -->
-        <div class="mt-4 pt-3 border-t border-white/5 space-y-2">
+        <!-- Code Diff Viewer -->
+        <div class="pt-3 border-t border-slate-200 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-              <i data-lucide="git-commit" class="w-3.5 h-3.5 text-purple-400"></i> Live Code Diff Inspector
+            <span class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+              <i data-lucide="git-commit" class="w-3.5 h-3.5 text-slate-500"></i> Live Code Diff Inspector
             </span>
-            <span id="diff-status-pill" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+            <span id="diff-status-pill" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
               Clean Master
             </span>
           </div>
 
-          <div id="diff-viewer" class="rounded-xl bg-slate-950 p-3 border border-white/5 font-mono text-[11px] space-y-1 overflow-x-auto">
-            <div class="text-zinc-500">// codebase/data_processor.py (calculate_average)</div>
+          <div id="diff-viewer" class="rounded-xl bg-slate-50 p-3 border border-slate-200 font-mono text-[11px] space-y-1 overflow-x-auto shadow-inner">
+            <div class="text-slate-400">// codebase/data_processor.py (calculate_average)</div>
             <div class="diff-added">+ if not numbers: return 0.0</div>
             <div class="diff-added">+ return round(sum(numbers) / len(numbers), 2)</div>
-            <div class="text-emerald-400 text-[10px] pt-1 italic">✓ Certified: ZeroDivisionError guard active for empty inputs.</div>
-          </div>
-        </div>
-
-        <!-- Autonomous Pipeline Architecture Diagram -->
-        <div class="mt-4 pt-3 border-t border-white/5 space-y-2">
-          <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-            <i data-lucide="cpu" class="w-3.5 h-3.5 text-amber-400"></i> Autonomous Auto-Dev Pipeline
-          </span>
-
-          <div class="p-3 rounded-xl bg-slate-900/60 border border-white/5 space-y-2 text-[11px] font-mono text-zinc-400">
-            <div class="flex items-center justify-between text-zinc-300">
-              <span>1. Codebase Scanner</span>
-              <span class="text-sky-400">AST & Test Runner</span>
-            </div>
-            <div class="flex items-center justify-between text-zinc-300">
-              <span>2. Root Cause Analysis</span>
-              <span class="text-sky-400">Traceback Diagnostics</span>
-            </div>
-            <div class="flex items-center justify-between text-zinc-300">
-              <span>3. Tech Solution Research</span>
-              <span class="text-amber-400">FastMCP Intelligence</span>
-            </div>
-            <div class="flex items-center justify-between text-zinc-300">
-              <span>4. Patch Synthesis & Git</span>
-              <span class="text-purple-400">Autonomous Patcher</span>
-            </div>
-            <div class="flex items-center justify-between text-zinc-300">
-              <span>5. QA Checklist Certify</span>
-              <span class="text-emerald-400">100% Pass Threshold</span>
-            </div>
+            <div class="text-emerald-700 text-[10px] pt-1 italic font-medium">✓ Certified: ZeroDivisionError guard active for empty inputs.</div>
           </div>
         </div>
 
       </div>
 
-      <!-- TAB 2: System Architecture & Data Flow Blueprint -->
-      <div id="panel-arch-tab" class="flex-1 overflow-y-auto p-4 space-y-3.5 hidden">
-        <div class="flex items-center justify-between border-b border-white/5 pb-2">
-          <span class="text-xs font-bold text-sky-300 uppercase tracking-wider flex items-center gap-1.5 font-mono">
-            <i data-lucide="git-merge" class="w-3.5 h-3.5 text-sky-400"></i> 6-Pillar Architecture Blueprint
-          </span>
-          <span class="px-2 py-0.5 rounded text-[10px] bg-sky-500/20 text-sky-300 font-mono">Enterprise Spec</span>
-        </div>
+      <!-- TAB 2: System Architecture Blueprint -->
+      <div id="panel-arch-tab" class="flex-1 overflow-y-auto p-4 space-y-3 hidden">
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">6-Pillar Architecture Blueprint</div>
 
-        <!-- Pillar 1: ASGI Interface Layer -->
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-sky-500/20 space-y-1.5">
+        <!-- Pillar 1 -->
+        <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1 shadow-sm">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-sky-300 flex items-center gap-1.5 font-mono">
-              <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> 1. ASGI Web Server Layer
+            <span class="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-sky-500"></span> 1. ASGI Web Server Layer
             </span>
-            <span class="text-[10px] font-mono text-zinc-500">Starlette + Uvicorn</span>
+            <span class="text-[10px] font-mono text-slate-500">Starlette + Uvicorn</span>
           </div>
-          <p class="text-[11px] text-zinc-400">
-            Non-blocking async HTTP/REST gateway. Dispatches heavy agent graph operations onto background worker thread pools (<code class="text-sky-300 font-mono">asyncio.to_thread</code>).
-          </p>
-          <div class="flex items-center gap-2 pt-1 text-[10px] font-mono text-zinc-500">
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-sky-400">app.py</span>
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-indigo-400">frontend/app.py</span>
-          </div>
+          <p class="text-xs text-slate-600">Non-blocking asynchronous HTTP/REST gateway. Offloads heavy agent reasoning to background worker threads.</p>
         </div>
 
-        <!-- Pillar 2: LangGraph StateGraph -->
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-indigo-500/20 space-y-1.5">
+        <!-- Pillar 2 -->
+        <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1 shadow-sm">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5 font-mono">
-              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> 2. LangGraph StateGraph Loop
+            <span class="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 2. LangGraph StateGraph
             </span>
-            <span class="text-[10px] font-mono text-zinc-500">LangGraph v0.2</span>
+            <span class="text-[10px] font-mono text-slate-500">LangGraph v0.2</span>
           </div>
-          <p class="text-[11px] text-zinc-400">
-            Cyclic decision flow: <code class="text-indigo-300 font-mono">START ➔ agent ➔ tools_condition ➔ tools ➔ agent ➔ END</code>. Includes single-turn loop synthesizer protection.
-          </p>
-          <div class="flex items-center gap-2 pt-1 text-[10px] font-mono text-zinc-500">
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-indigo-400">core/graph.py</span>
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-purple-400">core/agent.py</span>
-          </div>
+          <p class="text-xs text-slate-600">Cyclic agent loop with conditional tool routing and single-turn synthesis lock preventing infinite tool loops.</p>
         </div>
 
-        <!-- Pillar 3: Model-Agnostic LLM Factory -->
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-amber-500/20 space-y-1.5">
+        <!-- Pillar 3 -->
+        <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1 shadow-sm">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5 font-mono">
-              <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> 3. Model-Agnostic Factory
+            <span class="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span> 3. Model-Agnostic LLM Factory
             </span>
-            <span class="text-[10px] font-mono text-zinc-500">BaseChatModel</span>
+            <span class="text-[10px] font-mono text-slate-500">BaseChatModel</span>
           </div>
-          <p class="text-[11px] text-zinc-400">
-            Decoupled LLM instantiation supporting Google Gemini, Groq (LLaMA 3.3 70B), OpenAI, Anthropic Claude, and local Ollama without modifying agent logic.
-          </p>
-          <div class="flex items-center gap-2 pt-1 text-[10px] font-mono text-zinc-500">
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-amber-400">llm/factory.py</span>
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-zinc-400">config/settings.py</span>
-          </div>
+          <p class="text-xs text-slate-600">Supports Google Gemini, Groq (LLaMA 3.3), OpenAI, Claude, and local Ollama without modifying agent code.</p>
         </div>
 
-        <!-- Pillar 4: Multi-MCP Microservices -->
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-purple-500/20 space-y-1.5">
+        <!-- Pillar 4 -->
+        <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1 shadow-sm">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-purple-300 flex items-center gap-1.5 font-mono">
-              <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span> 4. FastMCP Protocol Bridge
+            <span class="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-purple-500"></span> 4. FastMCP Protocol Bridge
             </span>
-            <span class="text-[10px] font-mono text-emerald-400">4 Stdio Servers</span>
+            <span class="text-[10px] font-mono text-slate-500">4 Stdio Microservices</span>
           </div>
-          <p class="text-[11px] text-zinc-400">
-            4 independent microservices communicating over stdio JSON-RPC 2.0: System Diagnostics, GitHub Read-Only, High-Speed Web Search, and Advanced Statistics.
-          </p>
-          <div class="flex items-center gap-1.5 pt-1 text-[10px] font-mono text-zinc-500 flex-wrap">
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-purple-400">system_server</span>
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-teal-400">github_server</span>
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-sky-400">search_server</span>
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-amber-400">math_server</span>
-          </div>
+          <p class="text-xs text-slate-600">4 independent microservices: System Diagnostics, GitHub Read-Only, Real-Time Web Search, and Advanced Statistics.</p>
         </div>
 
-        <!-- Pillar 5: Conversation & Memory Layer -->
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-pink-500/20 space-y-1.5">
+        <!-- Pillar 5 -->
+        <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1 shadow-sm">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-pink-300 flex items-center gap-1.5 font-mono">
-              <span class="w-1.5 h-1.5 rounded-full bg-pink-400"></span> 5. Context & Memory Isolation
+            <span class="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-pink-500"></span> 5. Context & Memory Layer
             </span>
-            <span class="text-[10px] font-mono text-zinc-500">Multi-Session</span>
+            <span class="text-[10px] font-mono text-slate-500">Multi-Session</span>
           </div>
-          <p class="text-[11px] text-zinc-400">
-            <code class="text-pink-300 font-mono">trim_messages</code> guards context limits, <code class="text-pink-300 font-mono">MemorySaver</code> isolates threads by thread_id, and <code class="text-pink-300 font-mono">user_profile.json</code> persists facts across reboots.
-          </p>
-          <div class="flex items-center gap-2 pt-1 text-[10px] font-mono text-zinc-500">
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-pink-400">memory/checkpointer.py</span>
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-rose-400">memory/context_manager.py</span>
-          </div>
+          <p class="text-xs text-slate-600">trim_messages guards context limits, MemorySaver isolates threads, and user_profile.json stores persistent facts.</p>
         </div>
 
-        <!-- Pillar 6: Autonomous Remediation Engine -->
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-emerald-500/20 space-y-1.5">
+        <!-- Pillar 6 -->
+        <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1 shadow-sm">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5 font-mono">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 6. Autonomous Code Doctor
+            <span class="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 6. Autonomous Code Doctor
             </span>
-            <span class="text-[10px] font-mono text-emerald-400">6 QA Rules</span>
+            <span class="text-[10px] font-mono text-slate-500">6 QA Rules</span>
           </div>
-          <p class="text-[11px] text-zinc-400">
-            AST scanner, traceback extractor, automated code patcher, and test suite executor certifying 100% pass rates on <code class="text-emerald-300 font-mono">codebase/data_processor.py</code>.
-          </p>
-          <div class="flex items-center gap-2 pt-1 text-[10px] font-mono text-zinc-500">
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-emerald-400">core/bug_fixer_agent.py</span>
-            <span class="px-1.5 py-0.5 rounded bg-black/40 text-cyan-400">codebase/test_data_processor.py</span>
-          </div>
+          <p class="text-xs text-slate-600">Automated traceback diagnostics and code patch synthesis guaranteeing 100% test pass threshold.</p>
         </div>
-
       </div>
 
-      <!-- TAB 2: Long-Term Memory & Active Tools -->
+      <!-- TAB 3: Memory Profile & Active Tools -->
       <div id="panel-memory-tab" class="flex-1 overflow-y-auto p-4 space-y-4 hidden">
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <span class="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-pink-400"></i> Long-Term Memory Profile
-            </span>
-            <button onclick="fetchMemoryProfile()" title="Refresh memory" class="text-zinc-400 hover:text-zinc-200 transition">
+            <span class="text-xs font-semibold text-slate-700 uppercase tracking-wider">Permanent Memory Facts</span>
+            <button onclick="fetchMemoryProfile()" title="Refresh memory" class="text-slate-400 hover:text-slate-600 transition">
               <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
             </button>
           </div>
-          <p class="text-[11px] text-zinc-500 mb-2">Facts remembered permanently in <code class="text-zinc-400 font-mono">./data/user_profile.json</code></p>
-          <div id="memory-facts-container" class="p-3 rounded-xl bg-slate-900/60 border border-white/5 space-y-1.5 text-xs text-zinc-300 font-mono">
-            <div class="text-zinc-500 italic">Loading remembered facts...</div>
+          <p class="text-xs text-slate-500 mb-2">Stored permanently in <code class="text-slate-700 font-mono">./data/user_profile.json</code></p>
+          <div id="memory-facts-container" class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5 text-xs text-slate-700">
+            <div class="text-slate-400 italic">Loading remembered facts...</div>
           </div>
         </div>
 
         <div>
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-              <i data-lucide="wrench" class="w-3.5 h-3.5 text-amber-400"></i> Active Assistant Tools
-            </span>
-          </div>
-          <div id="tools-list-container" class="space-y-1.5 max-h-56 overflow-y-auto pr-1 text-xs font-mono">
-            <div class="text-zinc-500 italic">Loading registered tools...</div>
+          <div class="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Active Assistant Tools</div>
+          <div id="tools-list-container" class="space-y-1.5 max-h-56 overflow-y-auto pr-1 text-xs">
+            <div class="text-slate-400 italic">Loading registered tools...</div>
           </div>
         </div>
       </div>
 
       <!-- Cockpit Footer -->
-      <div class="p-3.5 border-t border-white/5 text-[11px] font-mono text-zinc-500 flex items-center justify-between">
-        <span class="flex items-center gap-1.5">
-          <i data-lucide="github" class="w-3.5 h-3.5 text-zinc-400"></i> debdeepsikha13-hub
-        </span>
-        <span class="text-sky-400 font-semibold">WOLF AUTO-DEV ACTIVE</span>
+      <div class="p-3 border-t border-slate-200 bg-white text-xs text-slate-500 flex items-center justify-between">
+        <span>debdeepsikha13-hub</span>
+        <span class="text-slate-700 font-medium">Wolf Auto-Dev Active</span>
       </div>
 
     </aside>
@@ -696,13 +426,12 @@
   </div>
 
   <!-- ========================================================== -->
-  <!-- JAVASCRIPT LOGIC: Interactive Cockpit & Auto-Dev Engine    -->
+  <!-- JAVASCRIPT LOGIC: Interactive Studio Engine                -->
   <!-- ========================================================== -->
   <script>
     const chatContainer = document.getElementById("chat-container");
     const userInput = document.getElementById("user-input");
     const sendBtn = document.getElementById("send-btn");
-    const healthBadge = document.getElementById("health-status-badge");
     const matrixPassRate = document.getElementById("matrix-pass-rate");
     const checklistCards = document.getElementById("checklist-cards-container");
     const diffViewer = document.getElementById("diff-viewer");
@@ -710,59 +439,12 @@
 
     let threadId = "wolf-session-" + Math.random().toString(36).substring(7);
 
-    // Theme Engine Manager (Cyber / Matrix / Amethyst)
-    const THEMES = [
-      { id: "cyber", class: "", label: "Theme: Cyber" },
-      { id: "matrix", class: "theme-matrix", label: "Theme: Matrix" },
-      { id: "amethyst", class: "theme-amethyst", label: "Theme: Amethyst" }
-    ];
-    let currentThemeIndex = 0;
-
-    function applyTheme(index) {
-      currentThemeIndex = index % THEMES.length;
-      const theme = THEMES[currentThemeIndex];
-      document.body.className = "h-screen flex flex-col overflow-hidden font-sans antialiased text-sm " + theme.class;
-      const label = document.getElementById("theme-label");
-      if (label) label.innerText = theme.label;
-      localStorage.setItem("wolf_theme", theme.id);
-      lucide.createIcons();
-    }
-
-    function cycleTheme() {
-      applyTheme(currentThemeIndex + 1);
-    }
-
     // Initial load: fetch status & checklist matrix
     window.addEventListener("DOMContentLoaded", () => {
-      // Restore theme
-      const savedTheme = localStorage.getItem("wolf_theme");
-      const foundIdx = THEMES.findIndex(t => t.id === savedTheme);
-      if (foundIdx >= 0) applyTheme(foundIdx);
-
-      // Initialize session HUD
-      const hudThread = document.getElementById("hud-thread-id");
-      if (hudThread) hudThread.innerText = threadId;
-
       lucide.createIcons();
       refreshCodebaseStatus();
       fetchMemoryProfile();
-      fetchStatusTelemetry();
     });
-
-    async function fetchStatusTelemetry() {
-      try {
-        const res = await fetch("/api/status");
-        if (!res.ok) return;
-        const data = await res.json();
-        const modelBadge = document.getElementById("telemetry-model-badge");
-        if (modelBadge && data.model) {
-          modelBadge.innerHTML = `<i data-lucide="cpu" class="w-3.5 h-3.5 text-amber-400"></i> ${escapeHtml(data.provider.toUpperCase())} (${escapeHtml(data.model)})`;
-          lucide.createIcons();
-        }
-      } catch (e) {
-        console.error("Telemetry error:", e);
-      }
-    }
 
     function switchRightTab(tab) {
       const panelQa = document.getElementById("panel-qa-tab");
@@ -778,19 +460,19 @@
       panelMemory.classList.add("hidden");
 
       // Reset button styles
-      tabQaBtn.className = "px-2.5 py-1 rounded-lg font-semibold text-zinc-400 hover:text-white transition flex items-center gap-1.5 text-[11px]";
-      tabArchBtn.className = "px-2.5 py-1 rounded-lg font-semibold text-zinc-400 hover:text-white transition flex items-center gap-1.5 text-[11px]";
-      tabMemoryBtn.className = "px-2.5 py-1 rounded-lg font-semibold text-zinc-400 hover:text-white transition flex items-center gap-1.5 text-[11px]";
+      tabQaBtn.className = "px-3 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 text-xs";
+      tabArchBtn.className = "px-3 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 text-xs";
+      tabMemoryBtn.className = "px-3 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 text-xs";
 
       if (tab === 'qa') {
         panelQa.classList.remove("hidden");
-        tabQaBtn.className = "px-2.5 py-1 rounded-lg font-semibold bg-sky-600 text-white transition flex items-center gap-1.5 shadow text-[11px]";
+        tabQaBtn.className = "px-3 py-1 rounded-lg font-semibold bg-white text-slate-900 transition flex items-center gap-1.5 shadow-sm text-xs";
       } else if (tab === 'arch') {
         panelArch.classList.remove("hidden");
-        tabArchBtn.className = "px-2.5 py-1 rounded-lg font-semibold bg-indigo-600 text-white transition flex items-center gap-1.5 shadow text-[11px]";
+        tabArchBtn.className = "px-3 py-1 rounded-lg font-semibold bg-white text-slate-900 transition flex items-center gap-1.5 shadow-sm text-xs";
       } else {
         panelMemory.classList.remove("hidden");
-        tabMemoryBtn.className = "px-2.5 py-1 rounded-lg font-semibold bg-pink-600 text-white transition flex items-center gap-1.5 shadow text-[11px]";
+        tabMemoryBtn.className = "px-3 py-1 rounded-lg font-semibold bg-white text-slate-900 transition flex items-center gap-1.5 shadow-sm text-xs";
         fetchMemoryProfile();
       }
       lucide.createIcons();
@@ -803,12 +485,12 @@
           const facts = await memRes.json();
           const container = document.getElementById("memory-facts-container");
           if (!facts || Object.keys(facts).length === 0) {
-            container.innerHTML = `<div class="text-zinc-500 italic">No permanent facts stored yet. Click "Save Memory" or tell Wolf your name!</div>`;
+            container.innerHTML = `<div class="text-slate-400 italic">No permanent facts stored yet. Click "Save Memory" or tell Wolf your name!</div>`;
           } else {
             container.innerHTML = Object.entries(facts).map(([k, v]) => `
-              <div class="flex items-center justify-between p-2 rounded bg-slate-950/70 border border-white/5">
-                <span class="text-sky-300 font-semibold">${escapeHtml(k)}:</span>
-                <span class="text-zinc-300">${escapeHtml(String(v))}</span>
+              <div class="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200">
+                <span class="text-slate-800 font-semibold">${escapeHtml(k)}:</span>
+                <span class="text-slate-600 font-mono">${escapeHtml(String(v))}</span>
               </div>
             `).join("");
           }
@@ -820,9 +502,9 @@
           const tContainer = document.getElementById("tools-list-container");
           const toolsList = Array.isArray(toolsData) ? toolsData : (toolsData.tools || []);
           tContainer.innerHTML = toolsList.map(t => `
-            <div class="p-2 rounded bg-slate-950/70 border border-white/5 flex items-center justify-between">
-              <span class="text-sky-300 font-semibold">${escapeHtml(t.name)}</span>
-              <span class="text-[10px] text-zinc-500 uppercase">${escapeHtml(t.type || t.source || 'tool')}</span>
+            <div class="p-2 rounded-lg bg-white border border-slate-200 flex items-center justify-between">
+              <span class="text-slate-800 font-medium">${escapeHtml(t.name)}</span>
+              <span class="text-[10px] text-slate-400 uppercase font-mono">${escapeHtml(t.type || t.source || 'tool')}</span>
             </div>
           `).join("");
         }
@@ -850,30 +532,24 @@
       matrixPassRate.innerText = `${tests.passed_count}/${tests.total_tests} Passed (${tests.pass_rate})`;
       
       if (bugFound || tests.failed_count > 0) {
-        healthBadge.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-red-500/20 text-red-300 border border-red-500/40 flex items-center gap-1.5";
-        healthBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span> 🚨 ${tests.failed_count} FAILING TEST (BUG DETECTED)`;
-        
-        diffStatusPill.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/20 text-red-300";
+        diffStatusPill.className = "text-[11px] font-mono px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200";
         diffStatusPill.innerText = "Bug Active in Code";
 
         diffViewer.innerHTML = `
-          <div class="text-zinc-500">// codebase/data_processor.py (calculate_average)</div>
+          <div class="text-slate-400">// codebase/data_processor.py (calculate_average)</div>
           <div class="diff-deleted">- # BUG: Missing empty list guard -> ZeroDivisionError!</div>
           <div class="diff-deleted">- return round(sum(numbers) / len(numbers), 2)</div>
-          <div class="text-red-400 text-[10px] pt-1 italic font-semibold">❌ Flaw: len(numbers) is 0 on empty input, crashing with ZeroDivisionError: division by zero.</div>
+          <div class="text-rose-600 text-[10px] pt-1 italic font-semibold">❌ Flaw: len(numbers) is 0 on empty input, crashing with ZeroDivisionError: division by zero.</div>
         `;
       } else {
-        healthBadge.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5";
-        healthBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ALL 6 TESTS PASSING`;
-
-        diffStatusPill.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300";
+        diffStatusPill.className = "text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200";
         diffStatusPill.innerText = "Certified Master";
 
         diffViewer.innerHTML = `
-          <div class="text-zinc-500">// codebase/data_processor.py (calculate_average)</div>
+          <div class="text-slate-400">// codebase/data_processor.py (calculate_average)</div>
           <div class="diff-added">+ if not numbers: return 0.0</div>
           <div class="diff-added">+ return round(sum(numbers) / len(numbers), 2)</div>
-          <div class="text-emerald-400 text-[10px] pt-1 italic">✓ Certified: ZeroDivisionError guard active for empty inputs.</div>
+          <div class="text-emerald-700 text-[10px] pt-1 italic font-medium">✓ Certified: ZeroDivisionError guard active for empty inputs.</div>
         `;
       }
 
@@ -882,16 +558,16 @@
       tests.checklist.forEach(item => {
         const isPass = item.passed;
         const card = document.createElement("div");
-        card.className = `p-3 rounded-xl cockpit-card flex items-center justify-between ${!isPass ? 'border-red-500/40 bg-red-500/10' : ''}`;
+        card.className = `p-3 rounded-xl border flex items-center justify-between transition ${isPass ? 'bg-white border-slate-200 hover:border-slate-300' : 'bg-rose-50/60 border-rose-200'}`;
         card.innerHTML = `
           <div class="flex items-center gap-2.5">
             <span class="text-base">${isPass ? '✅' : '❌'}</span>
             <div>
-              <div class="text-zinc-200 font-semibold">${formatTestTitle(item.test_id)}</div>
-              <div class="text-[10px] text-zinc-400">${item.description}</div>
+              <div class="text-slate-800 font-semibold">${formatTestTitle(item.test_id)}</div>
+              <div class="text-[11px] text-slate-500">${item.description}</div>
             </div>
           </div>
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isPass ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300 animate-pulse'}">
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isPass ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200'}">
             ${isPass ? 'PASS' : 'FAIL'}
           </span>
         `;
@@ -912,14 +588,6 @@
     // Trigger Quick Action Command Button
     async function triggerBugAction(action, systemNotice) {
       appendSystemMessage(systemNotice);
-
-      // Trigger live laser scanning animation
-      const laser = document.getElementById("scanner-laser");
-      if (laser) {
-        laser.classList.remove("hidden");
-        setTimeout(() => laser.classList.add("hidden"), 2200);
-      }
-
       try {
         const res = await fetch("/api/bug_action", {
           method: "POST",
@@ -998,9 +666,9 @@
     // Append User Bubble
     function appendUserMessage(text) {
       const msgDiv = document.createElement("div");
-      msgDiv.className = "flex items-start justify-end gap-3 max-w-2xl ml-auto";
+      msgDiv.className = "flex items-start justify-end gap-3 max-w-xl ml-auto";
       msgDiv.innerHTML = `
-        <div class="p-3.5 rounded-2xl rounded-tr-none user-bubble text-white text-xs leading-relaxed shadow-lg">
+        <div class="px-4 py-2.5 rounded-2xl rounded-tr-none bg-slate-900 text-white text-xs leading-relaxed shadow-sm">
           ${escapeHtml(text)}
         </div>
       `;
@@ -1011,10 +679,10 @@
     // Append System Notice Bubble
     function appendSystemMessage(text) {
       const msgDiv = document.createElement("div");
-      msgDiv.className = "flex justify-center max-w-xl mx-auto my-2";
+      msgDiv.className = "flex justify-center max-w-xl mx-auto my-1";
       msgDiv.innerHTML = `
-        <div class="px-4 py-2 rounded-xl bg-slate-900/90 border border-sky-500/20 text-sky-300 text-[11px] font-mono flex items-center gap-2 shadow-sm">
-          <i data-lucide="info" class="w-3.5 h-3.5 text-sky-400"></i> ${escapeHtml(text)}
+        <div class="px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-mono flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="info" class="w-3.5 h-3.5 text-slate-500"></i> ${escapeHtml(text)}
         </div>
       `;
       chatContainer.appendChild(msgDiv);
@@ -1025,7 +693,7 @@
     // Append Agent Message with Collapsible Tool Execution
     function appendAgentMessage(text, toolCalls) {
       const msgDiv = document.createElement("div");
-      msgDiv.className = "flex items-start gap-3.5 max-w-3xl";
+      msgDiv.className = "flex items-start gap-3 max-w-2xl";
 
       let toolHtml = "";
       if (toolCalls && toolCalls.length > 0) {
@@ -1035,22 +703,22 @@
           const toolResult = tc.result !== undefined ? (typeof tc.result === "string" ? tc.result : JSON.stringify(tc.result, null, 2)) : "Executed successfully";
 
           return `
-            <details class="text-[11px] border border-sky-500/20 rounded-lg overflow-hidden bg-slate-950/60 transition mb-1.5 group">
-              <summary class="cursor-pointer px-3 py-1.5 bg-slate-900/80 hover:bg-slate-800 text-sky-300 font-mono flex items-center justify-between select-none">
+            <details class="text-xs border border-slate-200 rounded-lg overflow-hidden bg-slate-50 transition mb-1.5 group">
+              <summary class="cursor-pointer px-3 py-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-800 font-mono flex items-center justify-between select-none">
                 <span class="flex items-center gap-1.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
-                  <strong>⚡ Executed:</strong> ${escapeHtml(toolName)}
+                  <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                  <strong>Executed:</strong> ${escapeHtml(toolName)}
                 </span>
-                <span class="text-[10px] text-zinc-500 group-open:rotate-180 transition transform">▼</span>
+                <span class="text-[10px] text-slate-500 group-open:rotate-180 transition transform">▼</span>
               </summary>
-              <div class="p-3 space-y-2 border-t border-white/5 font-mono text-[11px] text-zinc-300 bg-slate-950">
+              <div class="p-3 space-y-2 border-t border-slate-200 font-mono text-[11px] text-slate-700 bg-white">
                 <div>
-                  <span class="text-zinc-500 text-[10px] uppercase font-bold">Input Parameters:</span>
-                  <pre class="bg-black/60 p-2 rounded text-zinc-300 overflow-x-auto mt-0.5 text-[10px]">${escapeHtml(toolArgs)}</pre>
+                  <span class="text-slate-400 text-[10px] uppercase font-bold">Input Parameters:</span>
+                  <pre class="bg-slate-900 text-slate-100 p-2 rounded text-[10px] overflow-x-auto mt-0.5">${escapeHtml(toolArgs)}</pre>
                 </div>
                 <div>
-                  <span class="text-zinc-500 text-[10px] uppercase font-bold">Execution Output:</span>
-                  <pre class="bg-black/60 p-2 rounded text-emerald-300/90 overflow-x-auto mt-0.5 text-[10px]">${escapeHtml(toolResult)}</pre>
+                  <span class="text-slate-400 text-[10px] uppercase font-bold">Execution Output:</span>
+                  <pre class="bg-slate-900 text-emerald-300 p-2 rounded text-[10px] overflow-x-auto mt-0.5">${escapeHtml(toolResult)}</pre>
                 </div>
               </div>
             </details>
@@ -1063,7 +731,7 @@
       const parsedMarkdown = marked.parse(text || "");
 
       msgDiv.innerHTML = `
-        <div class="w-8 h-8 rounded-xl bg-slate-900 border border-sky-500/30 p-1 shrink-0 flex items-center justify-center shadow-md">
+        <div class="w-8 h-8 rounded-lg bg-slate-900 text-white p-1 shrink-0 flex items-center justify-center shadow-sm">
           <svg viewBox="0 0 100 100" class="w-full h-full">
             <polygon points="50,4 92,25 92,75 50,96 8,75 8,25" fill="#0f172a" stroke="#38bdf8" stroke-width="3"/>
             <polygon points="28,26 18,5 42,22" fill="#1e293b" stroke="#38bdf8"/>
@@ -1073,14 +741,14 @@
             <polygon points="65,46 55,47 62,51" fill="#38bdf8"/>
           </svg>
         </div>
-        <div class="space-y-1 w-full max-w-2xl">
-          <div class="flex items-center gap-2">
-            <span class="font-bold text-xs text-sky-400">WOLF</span>
-            <span class="text-[10px] text-zinc-500 font-mono">Auto-Dev</span>
+        <div class="space-y-1 w-full">
+          <div class="flex items-center gap-1.5">
+            <span class="font-semibold text-xs text-slate-900">Wolf</span>
+            <span class="text-[10px] text-slate-400 font-mono">Agent</span>
           </div>
-          <div class="p-4 rounded-2xl rounded-tl-none agent-bubble text-zinc-200 text-xs leading-relaxed space-y-2">
+          <div class="p-4 rounded-2xl rounded-tl-none bg-white border border-slate-200/90 text-slate-800 text-xs leading-relaxed space-y-2 shadow-sm">
             ${toolHtml}
-            <div class="prose prose-invert prose-xs max-w-none">
+            <div class="prose prose-slate prose-xs max-w-none text-slate-800">
               ${parsedMarkdown}
             </div>
           </div>
@@ -1097,14 +765,14 @@
       const id = "loading-" + Date.now();
       const div = document.createElement("div");
       div.id = id;
-      div.className = "flex items-start gap-3.5 max-w-xs";
+      div.className = "flex items-start gap-3 max-w-xs";
       div.innerHTML = `
-        <div class="w-8 h-8 rounded-xl bg-slate-900 border border-sky-500/30 p-1 shrink-0 flex items-center justify-center animate-pulse">
+        <div class="w-8 h-8 rounded-lg bg-slate-900 text-white p-1 shrink-0 flex items-center justify-center animate-pulse">
           <i data-lucide="loader-2" class="w-4 h-4 text-sky-400 animate-spin"></i>
         </div>
-        <div class="p-3 rounded-xl rounded-tl-none agent-bubble text-zinc-400 text-xs flex items-center gap-2 font-mono">
-          <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
-          <span>Wolf is analyzing codebase...</span>
+        <div class="p-3 rounded-xl rounded-tl-none bg-white border border-slate-200 text-slate-600 text-xs flex items-center gap-2 shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
+          <span>Wolf is reasoning...</span>
         </div>
       `;
       chatContainer.appendChild(div);
@@ -1116,10 +784,6 @@
     function removeLoadingIndicator(id) {
       const el = document.getElementById(id);
       if (el) el.remove();
-    }
-
-    function clearChatConsole() {
-      chatContainer.innerHTML = "";
     }
 
     function scrollToBottom() {
