@@ -59,6 +59,24 @@ def get_chat_model(settings: Optional[Settings] = None) -> BaseChatModel:
             convert_system_message_to_human=False
         )
 
+    elif provider == "groq":
+        api_key = cfg.GROQ_API_KEY or os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise ValueError(
+                "Missing GROQ_API_KEY! Please set it in your .env file."
+            )
+        try:
+            from langchain_groq import ChatGroq
+        except ImportError:
+            raise ImportError("Please install langchain-groq via pip.")
+
+        return ChatGroq(
+            model_name=model_name if "llama" in model_name.lower() or "mixtral" in model_name.lower() else "llama-3.3-70b-versatile",
+            groq_api_key=api_key,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+
     elif provider == "openai":
         api_key = cfg.OPENAI_API_KEY or os.getenv("OPENAI_API_KEY")
         if not api_key:

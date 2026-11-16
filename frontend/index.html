@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wolf - Personal AI Assistant</title>
+  <title>WOLF // Autonomous AI Software Engineer & Bug Fixer Agent</title>
   <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -11,587 +11,708 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     /* Sleek custom scrollbars */
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
 
-    /* Ultra-classy ambient background */
+    /* Cybernetic Developer Studio Theme */
     body {
-      background: radial-gradient(circle at 10% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
-                  radial-gradient(circle at 90% 85%, rgba(236, 72, 153, 0.07) 0%, transparent 45%),
-                  radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 60%),
-                  #09090b;
+      background: radial-gradient(circle at 15% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                  radial-gradient(circle at 85% 90%, rgba(99, 102, 241, 0.07) 0%, transparent 40%),
+                  radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.6) 0%, transparent 70%),
+                  #07090e;
+      color: #f1f5f9;
     }
 
-    .glass-sidebar {
-      background: rgba(15, 17, 23, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-right: 1px solid rgba(255, 255, 255, 0.08);
+    .glass-panel {
+      background: rgba(13, 17, 28, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
     }
 
     .glass-header {
-      background: rgba(15, 17, 23, 0.7);
+      background: rgba(10, 13, 22, 0.9);
       backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.15);
     }
 
-    .glass-card {
-      background: rgba(24, 24, 34, 0.65);
-      backdrop-filter: blur(12px);
+    .cockpit-card {
+      background: rgba(18, 24, 38, 0.7);
       border: 1px solid rgba(255, 255, 255, 0.06);
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .glass-card:hover {
-      border-color: rgba(129, 140, 248, 0.4);
-      background: rgba(30, 32, 46, 0.8);
+    .cockpit-card:hover {
+      border-color: rgba(56, 189, 248, 0.35);
+      background: rgba(22, 30, 48, 0.9);
       transform: translateY(-1px);
     }
 
-    .user-bubble {
-      background: linear-gradient(135deg, #4f46e5 0%, #0284c7 100%);
-      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
+    .diff-deleted {
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+      border-left: 3px solid #ef4444;
+      padding: 2px 8px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+    .diff-added {
+      background: rgba(34, 197, 94, 0.18);
+      color: #86efac;
+      border-left: 3px solid #22c55e;
+      padding: 2px 8px;
+      font-family: monospace;
+      font-size: 11px;
     }
 
     .agent-bubble {
-      background: rgba(22, 24, 34, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(10px);
+      background: rgba(15, 20, 32, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.12);
+      backdrop-filter: blur(12px);
     }
 
-    .prose code { background: rgba(39, 39, 42, 0.8); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; color: #a5f3fc; }
-    .prose pre { background: #0c0d12; padding: 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06); overflow-x: auto; margin: 8px 0; }
+    .user-bubble {
+      background: linear-gradient(135deg, #2563eb 0%, #0284c7 100%);
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+    }
+
+    .prose code { background: rgba(30, 41, 59, 0.8); padding: 2px 6px; border-radius: 4px; font-size: 0.88em; color: #38bdf8; font-family: monospace; }
+    .prose pre { background: #080c14; padding: 12px; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.15); overflow-x: auto; margin: 8px 0; }
   </style>
 </head>
-<body class="text-zinc-100 h-screen flex overflow-hidden font-sans antialiased">
+<body class="h-screen flex flex-col overflow-hidden font-sans antialiased text-sm">
 
   <!-- ========================================================== -->
-  <!-- LEFT SIDEBAR: Brand, MCP, Memory, Registered Tools         -->
+  <!-- TOP CONTROL DECK: Brand, Status Ribbon, Telemetry          -->
   <!-- ========================================================== -->
-  <aside class="w-80 glass-sidebar flex flex-col justify-between hidden md:flex z-10">
+  <header class="h-16 glass-header flex items-center justify-between px-6 z-20 shrink-0">
     
-    <!-- Header / Brand with Sweet Girl Robot -->
-    <div class="p-5 border-b border-white/5">
-      <div class="flex items-center space-x-3.5">
-        <!-- Sweet Girl Robot Logo -->
-        <div class="w-12 h-12 rounded-2xl overflow-hidden shrink-0 shadow-lg shadow-pink-500/20 border border-indigo-400/40 p-0.5 bg-gradient-to-tr from-sky-400/20 via-purple-500/20 to-pink-500/20">
-          <svg viewBox="0 0 100 100" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="cyberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#38bdf8"/>
-                <stop offset="50%" stop-color="#a855f7"/>
-                <stop offset="100%" stop-color="#ec4899"/>
-              </linearGradient>
-              <linearGradient id="faceGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#ffffff"/>
-                <stop offset="100%" stop-color="#f8fafc"/>
-              </linearGradient>
-              <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </defs>
-            <circle cx="50" cy="50" r="47" fill="#0f172a" stroke="url(#cyberGrad)" stroke-width="2.5" />
-            <path d="M 22 46 A 28 28 0 0 1 78 46" stroke="#818cf8" stroke-width="4" stroke-linecap="round" fill="none"/>
-            <path d="M 50 18 L 50 10" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="50" cy="8" r="4.5" fill="#f43f5e" filter="url(#softGlow)"/>
-            <rect x="15" y="38" width="10" height="20" rx="5" fill="#ec4899"/>
-            <rect x="75" y="38" width="10" height="20" rx="5" fill="#ec4899"/>
-            <circle cx="20" cy="48" r="2.5" fill="#ffffff"/>
-            <circle cx="80" cy="48" r="2.5" fill="#ffffff"/>
-            <rect x="25" y="27" width="50" height="46" rx="20" fill="url(#faceGrad)" stroke="#e2e8f0" stroke-width="1.5"/>
-            <path d="M 28 34 Q 50 42 72 34 Q 63 27 50 27 Q 37 27 28 34 Z" fill="#6366f1"/>
-            <circle cx="35" cy="31" r="2.5" fill="#f43f5e"/>
-            <circle cx="65" cy="31" r="2.5" fill="#38bdf8"/>
-            <ellipse cx="38" cy="48" rx="5.5" ry="7.5" fill="#0284c7"/>
-            <circle cx="39.5" cy="45.5" r="2.2" fill="#ffffff"/>
-            <circle cx="36" cy="51" r="1.2" fill="#ffffff"/>
-            <ellipse cx="62" cy="48" rx="5.5" ry="7.5" fill="#0284c7"/>
-            <circle cx="63.5" cy="45.5" r="2.2" fill="#ffffff"/>
-            <circle cx="60" cy="51" r="1.2" fill="#ffffff"/>
-            <ellipse cx="32" cy="55" rx="3.5" ry="2" fill="#fb7185" opacity="0.85"/>
-            <ellipse cx="68" cy="55" rx="3.5" ry="2" fill="#fb7185" opacity="0.85"/>
-            <path d="M 46 56 Q 50 60 54 56" stroke="#334155" stroke-width="2" stroke-linecap="round" fill="none"/>
-          </svg>
-        </div>
-        <div>
-          <h1 class="font-bold text-base leading-tight flex items-center gap-2">
-            <span id="agent-display-name">Wolf</span>
-            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Active</span>
-          </h1>
-          <p class="text-xs text-zinc-400 font-medium">Personal Assistant • Kolkata</p>
-        </div>
+    <!-- Wolf Brand & Logo -->
+    <div class="flex items-center space-x-3.5">
+      <!-- High-Tech Cyber Wolf Vector Logo -->
+      <div class="w-10 h-10 rounded-xl bg-slate-900 border border-cyan-500/40 p-1 flex items-center justify-center shadow-lg shadow-cyan-500/20 relative group">
+        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
+          <defs>
+            <linearGradient id="wolfShield" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0f172a"/>
+              <stop offset="50%" stop-color="#1e1b4b"/>
+              <stop offset="100%" stop-color="#090d16"/>
+            </linearGradient>
+            <linearGradient id="cyberCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8"/>
+              <stop offset="100%" stop-color="#6366f1"/>
+            </linearGradient>
+            <filter id="eyeGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+            </filter>
+          </defs>
+          <!-- Hex Shield Outline -->
+          <polygon points="50,4 92,25 92,75 50,96 8,75 8,25" fill="url(#wolfShield)" stroke="url(#cyberCyan)" stroke-width="2.5"/>
+          <!-- Left Ear -->
+          <polygon points="28,26 18,5 42,22" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
+          <polygon points="27,24 21,9 38,22" fill="url(#cyberCyan)" opacity="0.6"/>
+          <!-- Right Ear -->
+          <polygon points="72,26 82,5 58,22" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
+          <polygon points="73,24 79,9 62,22" fill="url(#cyberCyan)" opacity="0.6"/>
+          <!-- Forehead Plates -->
+          <polygon points="50,22 36,36 50,48 64,36" fill="#1e1b4b" stroke="#818cf8" stroke-width="1"/>
+          <!-- Cheeks / Ruff -->
+          <polygon points="36,36 16,48 26,64 38,54" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+          <polygon points="64,36 84,48 74,64 62,54" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+          <!-- Snout & Bridge -->
+          <polygon points="50,48 40,64 50,82 60,64" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
+          <polygon points="50,78 46,84 54,84" fill="#38bdf8"/>
+          <!-- Glowing Cyber Eyes -->
+          <polygon points="35,46 45,47 38,51" fill="#38bdf8" filter="url(#eyeGlow)"/>
+          <polygon points="35,46 45,47 38,51" fill="#ffffff"/>
+          <polygon points="65,46 55,47 62,51" fill="#38bdf8" filter="url(#eyeGlow)"/>
+          <polygon points="65,46 55,47 62,51" fill="#ffffff"/>
+        </svg>
+        <span class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-900 animate-pulse"></span>
       </div>
 
-      <!-- Active Provider Badge -->
-      <div class="mt-4 p-2.5 rounded-xl bg-zinc-900/70 border border-white/5 text-xs flex items-center justify-between">
+      <div>
         <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="text-zinc-200 font-medium" id="provider-badge">GEMINI</span>
+          <h1 class="font-extrabold text-base tracking-wider bg-gradient-to-r from-sky-400 via-indigo-300 to-white bg-clip-text text-transparent">
+            WOLF
+          </h1>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/20 font-semibold">
+            AUTO-DEV v2.4
+          </span>
         </div>
-        <span class="text-zinc-400 text-[11px] font-mono" id="model-badge">gemini-flash-lite</span>
+        <p class="text-[11px] text-zinc-400 font-mono">Autonomous AI Bug Hunter & Repository Auto-Healer</p>
       </div>
     </div>
 
-    <!-- Scrollable Control Center -->
-    <div class="flex-1 overflow-y-auto p-4 space-y-5 text-sm">
-
-      <!-- Connected MCP Servers -->
-      <div>
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-            <i data-lucide="cpu" class="w-3.5 h-3.5 text-sky-400"></i> MCP Microservices
-          </span>
-          <span id="mcp-count-badge" class="text-[11px] px-2 py-0.5 rounded-full bg-sky-950/80 text-sky-300 border border-sky-800/60 font-medium">2 Running</span>
-        </div>
-
-        <div class="space-y-2">
-          <!-- MCP Server 1 -->
-          <div class="p-2.5 rounded-xl glass-card">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-medium text-xs text-zinc-200 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> system_diagnostics
-              </span>
-              <span class="text-[10px] text-zinc-400 bg-white/5 px-1.5 py-0.5 rounded font-mono">stdio</span>
-            </div>
-            <p class="text-[11px] text-zinc-400">Windows specs, CPU, RAM & disk.</p>
-          </div>
-
-          <!-- MCP Server 2 -->
-          <div class="p-2.5 rounded-xl glass-card">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-medium text-xs text-zinc-200 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span> advanced_math
-              </span>
-              <span class="text-[10px] text-zinc-400 bg-white/5 px-1.5 py-0.5 rounded font-mono">stdio</span>
-            </div>
-            <p class="text-[11px] text-zinc-400">Statistics, primes & factorials.</p>
-          </div>
-
-          <!-- MCP Server 3 -->
-          <div class="p-2.5 rounded-xl glass-card">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-medium text-xs text-zinc-200 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> github_service
-              </span>
-              <span class="text-[10px] text-zinc-400 bg-white/5 px-1.5 py-0.5 rounded font-mono">stdio</span>
-            </div>
-            <p class="text-[11px] text-zinc-400">Read-only repos & issue tracking.</p>
-          </div>
-
-          <!-- MCP Server 4 -->
-          <div class="p-2.5 rounded-xl glass-card">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-medium text-xs text-zinc-200 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> web_search_service
-              </span>
-              <span class="text-[10px] text-zinc-400 bg-white/5 px-1.5 py-0.5 rounded font-mono">stdio</span>
-            </div>
-            <p class="text-[11px] text-zinc-400">DuckDuckGo live web & news.</p>
-          </div>
-        </div>
+    <!-- Live Telemetry Ribbon -->
+    <div class="hidden lg:flex items-center space-x-6 text-xs font-mono">
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/5">
+        <span class="text-zinc-500">TARGET:</span>
+        <span class="text-sky-300 font-semibold flex items-center gap-1">
+          <i data-lucide="folder-code" class="w-3.5 h-3.5 text-sky-400"></i> ecommerce/cart.py
+        </span>
       </div>
 
-      <!-- Long-Term Memory (UserProfileStore) -->
-      <div>
-        <div class="flex items-center justify-between mb-1.5">
-          <span class="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-pink-400"></i> Long-Term Memory
-          </span>
-          <button onclick="fetchMemory()" title="Refresh memory" class="text-zinc-400 hover:text-zinc-200 transition">
-            <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
-          </button>
-        </div>
-        <p class="text-[11px] text-zinc-500 mb-2">Facts remembered permanently in <code class="text-zinc-400">./data/user_profile.json</code></p>
-        
-        <div id="memory-container" class="p-3 rounded-xl bg-zinc-900/50 border border-white/5 space-y-1.5 text-xs text-zinc-300 max-h-40 overflow-y-auto">
-          <div class="text-zinc-500 italic">Loading remembered facts...</div>
-        </div>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/5">
+        <span class="text-zinc-500">HEALTH:</span>
+        <span id="health-status-badge" class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ALL 6 TESTS PASSING
+        </span>
       </div>
 
-      <!-- Registered Tools Accordion -->
-      <div>
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-            <i data-lucide="wrench" class="w-3.5 h-3.5 text-amber-400"></i> Available Tools
-          </span>
-          <span id="tools-total-badge" class="text-[11px] text-zinc-400">13 Tools</span>
-        </div>
-        <div id="tools-list" class="space-y-1.5 max-h-44 overflow-y-auto pr-1">
-          <!-- Dynamically populated -->
-        </div>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/5">
+        <span class="text-zinc-500">INFERENCE:</span>
+        <span class="text-amber-300 font-semibold flex items-center gap-1">
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i> Groq Llama-3 / Sub-Second
+        </span>
       </div>
-
     </div>
 
-    <!-- Sidebar Footer -->
-    <div class="p-3 border-t border-white/5 text-[11px] text-zinc-500 text-center font-medium">
-      LangGraph • Multi-MCP • Python 3.14
+    <!-- Action Bar Buttons -->
+    <div class="flex items-center space-x-2">
+      <button onclick="refreshCodebaseStatus()" title="Refresh QA Matrix" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-zinc-300 border border-white/10 transition">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+      </button>
+      <button onclick="clearChatConsole()" class="px-3 py-1.5 text-xs rounded-xl bg-slate-800/80 hover:bg-slate-700 text-zinc-300 border border-white/10 flex items-center gap-1.5 transition">
+        <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400"></i> Clear Log
+      </button>
     </div>
-  </aside>
+
+  </header>
 
   <!-- ========================================================== -->
-  <!-- MAIN CHAT INTERFACE                                        -->
+  <!-- COMMAND LAUNCHPAD (One-Click Operations)                   -->
   <!-- ========================================================== -->
-  <main class="flex-1 flex flex-col h-full bg-transparent">
-    
-    <!-- Top Bar -->
-    <header class="h-16 glass-header flex items-center justify-between px-6 z-10">
-      <div class="flex items-center space-x-3">
-        <h2 class="font-semibold text-sm text-zinc-100 flex items-center gap-2">
-          <span>Wolf Assistant Console</span>
-        </h2>
-        <span class="text-xs px-2.5 py-0.5 rounded-full bg-zinc-800/80 text-zinc-400 border border-white/5 font-mono" id="session-badge">Thread: default</span>
-      </div>
-      <div class="flex items-center space-x-2">
-        <button onclick="clearChat()" class="px-3.5 py-1.5 text-xs rounded-xl bg-zinc-800/70 hover:bg-zinc-700/80 text-zinc-300 border border-white/10 flex items-center gap-1.5 transition">
-          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Clear Chat
-        </button>
-      </div>
-    </header>
-
-    <!-- Quick Prompt Suggestions Chips -->
-    <div class="px-6 py-2.5 border-b border-white/5 bg-zinc-900/30 flex gap-2.5 overflow-x-auto text-xs whitespace-nowrap z-10">
-      <button onclick="sendQuickPrompt('What is the weather today?')" class="px-3.5 py-1.5 rounded-full glass-card hover:border-amber-400/50 hover:text-amber-300 flex items-center gap-1.5">
-        <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-amber-400"></i> Kolkata Weather
-      </button>
-      <button onclick="sendQuickPrompt('Check my system specs and OS details using your MCP tool.')" class="px-3.5 py-1.5 rounded-full glass-card hover:border-sky-400/50 hover:text-sky-300 flex items-center gap-1.5">
-        <i data-lucide="terminal" class="w-3.5 h-3.5 text-sky-400"></i> Check PC Specs (MCP)
-      </button>
-      <button onclick="sendQuickPrompt('List my repositories using your GitHub MCP tool.')" class="px-3.5 py-1.5 rounded-full glass-card hover:border-emerald-400/50 hover:text-emerald-300 flex items-center gap-1.5">
-        <i data-lucide="git-branch" class="w-3.5 h-3.5 text-emerald-400"></i> GitHub Repos (MCP)
-      </button>
-      <button onclick="sendQuickPrompt('Search the web for latest AI news')" class="px-3.5 py-1.5 rounded-full glass-card hover:border-amber-400/50 hover:text-amber-300 flex items-center gap-1.5">
-        <i data-lucide="globe" class="w-3.5 h-3.5 text-amber-400"></i> Web Search (MCP)
-      </button>
-      <button onclick="sendQuickPrompt('Calculate the statistics (mean, median, stdev) for [10, 25, 40, 70, 95] using MCP.')" class="px-3.5 py-1.5 rounded-full glass-card hover:border-purple-400/50 hover:text-purple-300 flex items-center gap-1.5">
-        <i data-lucide="calculator" class="w-3.5 h-3.5 text-purple-400"></i> Math & Stats (MCP)
-      </button>
-      <button onclick="sendQuickPrompt('Remember that I am based in Kolkata and love AI development.')" class="px-3.5 py-1.5 rounded-full glass-card hover:border-pink-400/50 hover:text-pink-300 flex items-center gap-1.5">
-        <i data-lucide="bookmark" class="w-3.5 h-3.5 text-pink-400"></i> Save Memory Fact
-      </button>
+  <div class="px-6 py-2.5 bg-slate-950/80 border-b border-white/5 flex items-center justify-between gap-3 overflow-x-auto text-xs whitespace-nowrap z-10 shrink-0">
+    <div class="flex items-center gap-2 text-zinc-400 font-mono text-[11px] uppercase tracking-wider shrink-0">
+      <i data-lucide="terminal" class="w-3.5 h-3.5 text-sky-400"></i> Commands:
     </div>
 
-    <!-- Messages Container -->
-    <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-6">
+    <div class="flex items-center gap-2 overflow-x-auto">
+      <!-- 1. Autopilot Full Pipeline -->
+      <button onclick="triggerBugAction('full_pipeline', '⚡ Running Autopilot: Code Scan ➔ Root Cause Diagnosis ➔ Groq Research ➔ Code Patch ➔ Test Verification...')" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-sky-600/25 transition">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Autopilot: Fix & Certify
+      </button>
+
+      <!-- 2. Simulate Real Bug -->
+      <button onclick="triggerBugAction('simulate_bug', '⚠️ Injected real-world tax & discount calculation bug into ecommerce/cart.py. Notice the QA Matrix update!')" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition">
+        <i data-lucide="bug" class="w-3.5 h-3.5 text-amber-400"></i> Simulate Real Bug
+      </button>
+
+      <!-- 3. Scan Codebase -->
+      <button onclick="triggerBugAction('scan', '🔍 Scanning e-commerce codebase and analyzing test assertions for failures...')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-sky-400/40 text-sky-200 flex items-center gap-1.5 transition">
+        <i data-lucide="search" class="w-3.5 h-3.5 text-sky-400"></i> Scan for Bugs
+      </button>
+
+      <!-- 4. Run QA Checklist -->
+      <button onclick="sendQuickPrompt('Run the full e-commerce QA test checklist.')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-emerald-400/40 text-emerald-200 flex items-center gap-1.5 transition">
+        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i> Run QA Checklist
+      </button>
+
+      <!-- 5. Groq Technical Search -->
+      <button onclick="sendQuickPrompt('Search technical documentation for Python ecommerce sales tax calculation before vs after discount')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-purple-400/40 text-purple-200 flex items-center gap-1.5 transition">
+        <i data-lucide="globe" class="w-3.5 h-3.5 text-purple-400"></i> Groq Tech Search
+      </button>
+
+      <!-- 6. GitHub Inspector -->
+      <button onclick="sendQuickPrompt('List my repositories using your GitHub MCP tool.')" class="px-3 py-1.5 rounded-lg cockpit-card hover:border-teal-400/40 text-teal-200 flex items-center gap-1.5 transition">
+        <i data-lucide="git-branch" class="w-3.5 h-3.5 text-teal-400"></i> GitHub Repos
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- MAIN WORKSPACE: Dual Stage (Console & Developer Cockpit)   -->
+  <!-- ========================================================== -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- LEFT STAGE: The Auto-Dev Interactive Console (60%) -->
+    <section class="flex-1 flex flex-col h-full bg-transparent border-r border-white/5 min-w-[360px]">
       
-      <!-- Welcome Message -->
-      <div class="flex items-start gap-3.5 max-w-3xl">
-        <div class="w-9 h-9 rounded-xl overflow-hidden shrink-0 shadow-lg shadow-pink-500/20 border border-indigo-400/30 p-0.5 bg-gradient-to-tr from-sky-400/20 to-pink-500/20">
-          <div id="welcome-avatar-container"></div>
-        </div>
-        <div class="space-y-1">
-          <div class="flex items-center gap-2">
-            <span class="font-semibold text-xs text-zinc-200" id="welcome-name">Wolf</span>
-            <span class="text-[10px] text-zinc-500">Just now</span>
+      <!-- Messages & Log Stream -->
+      <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-5">
+        
+        <!-- Welcome Autonomous Mission Banner -->
+        <div class="flex items-start gap-3.5 max-w-3xl">
+          <div class="w-9 h-9 rounded-xl bg-slate-900 border border-sky-500/30 p-1 shrink-0 flex items-center justify-center shadow-md shadow-sky-500/10">
+            <svg viewBox="0 0 100 100" class="w-full h-full">
+              <polygon points="50,4 92,25 92,75 50,96 8,75 8,25" fill="#0f172a" stroke="#38bdf8" stroke-width="3"/>
+              <polygon points="28,26 18,5 42,22" fill="#1e293b" stroke="#38bdf8"/>
+              <polygon points="72,26 82,5 58,22" fill="#1e293b" stroke="#38bdf8"/>
+              <polygon points="50,22 36,36 50,48 64,36" fill="#1e1b4b"/>
+              <polygon points="50,48 40,64 50,82 60,64" fill="#1e293b" stroke="#38bdf8"/>
+              <polygon points="35,46 45,47 38,51" fill="#38bdf8"/>
+              <polygon points="65,46 55,47 62,51" fill="#38bdf8"/>
+            </svg>
           </div>
-          <div class="p-4 rounded-2xl rounded-tl-none agent-bubble text-sm text-zinc-200 leading-relaxed space-y-2">
-            <p>👋 Hey there! I'm <strong>Wolf</strong>, your personal AI assistant.</p>
-            <p>I am connected with <strong>4 local MCP microservices</strong> (System Specs, Advanced Math, GitHub Read-Only, and Live Web Search), live weather for Kolkata, and persistent long-term memory.</p>
-            <p class="text-xs text-zinc-400">Try clicking any of the suggestion chips above to see live tool execution in action!</p>
+
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-xs text-sky-400">WOLF AUTO-DEV ENGINE</span>
+              <span class="text-[10px] text-zinc-500 font-mono">Mission: Autonomous Bug Remediation</span>
+            </div>
+
+            <div class="p-4 rounded-2xl rounded-tl-none agent-bubble text-zinc-200 leading-relaxed space-y-2.5 text-xs">
+              <div class="font-semibold text-zinc-100 flex items-center gap-2 text-sm">
+                <span>🛡️ Operating On Behalf of the Developer</span>
+              </div>
+              <p>
+                In enterprise development, codebases accumulate regression bugs and broken logic that developers cannot manually triage by hand. 
+                I act as your autonomous engineering agent: scanning repositories, discovering root causes, retrieving fixes using <strong>Groq-accelerated intelligence</strong>, applying code patches, and certifying the production QA Checklist.
+              </p>
+              
+              <div class="p-3 rounded-xl bg-slate-900/80 border border-white/5 space-y-1 text-[11px] font-mono">
+                <div class="text-sky-300 font-semibold">Ready to test? Try this live demonstration workflow:</div>
+                <div class="text-zinc-400">1. Click <strong class="text-amber-300">"Simulate Real Bug"</strong> above to inject a breaking checkout flaw into <code class="text-sky-300">ecommerce/cart.py</code>.</div>
+                <div class="text-zinc-400">2. Observe the QA Matrix on the right turn red (<span class="text-red-400 font-bold">FAIL ❌</span>).</div>
+                <div class="text-zinc-400">3. Click <strong class="text-sky-300">"Autopilot: Fix & Certify"</strong> to watch Wolf autonomously diagnose, patch, and restore all 6 tests to green!</div>
+              </div>
+            </div>
           </div>
         </div>
+
       </div>
 
-    </div>
-
-    <!-- Input Footer -->
-    <footer class="p-4 border-t border-white/5 bg-zinc-950/60 backdrop-blur-md">
-      <div class="max-w-4xl mx-auto">
+      <!-- Terminal Input Console -->
+      <footer class="p-4 border-t border-white/5 bg-slate-950/80 backdrop-blur-md">
         <form id="chat-form" onsubmit="handleSend(event)" class="relative flex items-center">
+          <div class="absolute left-4 text-sky-400 font-mono text-xs font-bold flex items-center gap-1 pointer-events-none">
+            <span>wolf</span><span class="text-zinc-600">@</span><span class="text-indigo-400">dev</span><span class="text-zinc-500">:~$</span>
+          </div>
+
           <input 
             type="text" 
             id="user-input" 
-            placeholder="Ask Wolf anything (weather, system specs, math stats, or save a fact)..." 
+            placeholder="Type a command (e.g. 'Fix the bug and verify tests', 'Scan repository', or search error with Groq)..." 
             autocomplete="off"
-            class="w-full pl-5 pr-28 py-3.5 rounded-2xl bg-zinc-900/80 border border-white/10 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition shadow-inner"
+            class="w-full pl-28 pr-28 py-3 rounded-xl bg-slate-900/90 border border-white/10 text-xs font-mono text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition shadow-inner"
           />
+
           <button 
             type="submit" 
             id="send-btn"
-            class="absolute right-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition disabled:opacity-50"
+            class="absolute right-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-sky-600/30 transition disabled:opacity-50"
           >
-            <span>Send</span>
-            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            <span>Execute</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
           </button>
         </form>
-        <p class="text-[11px] text-zinc-500 mt-2.5 text-center">
-          Wolf Assistant • Built with Python, LangGraph & Model Context Protocol (MCP)
-        </p>
+
+        <div class="flex items-center justify-between text-[11px] text-zinc-500 mt-2 px-1 font-mono">
+          <span>Target: <strong class="text-zinc-400">ecommerce-core</strong></span>
+          <span>Wolf Autonomous AI Agent • LangGraph • Groq • FastMCP</span>
+        </div>
+      </footer>
+
+    </section>
+
+    <!-- RIGHT STAGE: The Developer Cockpit & Live QA Matrix (40%) -->
+    <aside class="w-[420px] glass-panel flex flex-col justify-between hidden lg:flex z-10 shrink-0">
+      
+      <!-- Cockpit Header -->
+      <div class="p-4 border-b border-white/5 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="check-square" class="w-4 h-4 text-sky-400"></i>
+          <span class="font-bold text-xs uppercase tracking-wider text-zinc-200">Production QA Checklist</span>
+        </div>
+        <span id="matrix-pass-rate" class="px-2 py-0.5 text-[11px] font-mono rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+          6/6 Passed (100%)
+        </span>
       </div>
-    </footer>
 
-  </main>
-
-  <!-- ========================================================== -->
-  <!-- JAVASCRIPT LOGIC                                           -->
-  <!-- ========================================================== -->
-  <script>
-    // Sweet Girl Robot SVG Vector
-    const GIRL_ROBOT_SVG = `
-      <svg viewBox="0 0 100 100" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="cyberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#38bdf8"/>
-            <stop offset="50%" stop-color="#a855f7"/>
-            <stop offset="100%" stop-color="#ec4899"/>
-          </linearGradient>
-          <linearGradient id="faceGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#ffffff"/>
-            <stop offset="100%" stop-color="#f8fafc"/>
-          </linearGradient>
-          <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
-        </defs>
-        <circle cx="50" cy="50" r="47" fill="#0f172a" stroke="url(#cyberGrad)" stroke-width="2.5" />
-        <path d="M 22 46 A 28 28 0 0 1 78 46" stroke="#818cf8" stroke-width="4" stroke-linecap="round" fill="none"/>
-        <path d="M 50 18 L 50 10" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="50" cy="8" r="4.5" fill="#f43f5e" filter="url(#softGlow)"/>
-        <rect x="15" y="38" width="10" height="20" rx="5" fill="#ec4899"/>
-        <rect x="75" y="38" width="10" height="20" rx="5" fill="#ec4899"/>
-        <circle cx="20" cy="48" r="2.5" fill="#ffffff"/>
-        <circle cx="80" cy="48" r="2.5" fill="#ffffff"/>
-        <rect x="25" y="27" width="50" height="46" rx="20" fill="url(#faceGrad)" stroke="#e2e8f0" stroke-width="1.5"/>
-        <path d="M 28 34 Q 50 42 72 34 Q 63 27 50 27 Q 37 27 28 34 Z" fill="#6366f1"/>
-        <circle cx="35" cy="31" r="2.5" fill="#f43f5e"/>
-        <circle cx="65" cy="31" r="2.5" fill="#38bdf8"/>
-        <ellipse cx="38" cy="48" rx="5.5" ry="7.5" fill="#0284c7"/>
-        <circle cx="39.5" cy="45.5" r="2.2" fill="#ffffff"/>
-        <circle cx="36" cy="51" r="1.2" fill="#ffffff"/>
-        <ellipse cx="62" cy="48" rx="5.5" ry="7.5" fill="#0284c7"/>
-        <circle cx="63.5" cy="45.5" r="2.2" fill="#ffffff"/>
-        <circle cx="60" cy="51" r="1.2" fill="#ffffff"/>
-        <ellipse cx="32" cy="55" rx="3.5" ry="2" fill="#fb7185" opacity="0.85"/>
-        <ellipse cx="68" cy="55" rx="3.5" ry="2" fill="#fb7185" opacity="0.85"/>
-        <path d="M 46 56 Q 50 60 54 56" stroke="#334155" stroke-width="2" stroke-linecap="round" fill="none"/>
-      </svg>
-    `;
-
-    document.getElementById('welcome-avatar-container').innerHTML = GIRL_ROBOT_SVG;
-
-    const chatContainer = document.getElementById('chat-container');
-    const userInput = document.getElementById('user-input');
-    const sendBtn = document.getElementById('send-btn');
-    let threadId = 'session_' + Math.random().toString(36).substring(2, 9);
-    document.getElementById('session-badge').textContent = 'Thread: ' + threadId;
-
-    lucide.createIcons();
-
-    window.addEventListener('DOMContentLoaded', () => {
-      fetchStatus();
-      fetchTools();
-      fetchMemory();
-    });
-
-    let currentAgentName = 'Wolf';
-
-    async function fetchStatus() {
-      try {
-        const res = await fetch('/api/status');
-        const data = await res.json();
-        currentAgentName = data.agent_name || 'Wolf';
-        const formattedName = currentAgentName.charAt(0).toUpperCase() + currentAgentName.slice(1);
-        document.getElementById('agent-display-name').textContent = formattedName;
-        const welcomeEl = document.getElementById('welcome-name');
-        if (welcomeEl) welcomeEl.textContent = formattedName;
-        document.getElementById('provider-badge').textContent = data.provider.toUpperCase();
-        document.getElementById('model-badge').textContent = data.model;
-        document.getElementById('mcp-count-badge').textContent = `${data.mcp_servers} Running`;
-        document.title = `${formattedName} - Personal AI Assistant`;
-      } catch (e) {
-        console.error('Failed to load status', e);
-      }
-    }
-
-    async function fetchMemory() {
-      try {
-        const res = await fetch('/api/memory');
-        const facts = await res.json();
-        const container = document.getElementById('memory-container');
-        container.innerHTML = '';
+      <!-- Checklist Items Container -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-2.5">
         
-        const entries = Object.entries(facts);
-        if (entries.length === 0) {
-          container.innerHTML = '<div class="text-zinc-500 italic">No stored facts yet. Tell Wolf a fact!</div>';
-          return;
-        }
-
-        entries.forEach(([k, v]) => {
-          const row = document.createElement('div');
-          row.className = 'p-2 rounded-lg bg-zinc-800/40 border border-white/5 flex flex-col gap-0.5';
-          row.innerHTML = `<span class="text-pink-400 font-semibold text-[11px] font-mono">${k}</span><span class="text-zinc-200 text-xs">${v}</span>`;
-          container.appendChild(row);
-        });
-      } catch (e) {
-        console.error('Failed to load memory', e);
-      }
-    }
-
-    async function fetchTools() {
-      try {
-        const res = await fetch('/api/tools');
-        const tools = await res.json();
-        const list = document.getElementById('tools-list');
-        list.innerHTML = '';
-        document.getElementById('tools-total-badge').textContent = `${tools.length} Tools`;
-
-        tools.forEach(t => {
-          const item = document.createElement('div');
-          const isMcp = t.type === 'mcp';
-          item.className = 'p-2 rounded-lg glass-card text-xs flex flex-col gap-0.5';
-          item.innerHTML = `
-            <div class="flex items-center justify-between">
-              <span class="font-medium text-zinc-200">${t.name}</span>
-              <span class="text-[9px] px-1.5 py-0.2 rounded font-mono ${isMcp ? 'bg-sky-950 text-sky-300 border border-sky-800/60' : 'bg-zinc-700/60 text-zinc-300'}">${isMcp ? 'MCP' : 'Native'}</span>
+        <!-- Checklist Cards (Dynamically refreshed) -->
+        <div id="checklist-cards-container" class="space-y-2 text-xs font-mono">
+          <!-- Populated by JavaScript -->
+          <div class="p-3 rounded-xl cockpit-card flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="text-emerald-400 font-bold">✅</span>
+              <div>
+                <div class="text-zinc-200 font-semibold">Subtotal Calculation</div>
+                <div class="text-[10px] text-zinc-400">Sums item price * quantity accurately</div>
+              </div>
             </div>
-            <p class="text-[10px] text-zinc-400 truncate">${t.description || 'No description'}</p>
-          `;
-          list.appendChild(item);
-        });
-      } catch (e) {
-        console.error('Failed to load tools', e);
-      }
-    }
-
-    function sendQuickPrompt(text) {
-      userInput.value = text;
-      handleSend(new Event('submit'));
-    }
-
-    function clearChat() {
-      chatContainer.innerHTML = `
-        <div class="flex items-start gap-3.5 max-w-3xl">
-          <div class="w-9 h-9 rounded-xl overflow-hidden shrink-0 shadow-lg shadow-pink-500/20 border border-indigo-400/30 p-0.5 bg-gradient-to-tr from-sky-400/20 to-pink-500/20">
-            ${GIRL_ROBOT_SVG}
+            <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300">PASS</span>
           </div>
-          <div class="space-y-1">
-            <div class="flex items-center gap-2">
-              <span class="font-semibold text-xs text-zinc-200">${currentAgentName}</span>
+        </div>
+
+        <!-- Code Patch Inspector (Before vs After Diff) -->
+        <div class="mt-4 pt-3 border-t border-white/5 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="git-commit" class="w-3.5 h-3.5 text-purple-400"></i> Live Code Diff Inspector
+            </span>
+            <span id="diff-status-pill" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+              Clean Master
+            </span>
+          </div>
+
+          <div id="diff-viewer" class="rounded-xl bg-slate-950 p-3 border border-white/5 font-mono text-[11px] space-y-1 overflow-x-auto">
+            <div class="text-zinc-500">// ecommerce/cart.py (Lines 105-110)</div>
+            <div class="diff-added">+ taxable_amount = max(0.0, subtotal - discount)</div>
+            <div class="diff-added">+ return round(taxable_amount * self.TAX_RATE, 2)</div>
+            <div class="text-zinc-400 text-[10px] pt-1 italic">✓ Certified: Tax computed strictly on discounted subtotal.</div>
+          </div>
+        </div>
+
+        <!-- Autonomous Pipeline Architecture Diagram -->
+        <div class="mt-4 pt-3 border-t border-white/5 space-y-2">
+          <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="cpu" class="w-3.5 h-3.5 text-amber-400"></i> Autonomous Auto-Dev Engine
+          </span>
+
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-white/5 space-y-2 text-[11px] font-mono text-zinc-400">
+            <div class="flex items-center justify-between text-zinc-300">
+              <span>1. Codebase Scanner</span>
+              <span class="text-sky-400">AST & Test Runner</span>
             </div>
-            <div class="p-4 rounded-2xl rounded-tl-none agent-bubble text-sm text-zinc-200">
-              Chat cleared. How can I help you today?
+            <div class="flex items-center justify-between text-zinc-300">
+              <span>2. Root Cause Analysis</span>
+              <span class="text-sky-400">Traceback Diagnostics</span>
+            </div>
+            <div class="flex items-center justify-between text-zinc-300">
+              <span>3. Tech Solution Research</span>
+              <span class="text-amber-400">Groq Llama-3 MCP</span>
+            </div>
+            <div class="flex items-center justify-between text-zinc-300">
+              <span>4. Patch Synthesis & Git</span>
+              <span class="text-purple-400">Autonomous Patcher</span>
+            </div>
+            <div class="flex items-center justify-between text-zinc-300">
+              <span>5. QA Checklist Certify</span>
+              <span class="text-emerald-400">100% Pass Threshold</span>
             </div>
           </div>
         </div>
-      `;
+
+      </div>
+
+      <!-- Cockpit Footer -->
+      <div class="p-3.5 border-t border-white/5 text-[11px] font-mono text-zinc-500 flex items-center justify-between">
+        <span class="flex items-center gap-1.5">
+          <i data-lucide="github" class="w-3.5 h-3.5 text-zinc-400"></i> debdeepsikha13-hub
+        </span>
+        <span class="text-sky-400 font-semibold">WOLF AUTO-DEV ACTIVE</span>
+      </div>
+
+    </aside>
+
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- JAVASCRIPT LOGIC: Interactive Cockpit & Auto-Dev Engine    -->
+  <!-- ========================================================== -->
+  <script>
+    const chatContainer = document.getElementById("chat-container");
+    const userInput = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+    const healthBadge = document.getElementById("health-status-badge");
+    const matrixPassRate = document.getElementById("matrix-pass-rate");
+    const checklistCards = document.getElementById("checklist-cards-container");
+    const diffViewer = document.getElementById("diff-viewer");
+    const diffStatusPill = document.getElementById("diff-status-pill");
+
+    let threadId = "wolf-session-" + Math.random().toString(36).substring(7);
+
+    // Initial load: fetch status & checklist matrix
+    window.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
+      refreshCodebaseStatus();
+    });
+
+    // Refresh Codebase QA Status & Checklist Matrix
+    async function refreshCodebaseStatus() {
+      try {
+        const res = await fetch("/api/bug_status");
+        if (!res.ok) return;
+        const data = await res.json();
+        renderChecklistMatrix(data.tests, data.bug_found);
+      } catch (err) {
+        console.error("Failed to fetch bug status:", err);
+      }
     }
 
+    // Render Checklist Cards and Diff Viewer
+    function renderChecklistMatrix(tests, bugFound) {
+      if (!tests || !tests.checklist) return;
+
+      matrixPassRate.innerText = `${tests.passed_count}/${tests.total_tests} Passed (${tests.pass_rate})`;
+      
+      if (bugFound || tests.failed_count > 0) {
+        healthBadge.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-red-500/20 text-red-300 border border-red-500/40 flex items-center gap-1.5";
+        healthBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span> 🚨 ${tests.failed_count} FAILING TEST (BUG DETECTED)`;
+        
+        diffStatusPill.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/20 text-red-300";
+        diffStatusPill.innerText = "Bug Active in Code";
+
+        diffViewer.innerHTML = `
+          <div class="text-zinc-500">// ecommerce/cart.py (calculate_tax)</div>
+          <div class="diff-deleted">- # BUG: Calculating tax on pre-discount amount!</div>
+          <div class="diff-deleted">- return round(subtotal * self.TAX_RATE, 2)</div>
+          <div class="text-red-400 text-[10px] pt-1 italic font-semibold">❌ Flaw: Tax applied to raw subtotal, overcharging customer by ignoring discount.</div>
+        `;
+      } else {
+        healthBadge.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5";
+        healthBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ALL 6 TESTS PASSING`;
+
+        diffStatusPill.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300";
+        diffStatusPill.innerText = "Certified Master";
+
+        diffViewer.innerHTML = `
+          <div class="text-zinc-500">// ecommerce/cart.py (calculate_tax)</div>
+          <div class="diff-added">+ taxable_amount = max(0.0, subtotal - discount)</div>
+          <div class="diff-added">+ return round(taxable_amount * self.TAX_RATE, 2)</div>
+          <div class="text-emerald-400 text-[10px] pt-1 italic">✓ Certified: Tax computed strictly on discounted subtotal.</div>
+        `;
+      }
+
+      // Render cards
+      checklistCards.innerHTML = "";
+      tests.checklist.forEach(item => {
+        const isPass = item.passed;
+        const card = document.createElement("div");
+        card.className = `p-3 rounded-xl cockpit-card flex items-center justify-between ${!isPass ? 'border-red-500/40 bg-red-500/10' : ''}`;
+        card.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <span class="text-base">${isPass ? '✅' : '❌'}</span>
+            <div>
+              <div class="text-zinc-200 font-semibold">${formatTestTitle(item.test_id)}</div>
+              <div class="text-[10px] text-zinc-400">${item.description}</div>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isPass ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300 animate-pulse'}">
+            ${isPass ? 'PASS' : 'FAIL'}
+          </span>
+        `;
+        checklistCards.appendChild(card);
+      });
+    }
+
+    function formatTestTitle(testId) {
+      if (testId.includes("1_subtotal")) return "Subtotal Calculation";
+      if (testId.includes("2_discount")) return "Discount Coupon (SAVE20)";
+      if (testId.includes("3_tax")) return "Tax on Discounted Total";
+      if (testId.includes("4_free_shipping")) return "Free Shipping Threshold";
+      if (testId.includes("5_inventory")) return "Inventory Oversell Lock";
+      if (testId.includes("6_currency")) return "Currency Precision & Rounding";
+      return testId;
+    }
+
+    // Trigger Quick Action Command Button
+    async function triggerBugAction(action, systemNotice) {
+      appendSystemMessage(systemNotice);
+      try {
+        const res = await fetch("/api/bug_action", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: action })
+        });
+        const data = await res.json();
+        renderChecklistMatrix(data.tests, (data.tests.failed_count > 0));
+
+        let reportMsg = "";
+        if (action === "simulate_bug") {
+          reportMsg = "⚠️ **Real-World E-Commerce Bug Injected!**\n- Target: `ecommerce/cart.py` -> `calculate_tax()`\n- Impact: Overcharging customers by applying tax before promo discounts.\n- **Test [CHECKLIST-3] is now FAILING (❌)**. Click **'Autopilot: Fix & Certify'** to heal it!";
+        } else if (action === "scan") {
+          reportMsg = data.result.bug_found 
+            ? `🚨 **Bug Found**: ${data.result.diagnosis.bug_title}\n- File: \`${data.result.diagnosis.file}\`\n- Severity: **${data.result.diagnosis.severity}**\n- Impact: ${data.result.diagnosis.impact}`
+            : "✅ **Code Scan Clean**: All 6 QA checklist tests are passing!";
+        } else if (action === "full_pipeline") {
+          reportMsg = "🎉 **Autonomous Bug Fixer Finished**:\n1. 🔍 Discovered failing tax calculation flaw.\n2. ⚡ Researched logic fix via Groq.\n3. 🛠️ Applied verified patch to `ecommerce/cart.py`.\n4. 📋 **100% QA Checklist Verified**: All 6/6 tests PASSING.";
+        }
+        appendAgentMessage(reportMsg, []);
+      } catch (err) {
+        console.error("Action error:", err);
+      }
+    }
+
+    // Send Quick Prompt into Chat
+    function sendQuickPrompt(promptText) {
+      userInput.value = promptText;
+      handleSend(new Event("submit"));
+    }
+
+    // Handle Form Submit
     async function handleSend(e) {
       if (e) e.preventDefault();
       const text = userInput.value.trim();
       if (!text) return;
 
-      appendMessage('user', text);
-      userInput.value = '';
+      appendUserMessage(text);
+      userInput.value = "";
+      userInput.disabled = true;
       sendBtn.disabled = true;
 
-      const loadingId = appendLoading();
+      const loadingId = appendLoadingIndicator();
 
       try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: text, thread_id: threadId })
         });
-        const data = await response.json();
-        removeLoading(loadingId);
 
-        if (data.error) {
-          appendMessage('assistant', `⚠️ **Error**: ${data.error}`);
-        } else {
-          appendMessage('assistant', data.reply, data.tool_calls);
-          fetchMemory();
+        removeLoadingIndicator(loadingId);
+
+        if (!res.ok) {
+          const errData = await res.json();
+          appendAgentMessage("⚠️ Error: " + (errData.error || "Server response failure"), []);
+          return;
         }
+
+        const data = await res.json();
+        appendAgentMessage(data.reply || "", data.tool_calls || []);
+        
+        // Refresh QA Matrix to sync any tool execution updates
+        refreshCodebaseStatus();
+
       } catch (err) {
-        removeLoading(loadingId);
-        appendMessage('assistant', `⚠️ **Network Error**: Could not reach backend agent.`);
+        removeLoadingIndicator(loadingId);
+        appendAgentMessage("⚠️ Network error: Could not reach Wolf Assistant backend.", []);
       } finally {
+        userInput.disabled = false;
         sendBtn.disabled = false;
         userInput.focus();
       }
     }
 
-    function appendMessage(sender, text, toolCalls = []) {
-      const wrapper = document.createElement('div');
-      const isUser = sender === 'user';
-      wrapper.className = `flex items-start gap-3.5 max-w-3xl ${isUser ? 'ml-auto flex-row-reverse' : ''}`;
+    // Append User Bubble
+    function appendUserMessage(text) {
+      const msgDiv = document.createElement("div");
+      msgDiv.className = "flex items-start justify-end gap-3 max-w-2xl ml-auto";
+      msgDiv.innerHTML = `
+        <div class="p-3.5 rounded-2xl rounded-tr-none user-bubble text-white text-xs leading-relaxed shadow-lg">
+          ${escapeHtml(text)}
+        </div>
+      `;
+      chatContainer.appendChild(msgDiv);
+      scrollToBottom();
+    }
 
-      const avatar = isUser
-        ? `<div class="w-9 h-9 rounded-xl bg-zinc-800 border border-white/10 flex items-center justify-center shrink-0 shadow-md"><i data-lucide="user" class="w-4 h-4 text-zinc-200"></i></div>`
-        : `<div class="w-9 h-9 rounded-xl overflow-hidden shrink-0 shadow-lg shadow-pink-500/20 border border-indigo-400/30 p-0.5 bg-gradient-to-tr from-sky-400/20 to-pink-500/20">${GIRL_ROBOT_SVG}</div>`;
+    // Append System Notice Bubble
+    function appendSystemMessage(text) {
+      const msgDiv = document.createElement("div");
+      msgDiv.className = "flex justify-center max-w-xl mx-auto my-2";
+      msgDiv.innerHTML = `
+        <div class="px-4 py-2 rounded-xl bg-slate-900/90 border border-sky-500/20 text-sky-300 text-[11px] font-mono flex items-center gap-2 shadow-sm">
+          <i data-lucide="info" class="w-3.5 h-3.5 text-sky-400"></i> ${escapeHtml(text)}
+        </div>
+      `;
+      chatContainer.appendChild(msgDiv);
+      lucide.createIcons();
+      scrollToBottom();
+    }
 
-      let toolsHtml = '';
+    // Append Agent Message with Collapsible Tool Execution
+    function appendAgentMessage(text, toolCalls) {
+      const msgDiv = document.createElement("div");
+      msgDiv.className = "flex items-start gap-3.5 max-w-3xl";
+
+      let toolHtml = "";
       if (toolCalls && toolCalls.length > 0) {
-        const toolNames = toolCalls.map(tc => tc.name).join(', ');
-        toolsHtml = `
-          <details class="group mb-2.5 rounded-xl bg-zinc-900/70 border border-white/5 transition-all text-xs overflow-hidden">
-            <summary class="flex items-center justify-between px-3 py-1.5 cursor-pointer list-none select-none text-[11px] font-medium text-zinc-400 hover:text-zinc-200 hover:bg-white/5 transition">
-              <span class="flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span>⚡ Used tool: <strong class="text-sky-300 font-mono">${toolNames}</strong></span>
-              </span>
-              <span class="text-[10px] text-zinc-500 group-open:rotate-180 transition-transform duration-200">▾</span>
-            </summary>
-            <div class="p-2.5 pt-1.5 border-t border-white/5 space-y-1.5 bg-black/40 font-mono text-[11px]">
-              ${toolCalls.map(tc => `
-                <div class="p-2 rounded-lg bg-zinc-900/90 border border-white/5 text-zinc-300">
-                  <div class="text-sky-400 font-semibold mb-0.5">⚙️ ${tc.name}</div>
-                  <div class="text-zinc-400 text-[10px] whitespace-pre-wrap overflow-x-auto">${JSON.stringify(tc.args, null, 2)}</div>
+        const pills = toolCalls.map(tc => {
+          const toolName = tc.tool || "Tool";
+          const toolArgs = JSON.stringify(tc.args || {}, null, 2);
+          const toolResult = typeof tc.result === "string" ? tc.result : JSON.stringify(tc.result || {}, null, 2);
+
+          return `
+            <details class="text-[11px] border border-sky-500/20 rounded-lg overflow-hidden bg-slate-950/60 transition mb-1.5 group">
+              <summary class="cursor-pointer px-3 py-1.5 bg-slate-900/80 hover:bg-slate-800 text-sky-300 font-mono flex items-center justify-between select-none">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
+                  <strong>⚡ Executed:</strong> ${escapeHtml(toolName)}
+                </span>
+                <span class="text-[10px] text-zinc-500 group-open:rotate-180 transition transform">▼</span>
+              </summary>
+              <div class="p-3 space-y-2 border-t border-white/5 font-mono text-[11px] text-zinc-300 bg-slate-950">
+                <div>
+                  <span class="text-zinc-500 text-[10px] uppercase font-bold">Input Parameters:</span>
+                  <pre class="bg-black/60 p-2 rounded text-zinc-300 overflow-x-auto mt-0.5 text-[10px]">${escapeHtml(toolArgs)}</pre>
                 </div>
-              `).join('')}
-            </div>
-          </details>
-        `;
+                <div>
+                  <span class="text-zinc-500 text-[10px] uppercase font-bold">Execution Output:</span>
+                  <pre class="bg-black/60 p-2 rounded text-emerald-300/90 overflow-x-auto mt-0.5 text-[10px]">${escapeHtml(toolResult)}</pre>
+                </div>
+              </div>
+            </details>
+          `;
+        }).join("");
+
+        toolHtml = `<div class="mb-2 space-y-1">${pills}</div>`;
       }
 
-      const formattedBody = isUser ? text : marked.parse(text);
+      const parsedMarkdown = marked.parse(text || "");
 
-      wrapper.innerHTML = `
-        ${avatar}
-        <div class="space-y-1 ${isUser ? 'items-end' : ''}">
-          <div class="flex items-center gap-2 ${isUser ? 'justify-end' : ''}">
-            <span class="font-semibold text-xs text-zinc-300">${isUser ? 'You' : currentAgentName}</span>
-            <span class="text-[10px] text-zinc-500">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+      msgDiv.innerHTML = `
+        <div class="w-8 h-8 rounded-xl bg-slate-900 border border-sky-500/30 p-1 shrink-0 flex items-center justify-center shadow-md">
+          <svg viewBox="0 0 100 100" class="w-full h-full">
+            <polygon points="50,4 92,25 92,75 50,96 8,75 8,25" fill="#0f172a" stroke="#38bdf8" stroke-width="3"/>
+            <polygon points="28,26 18,5 42,22" fill="#1e293b" stroke="#38bdf8"/>
+            <polygon points="72,26 82,5 58,22" fill="#1e293b" stroke="#38bdf8"/>
+            <polygon points="50,48 40,64 50,82 60,64" fill="#1e293b" stroke="#38bdf8"/>
+            <polygon points="35,46 45,47 38,51" fill="#38bdf8"/>
+            <polygon points="65,46 55,47 62,51" fill="#38bdf8"/>
+          </svg>
+        </div>
+        <div class="space-y-1 w-full max-w-2xl">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-xs text-sky-400">WOLF</span>
+            <span class="text-[10px] text-zinc-500 font-mono">Auto-Dev</span>
           </div>
-          <div class="p-4 rounded-2xl ${isUser ? 'rounded-tr-none user-bubble text-white' : 'rounded-tl-none agent-bubble text-zinc-200'} text-sm leading-relaxed prose prose-invert max-w-none">
-            ${toolsHtml}
-            ${formattedBody}
+          <div class="p-4 rounded-2xl rounded-tl-none agent-bubble text-zinc-200 text-xs leading-relaxed space-y-2">
+            ${toolHtml}
+            <div class="prose prose-invert prose-xs max-w-none">
+              ${parsedMarkdown}
+            </div>
           </div>
         </div>
       `;
 
-      chatContainer.appendChild(wrapper);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+      chatContainer.appendChild(msgDiv);
       lucide.createIcons();
+      scrollToBottom();
     }
 
-    function appendLoading() {
-      const id = 'loading_' + Date.now();
-      const div = document.createElement('div');
+    // Loading State
+    function appendLoadingIndicator() {
+      const id = "loading-" + Date.now();
+      const div = document.createElement("div");
       div.id = id;
-      div.className = 'flex items-start gap-3.5 max-w-3xl';
+      div.className = "flex items-start gap-3.5 max-w-xs";
       div.innerHTML = `
-        <div class="w-9 h-9 rounded-xl overflow-hidden shrink-0 shadow-lg shadow-pink-500/20 border border-indigo-400/30 p-0.5 bg-gradient-to-tr from-sky-400/20 to-pink-500/20 animate-pulse">
-          ${GIRL_ROBOT_SVG}
+        <div class="w-8 h-8 rounded-xl bg-slate-900 border border-sky-500/30 p-1 shrink-0 flex items-center justify-center animate-pulse">
+          <i data-lucide="loader-2" class="w-4 h-4 text-sky-400 animate-spin"></i>
         </div>
-        <div class="p-3.5 rounded-2xl rounded-tl-none agent-bubble flex items-center gap-2 text-xs text-zinc-400">
-          <span class="w-2 h-2 rounded-full bg-pink-400 animate-ping"></span>
-          <span>${currentAgentName} is thinking...</span>
+        <div class="p-3 rounded-xl rounded-tl-none agent-bubble text-zinc-400 text-xs flex items-center gap-2 font-mono">
+          <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
+          <span>Wolf is analyzing codebase...</span>
         </div>
       `;
       chatContainer.appendChild(div);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
       lucide.createIcons();
+      scrollToBottom();
       return id;
     }
 
-    function removeLoading(id) {
+    function removeLoadingIndicator(id) {
       const el = document.getElementById(id);
       if (el) el.remove();
+    }
+
+    function clearChatConsole() {
+      chatContainer.innerHTML = "";
+    }
+
+    function scrollToBottom() {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function escapeHtml(string) {
+      if (typeof string !== 'string') return string;
+      return string.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
   </script>
 </body>

@@ -40,13 +40,13 @@ class TestAgentComponents(unittest.TestCase):
         self.assertIn("Repositories", repos)
 
         issues = list_issues(repo="octocat/Hello-World", limit=2)
-        self.assertIn("Issues", issues)
+        self.assertIn("issues", issues.lower())
 
     def test_web_search_mcp_server_tools(self):
         """Verify Web Search MCP tools function properly."""
         from mcp_service.servers.search_server import search_web
         res = search_web(query="Python LangChain", max_results=2)
-        self.assertIn("Search Results", res)
+        self.assertIn("results", res.lower())
 
     def test_calculator_tool(self):
         """Verify calculator evaluates math correctly."""

@@ -178,12 +178,54 @@ async def api_chat(request):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
+async def api_bug_status(request):
+    """Return live codebase status, active bugs, and test checklist matrix."""
+    from core.bug_fixer_agent import ECommerceBugFixerAgent
+    agent = ECommerceBugFixerAgent()
+    scan = await asyncio.to_thread(agent.scan_for_bugs)
+    tests = await asyncio.to_thread(agent.run_tests)
+    return JSONResponse({
+        "bug_found": scan["bug_found"],
+        "diagnosis": scan.get("diagnosis"),
+        "tests": tests
+    })
+
+
+async def api_bug_action(request):
+    """Execute autonomous bug fixer action (scan, fix, simulate_bug, full_pipeline)."""
+    from core.bug_fixer_agent import ECommerceBugFixerAgent
+    agent = ECommerceBugFixerAgent()
+    try:
+        body = await request.json()
+        action = body.get("action", "full_pipeline")
+    except Exception:
+        action = "full_pipeline"
+
+    if action == "simulate_bug":
+        res = await asyncio.to_thread(agent.inject_demo_bug, "tax_bug")
+    elif action == "fix":
+        res = await asyncio.to_thread(agent.apply_fix)
+    elif action == "scan":
+        res = await asyncio.to_thread(agent.scan_for_bugs)
+    else:
+        res = await asyncio.to_thread(agent.run_full_pipeline)
+
+    tests = await asyncio.to_thread(agent.run_tests)
+    return JSONResponse({
+        "action": action,
+        "result": res,
+        "tests": tests
+    })
+
+
 # Define routes
 routes = [
     Route("/", homepage),
     Route("/api/status", api_status),
     Route("/api/memory", api_memory),
     Route("/api/tools", api_tools),
+    Route("/api/bug_status", api_bug_status),
+    Route("/api/bug_action", api_bug_action, methods=["POST"]),
     Route("/api/chat", api_chat, methods=["POST"]),
 ]
 

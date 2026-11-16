@@ -29,9 +29,9 @@ class Settings(BaseSettings):
     # -------------------------------------------------------------
     # 1. Model Provider Configuration (Model-Agnostic)
     # -------------------------------------------------------------
-    MODEL_PROVIDER: Literal["gemini", "openai", "anthropic", "ollama"] = Field(
+    MODEL_PROVIDER: Literal["gemini", "groq", "openai", "anthropic", "ollama"] = Field(
         default="gemini",
-        description="The AI model provider to use (gemini, openai, anthropic, ollama)"
+        description="The AI model provider to use (gemini, groq, openai, anthropic, ollama)"
     )
     MODEL_NAME: str = Field(
         default="gemini-flash-lite-latest",
@@ -52,6 +52,7 @@ class Settings(BaseSettings):
     # 2. Provider API Credentials
     # -------------------------------------------------------------
     GOOGLE_API_KEY: Optional[str] = Field(default=None, description="Google Gemini API Key")
+    GROQ_API_KEY: Optional[str] = Field(default=None, description="Groq Cloud API Key")
     OPENAI_API_KEY: Optional[str] = Field(default=None, description="OpenAI API Key")
     ANTHROPIC_API_KEY: Optional[str] = Field(default=None, description="Anthropic API Key")
     OLLAMA_BASE_URL: str = Field(default="http://localhost:11434", description="Base URL for local Ollama")

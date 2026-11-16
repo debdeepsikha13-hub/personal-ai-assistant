@@ -10,11 +10,38 @@ HOW THIS WORKS (MCP):
 """
 
 from typing import List, Optional
+import os
 from mcp.server.fastmcp import FastMCP
 from duckduckgo_search import DDGS
 
 # Initialize FastMCP Server for Web Search
 mcp = FastMCP("WebSearchMCPServer")
+
+
+def _synthesize_with_groq(query: str, raw_text: str) -> Optional[str]:
+    """Uses Groq API key to generate sub-second technical synthesis of search results."""
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    if not groq_api_key:
+        return None
+    try:
+        from groq import Groq
+        client = Groq(api_key=groq_api_key)
+        prompt = (
+            f"You are an autonomous engineering research assistant for software developers.\n"
+            f"Query: {query}\n\n"
+            f"Web Results / Documentation:\n{raw_text}\n\n"
+            f"Synthesize a direct, actionable technical summary with code solutions if applicable."
+        )
+        completion = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            temperature=0.2,
+            max_tokens=600
+        )
+        ans = completion.choices[0].message.content
+        return f"⚡ **Groq Llama-3.3 Technical Intelligence**:\n\n{ans}\n\n🔗 **Raw Verified Sources:**\n{raw_text}"
+    except Exception:
+        return None
 
 
 @mcp.tool()
@@ -51,7 +78,9 @@ def search_web(query: str, max_results: int = 3) -> str:
                     title = item.find("title").text if item.find("title") is not None else "No Title"
                     link = item.find("link").text if item.find("link") is not None else ""
                     results.append(f"• **{title}**\n  Source: {link}")
-                return f"🌐 Live Web Results for **'{cleaned_query}'** ({len(results)} found):\n\n" + "\n\n".join(results)
+                raw_out = f"🌐 Live Web Results for **'{cleaned_query}'** ({len(results)} found):\n\n" + "\n\n".join(results)
+                groq_synth = _synthesize_with_groq(cleaned_query, raw_out)
+                return groq_synth if groq_synth else raw_out
     except Exception:
         pass
 
