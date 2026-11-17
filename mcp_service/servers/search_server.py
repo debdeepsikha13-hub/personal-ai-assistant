@@ -18,17 +18,56 @@ from duckduckgo_search import DDGS
 mcp = FastMCP("WebSearchMCPServer")
 
 
+def synthesize_with_groq(query: str, raw_results: str) -> str:
+    """
+    Synthesize raw live web search results into an actionable technical breakdown
+    using Groq's ultra-fast LLaMA-3.3-70B model.
+    """
+    groq_api_key = os.getenv("GROQ_API_KEY", "").strip()
+    if not groq_api_key:
+        return (
+            "⚠️ **Groq Search Synthesis Inactive: Missing GROQ_API_KEY**\n"
+            "To have Groq fully synthesize and analyze technical search results, add your free Groq API key to `.env`:\n"
+            "`GROQ_API_KEY=gsk_your_key_here` (Get one free at https://console.groq.com/keys).\n\n"
+            f"**Raw Web Search Results:**\n{raw_results}"
+        )
+
+    try:
+        from groq import Groq
+        client = Groq(api_key=groq_api_key)
+        prompt = (
+            f"You are a specialized technical research AI powered by Groq LLaMA-3.3.\n"
+            f"User Query: {query}\n\n"
+            f"Real-Time Web Documentation & Sources:\n{raw_results}\n\n"
+            f"Synthesize a clear, direct, and actionable technical explanation with code examples where applicable, "
+            f"and list the source URLs at the end."
+        )
+        completion = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are a senior developer intelligence assistant powered by Groq LLaMA-3.3."},
+                {"role": "user", "content": prompt}
+            ],
+            model="llama-3.3-70b-versatile",
+            temperature=0.2,
+            max_tokens=800
+        )
+        ans = completion.choices[0].message.content
+        return f"⚡ **Groq LLaMA-3.3 Search Intelligence**:\n\n{ans}\n\n🔗 **Live Sources:**\n{raw_results}"
+    except Exception as e:
+        return f"⚠️ Groq Synthesis Error ({e}). Raw web search results:\n\n{raw_results}"
+
+
 @mcp.tool()
 def search_web(query: str, max_results: int = 3) -> str:
     """
-    Search the live internet for up-to-date facts, documentation, or queries.
+    Search the live internet and synthesize technical documentation using Groq LLaMA-3.3.
     
     Args:
         query: The search query string (e.g. 'latest AI news', 'Python 3.14 features').
         max_results: Number of search results to return (default: 3).
         
     Returns:
-        Formatted summary with titles, snippets, and source URLs.
+        Groq-synthesized technical analysis with citations and source URLs.
     """
     import urllib.parse
     import xml.etree.ElementTree as ET
@@ -37,6 +76,8 @@ def search_web(query: str, max_results: int = 3) -> str:
     cleaned_query = query.strip()
     if not cleaned_query:
         return "Error: Empty search query provided."
+
+    raw_out = ""
 
     # Strategy 1: High-speed sub-second direct web query (unblocked, 0.4s response)
     try:
@@ -52,9 +93,32 @@ def search_web(query: str, max_results: int = 3) -> str:
                     title = item.find("title").text if item.find("title") is not None else "No Title"
                     link = item.find("link").text if item.find("link") is not None else ""
                     results.append(f"• **{title}**\n  Source: {link}")
-                return f"🌐 Live Web Results for **'{cleaned_query}'** ({len(results)} found):\n\n" + "\n\n".join(results)
+                raw_out = f"🌐 Live Web Results for **'{cleaned_query}'** ({len(results)} found):\n\n" + "\n\n".join(results)
     except Exception:
         pass
+
+    # Strategy 2: DDGS fallback if Strategy 1 found nothing
+    if not raw_out:
+        try:
+            results = []
+            with DDGS(timeout=3) as ddgs:
+                raw_results = list(ddgs.text(cleaned_query, max_results=max_results, backend="lite"))
+                for r in raw_results[:max_results]:
+                    title = r.get("title", "No Title")
+                    body = r.get("body", "No Snippet")[:200]
+                    href = r.get("href", "")
+                    results.append(f"• **{title}**\n  {body}\n  Source: {href}")
+
+            if results:
+                raw_out = f"🌐 Search Results for **'{cleaned_query}'** ({len(results)} found):\n\n" + "\n\n".join(results)
+        except Exception:
+            pass
+
+    if not raw_out:
+        raw_out = f"No live search results could be retrieved for '{cleaned_query}'."
+
+    # Synthesize with Groq LLaMA-3.3
+    return synthesize_with_groq(cleaned_query, raw_out)
 
     # Strategy 2: DDGS fallback
     try:
