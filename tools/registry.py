@@ -23,7 +23,7 @@ from tools.notes_tool import save_note, list_notes
 # 2. Autonomous Python Code Bug Fixer & QA Tools
 from tools.bug_fixer_tool import run_bug_fixer_agent, run_code_quality_checklist
 
-# 3. Import MCP Multi-Server tool loader (GitHub, Groq Web Search, PC Specs, Statistics)
+# 3. Import MCP Multi-Server tool loader (GitHub, Web Search, PC Specs, Statistics)
 from mcp_service.manager import get_mcp_tools_sync
 from utils.logger import setup_logger
 
