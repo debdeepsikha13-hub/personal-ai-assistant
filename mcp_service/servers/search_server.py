@@ -11,8 +11,12 @@ HOW THIS WORKS (MCP):
 
 from typing import List, Optional
 import os
+from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 from duckduckgo_search import DDGS
+
+# Ensure environment variables are loaded
+load_dotenv()
 
 # Initialize FastMCP Server for Web Search
 mcp = FastMCP("WebSearchMCPServer")
@@ -21,7 +25,7 @@ mcp = FastMCP("WebSearchMCPServer")
 def synthesize_with_groq(query: str, raw_results: str) -> str:
     """
     Synthesize raw live web search results into an actionable technical breakdown
-    using Groq's ultra-fast LLaMA-3.3-70B model.
+    using Groq's ultra-fast LLM inference.
     """
     groq_api_key = os.getenv("GROQ_API_KEY", "").strip()
     if not groq_api_key:
@@ -34,27 +38,50 @@ def synthesize_with_groq(query: str, raw_results: str) -> str:
 
     try:
         from groq import Groq
-        client = Groq(api_key=groq_api_key)
+        client = Groq(api_key=groq_api_key, max_retries=0)
         prompt = (
-            f"You are a specialized technical research AI powered by Groq LLaMA-3.3.\n"
+            f"You are a specialized technical research AI powered by Groq.\n"
             f"User Query: {query}\n\n"
             f"Real-Time Web Documentation & Sources:\n{raw_results}\n\n"
             f"Synthesize a clear, direct, and actionable technical explanation with code examples where applicable, "
             f"and list the source URLs at the end."
         )
-        completion = client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": "You are a senior developer intelligence assistant powered by Groq LLaMA-3.3."},
-                {"role": "user", "content": prompt}
-            ],
-            model="llama-3.3-70b-versatile",
-            temperature=0.2,
-            max_tokens=800
-        )
-        ans = completion.choices[0].message.content
-        return f"⚡ **Groq LLaMA-3.3 Search Intelligence**:\n\n{ans}\n\n🔗 **Live Sources:**\n{raw_results}"
-    except Exception as e:
-        return f"⚠️ Groq Synthesis Error ({e}). Raw web search results:\n\n{raw_results}"
+
+        candidate_models = [
+            "qwen/qwen3.8-27b",
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b",
+            "llama-3.3-70b-versatile"
+        ]
+        
+        ans = None
+        used_model = None
+
+        for model_id in candidate_models:
+            try:
+                completion = client.chat.completions.create(
+                    messages=[
+                        {"role": "system", "content": "You are a senior developer intelligence assistant powered by Groq."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    model=model_id,
+                    temperature=0.2,
+                    max_tokens=800
+                )
+                content = completion.choices[0].message.content
+                if content and len(content.strip()) > 10:
+                    ans = content
+                    used_model = model_id
+                    break
+            except Exception:
+                continue
+
+        if ans:
+            return f"⚡ **Groq Intelligence ({used_model})**:\n\n{ans}\n\n🔗 **Live Search Results:**\n{raw_results}"
+        else:
+            return f"**Live Search Results:**\n\n{raw_results}"
+    except Exception:
+        return f"**Live Search Results:**\n\n{raw_results}"
 
 
 @mcp.tool()
