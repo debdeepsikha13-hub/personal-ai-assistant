@@ -178,5 +178,68 @@ def run_code_quality_checklist(target_path: str = "") -> str:
     return "\n".join(lines)
 
 
+@tool
+def execute_repository_link(repo_url_or_path: str) -> str:
+    """
+    On-Demand 2-Stage Repository Executor.
+    Use ONLY when the user provides a GitHub repository URL (e.g. https://github.com/user/repo)
+    or local folder/file path to execute.
+
+    Stage 1: Clones/opens the repository, scans for real bugs, and autonomously fixes them.
+    Stage 2: Scans the fixed code for cybersecurity vulnerabilities (OWASP Top 10 / CWE)
+             and returns a clear SECURE or INSECURE indicator.
+
+    Args:
+        repo_url_or_path: GitHub repo URL (https://github.com/owner/repo) or local path.
+
+    Returns:
+        str: Formatted 2-stage report (Stage 1 Bugs Fixed + Stage 2 SECURE/INSECURE verdict).
+    """
+    from core.repo_executor import OnDemandRepoExecutor
+
+    executor = OnDemandRepoExecutor()
+    res = executor.execute(repo_url_or_path)
+    if res.get("status") != "completed":
+        return f"❌ **Execution Failed**: {res.get('error', 'Unknown error')}"
+
+    repo_label = res["repo"]["repo_label"]
+    s1 = res["stage1_bugs"]
+    s2 = res["stage2_security"]
+    is_secure = s2.get("verdict") == "SECURE"
+
+    lines = [
+        f"🚀 **On-Demand Execution Complete — `{repo_label}`** ({res['duration_ms']}ms)",
+        f"### {'🟢 SECURITY VERDICT: CODE IS SECURE ✅' if is_secure else '🔴 SECURITY VERDICT: INSECURE — ACTION REQUIRED 🚨'}",
+        f"- **Grade**: **{s2['overall_grade']}** ({s2['score']}/100) | **Vulnerabilities**: **{s2['vulnerabilities_count']}**\n",
+        "---",
+        "### Stage 1: Bug Detection & Autonomous Fixing",
+        f"- Python Files Analyzed: `{s1['files_analyzed']}`",
+        f"- Bugs Detected: **{s1['bugs_found_count']}** | Auto-Fixed: **{s1['bugs_fixed_count']}** | Needs Manual Review: **{s1['remaining_bugs_count']}**"
+    ]
+
+    if s1["fixes_applied"]:
+        lines.append("\n**Patches Applied Automatically:**")
+        for fx in s1["fixes_applied"][:10]:
+            lines.append(f"- 🛠️ `{fx['file']}:{fx['line']}` ({fx['bug_type']}): {fx.get('fix', fx['description'])}")
+
+    if s1["remaining_bugs"]:
+        lines.append("\n**Remaining Bugs Flagged for Review:**")
+        for rb in s1["remaining_bugs"][:10]:
+            lines.append(f"- ⚠️ `{rb['file']}:{rb['line']}` ({rb['bug_type']}): {rb['description']}")
+
+    lines.append("\n---")
+    lines.append("### Stage 2: Post-Fix Cybersecurity Scan (OWASP / CWE)")
+    if is_secure:
+        lines.append("- ✅ **All 6 OWASP/CWE security checks passed.** No injection flaws, leaked secrets, SQLi, or unsafe deserialization detected.")
+    else:
+        for f in s2.get("findings", [])[:10]:
+            lines.append(
+                f"- 🚨 **[{f['severity']}] {f['rule_id']} ({f['cwe']})** in `{f['file']}:{f['line']}` — {f['title']}\n"
+                f"  - *Fix*: {f['remediation']}"
+            )
+
+    return "\n".join(lines)
+
+
 # Backwards compatibility alias
 run_ecommerce_test_checklist = run_code_quality_checklist

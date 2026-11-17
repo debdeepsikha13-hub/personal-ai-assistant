@@ -21,7 +21,7 @@ from tools.memory_tool import remember_user_fact, get_user_facts
 from tools.notes_tool import save_note, list_notes
 
 # 2. Autonomous Python Code Bug Fixer, QA & Cybersecurity SAST Tools
-from tools.bug_fixer_tool import run_bug_fixer_agent, run_code_quality_checklist
+from tools.bug_fixer_tool import run_bug_fixer_agent, run_code_quality_checklist, execute_repository_link
 from tools.security_tool import run_security_audit
 
 # 3. Import MCP Multi-Server tool loader (GitHub, Web Search, PC Specs, Statistics)
@@ -40,6 +40,7 @@ _NATIVE_TOOLS: List[BaseTool] = [
     remember_user_fact,
     get_user_facts,
     # Software Engineering, Bug Remediation & Cybersecurity SAST
+    execute_repository_link,
     run_bug_fixer_agent,
     run_code_quality_checklist,
     run_security_audit

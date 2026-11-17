@@ -217,7 +217,7 @@
       <!-- Zero-Touch Engine Indicator -->
       <div class="hidden sm:flex items-center gap-1.5 pl-4 h-6 border-l border-slate-200/80 dark:border-slate-800">
         <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-        <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400 font-semibold">Zero-Touch SAST</span>
+        <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400 font-semibold">On-Demand Mode</span>
       </div>
     </div>
 
@@ -257,13 +257,13 @@
 
       <!-- Cybersecurity Health Pill -->
       <button
-        onclick="switchRightTab('sec')"
+        onclick="switchRightTab('hub')"
         id="header-security-pill"
-        title="View OWASP/CWE SAST Security Audit"
-        class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-semibold shadow-sm hover:opacity-90 transition"
+        title="Security Status of Last Executed Repository"
+        class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold shadow-sm hover:opacity-90 transition"
       >
-        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
-        <span id="header-security-text">Security: A+ (0 Vulns)</span>
+        <i data-lucide="shield" class="w-3.5 h-3.5 text-slate-500"></i>
+        <span id="header-security-text">Security: Ready</span>
       </button>
 
       <!-- System Health Pill -->
@@ -289,32 +289,20 @@
   <!-- ========================================================== -->
   <div class="px-6 py-2.5 glass-card border-b flex items-center gap-2 overflow-x-auto text-xs whitespace-nowrap z-10 shrink-0 select-none">
     
-    <!-- Group 1: Enterprise DevSecOps Autopilot Tools -->
+    <!-- Group 1: On-Demand Repo Execution Tools -->
     <div class="flex items-center gap-1.5 shrink-0 pr-2 border-r border-slate-200 dark:border-slate-800">
-      <span class="text-[10px] uppercase font-mono text-slate-400 font-bold px-1">DevSecOps:</span>
+      <span class="text-[10px] uppercase font-mono text-slate-400 font-bold px-1">Repo Runner:</span>
       
-      <!-- Autopilot Fix & Audit Button -->
-      <button onclick="triggerBugAction('full_pipeline', '⚡ DevSecOps Pipeline Activated: Stage 1 (Bug Fix & QA) + Stage 2 (OWASP/CWE Security Audit)...')" class="glass-dock-item shrink-0 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/20">
-        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
-        <span>Fix &amp; Certify</span>
+      <!-- Focus Repo URL Executor -->
+      <button onclick="focusRepoInput()" class="glass-dock-item shrink-0 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/20">
+        <i data-lucide="play" class="w-3.5 h-3.5 text-amber-300"></i>
+        <span>Execute Repo Link</span>
       </button>
 
-      <!-- Central Platform Fleet Sync -->
-      <button onclick="syncCentralFleet()" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-semibold flex items-center gap-1.5">
-        <i data-lucide="radar" class="w-3.5 h-3.5 text-indigo-500"></i>
-        <span>Sync Fleet</span>
-      </button>
-
-      <!-- Security Audit Button (SAST) -->
-      <button onclick="triggerBugAction('security_audit', '🛡️ Running OWASP Top 10 / CWE Static Application Security Testing (SAST) scan...')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-semibold flex items-center gap-1.5">
+      <!-- Snippet Security Sandbox -->
+      <button onclick="switchRightTab('sec')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-semibold flex items-center gap-1.5">
         <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-emerald-500"></i>
-        <span>Security Audit</span>
-      </button>
-
-      <!-- Scan AST & Tests -->
-      <button onclick="triggerBugAction('scan', '🔍 Scanning target repository for AST flaws, failing tests, and security risks...')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
-        <i data-lucide="search" class="w-3.5 h-3.5 text-sky-500"></i>
-        <span>Scan Repo</span>
+        <span>Code Security Sandbox</span>
       </button>
     </div>
 
@@ -447,97 +435,108 @@
       <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
         <div class="flex items-center gap-1 p-1 rounded-xl bg-slate-200/60 dark:bg-slate-800 text-[11px]">
           <button id="tab-hub-btn" onclick="switchRightTab('hub')" class="px-2.5 py-1 rounded-lg font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition flex items-center gap-1 shadow-sm">
-            <i data-lucide="radar" class="w-3.5 h-3.5 text-indigo-500"></i> Central Hub
-          </button>
-          <button id="tab-sec-btn" onclick="switchRightTab('sec')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> SAST
+            <i data-lucide="play-circle" class="w-3.5 h-3.5 text-indigo-500"></i> Execute Repo
           </button>
           <button id="tab-ide-btn" onclick="switchRightTab('ide')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
             <i data-lucide="code-2" class="w-3.5 h-3.5 text-sky-500"></i> Code
           </button>
-          <button id="tab-qa-btn" onclick="switchRightTab('qa')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
-            <i data-lucide="check-square" class="w-3.5 h-3.5 text-teal-500"></i> QA
+          <button id="tab-sec-btn" onclick="switchRightTab('sec')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> Security
           </button>
           <button id="tab-arch-btn" onclick="switchRightTab('arch')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
             <i data-lucide="layers" class="w-3.5 h-3.5 text-purple-500"></i> Arch
           </button>
         </div>
 
-        <span id="matrix-pass-rate" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">
-          6/6 (100%)
+        <span id="matrix-pass-rate" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
+          Idle
         </span>
       </div>
 
-      <!-- TAB 0: Central Security Scanning Platform Hub (Default) -->
+      <!-- TAB 0: On-Demand Repository Executor (Paste Link -> Fix Bugs -> Security Verdict) -->
       <div id="panel-hub-tab" class="flex-1 overflow-y-auto p-4 space-y-3">
-        <!-- Missing Scan Visibility Banner -->
-        <div id="hub-missing-banner" class="p-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/40 space-y-1">
-          <div class="flex items-center justify-between text-xs font-bold text-amber-800 dark:text-amber-300">
-            <span class="flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4 text-amber-500"></i> Missing Scan Visibility</span>
-            <span id="hub-coverage-pill" class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-200/70 dark:bg-amber-900 font-bold">Loading...</span>
-          </div>
-          <p id="hub-missing-desc" class="text-[11px] text-amber-700 dark:text-amber-400">
-            Every repository is discovered centrally without adding workflow files. Unscanned repos are flagged visibly below.
-          </p>
-        </div>
 
-        <!-- Zero-Touch GitHub Org / User Discovery Bar -->
-        <div class="p-2.5 rounded-xl glass-card border border-slate-200/80 dark:border-slate-800 space-y-1.5">
-          <div class="flex items-center justify-between text-[10px] font-mono uppercase text-slate-400 font-bold">
-            <span class="flex items-center gap-1"><i data-lucide="github" class="w-3 h-3 text-indigo-500"></i> Zero-Touch Org / Repo Discovery</span>
-            <span class="text-emerald-500 normal-case font-semibold">0 files added to repos</span>
+        <!-- Step 0: Paste GitHub Link or Local Path -->
+        <div class="p-3.5 rounded-xl glass-card border border-indigo-200/80 dark:border-indigo-900/70 space-y-2">
+          <div class="flex items-center justify-between text-[11px] font-bold text-slate-800 dark:text-white">
+            <span class="flex items-center gap-1.5"><i data-lucide="git-branch" class="w-3.5 h-3.5 text-indigo-500"></i> On-Demand Repository Executor</span>
+            <span class="text-[10px] font-mono text-slate-400">Runs ONLY when you click</span>
           </div>
-          <div class="flex items-center gap-1.5">
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">
+            Paste any GitHub repo link (e.g. your friend's repo) or local folder path. Wolf will <strong>(1) fix bugs</strong> and then <strong>(2) scan for security risks</strong>.
+          </p>
+          <div class="space-y-2">
             <input
-              id="hub-org-input"
+              id="repo-link-input"
               type="text"
-              value="debdeepsikha13-hub"
-              placeholder="GitHub org or username"
-              class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 text-[11px] font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-              onkeydown="if(event.key==='Enter'){ syncCentralFleet(); }"
+              placeholder="https://github.com/username/repo-name  or  C:\path\to\folder"
+              class="w-full px-3 py-2 rounded-xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+              onkeydown="if(event.key==='Enter'){ runOnDemandRepo(); }"
             />
-            <button onclick="syncCentralFleet()" id="hub-sync-btn" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold transition shrink-0 flex items-center gap-1">
-              <i data-lucide="refresh-cw" class="w-3 h-3"></i> Sync Repos
+            <button
+              id="execute-repo-btn"
+              onclick="runOnDemandRepo()"
+              class="w-full py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-bold transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
+              <span id="execute-repo-btn-label">Execute: Fix Bugs &amp; Security Scan</span>
             </button>
           </div>
         </div>
 
-        <!-- Fleet Repository Scan Coverage Matrix -->
-        <div class="space-y-1.5">
+        <!-- BIG SECURITY VERDICT INDICATOR BANNER -->
+        <div id="verdict-banner" class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 space-y-1">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Fleet Scan Coverage (Missing Scans First)</span>
-            <span id="hub-repo-count" class="text-[10px] font-mono text-slate-400">0 repos</span>
+            <span id="verdict-title" class="text-xs font-extrabold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <i data-lucide="shield" class="w-4 h-4 text-slate-400"></i> Waiting for Repository Link
+            </span>
+            <span id="verdict-grade-pill" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+              IDLE
+            </span>
           </div>
-          <div id="hub-repos-list" class="space-y-1.5 text-xs">
-            <div class="p-3 rounded-xl glass-card text-slate-500 font-mono text-[11px]">Loading central repository inventory...</div>
-          </div>
+          <p id="verdict-desc" class="text-[11px] text-slate-500 dark:text-slate-400">
+            Nothing is being scanned in the background. Paste a link above and click <strong>Execute</strong> to run Stage 1 (Bug Fix) + Stage 2 (Security Scan).
+          </p>
         </div>
 
-        <!-- Current State Governance Table (Item / Value Matrix) -->
-        <div class="space-y-1.5 pt-1">
-          <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Current State — Platform Governance</div>
-          <div class="rounded-xl glass-card border border-slate-200/80 dark:border-slate-800 overflow-hidden">
-            <table class="w-full text-left text-[11px]">
-              <thead class="bg-slate-100/80 dark:bg-slate-900/80 text-[10px] font-mono uppercase text-slate-500">
-                <tr>
-                  <th class="px-3 py-1.5">Item</th>
-                  <th class="px-3 py-1.5">Value</th>
-                </tr>
-              </thead>
-              <tbody id="hub-current-state-body" class="divide-y divide-slate-200/60 dark:divide-slate-800">
-                <!-- Populated by JS -->
-              </tbody>
-            </table>
+        <!-- STAGE 1 RESULT CARD: Bug Detection & Fixing -->
+        <div id="stage1-card" class="p-3.5 rounded-xl glass-card border border-slate-200/80 dark:border-slate-800 space-y-2 hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <span class="w-5 h-5 rounded-md bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] flex items-center justify-center font-black">1</span>
+              Stage 1: Bug Detection &amp; Auto-Fix
+            </span>
+            <span id="stage1-pill" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 font-bold">0 Fixed</span>
           </div>
+          <div class="grid grid-cols-3 gap-1.5 text-center font-mono text-[10px]">
+            <div class="p-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-900/70">
+              <div id="s1-files" class="font-black text-slate-800 dark:text-white">0</div>
+              <div class="text-[9px] text-slate-400">PY FILES</div>
+            </div>
+            <div class="p-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-900/70">
+              <div id="s1-fixed" class="font-black text-emerald-600">0</div>
+              <div class="text-[9px] text-slate-400">AUTO-FIXED</div>
+            </div>
+            <div class="p-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-900/70">
+              <div id="s1-remaining" class="font-black text-amber-500">0</div>
+              <div class="text-[9px] text-slate-400">REVIEW</div>
+            </div>
+          </div>
+          <div id="stage1-details" class="space-y-1 text-[11px]"></div>
         </div>
 
-        <!-- Centralized SQLite Report History -->
-        <div class="space-y-1.5 pt-1">
-          <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Central Audit Report Storage (SQLite)</div>
-          <div id="hub-reports-history" class="space-y-1 text-[11px]">
-            <div class="p-2.5 rounded-xl glass-card text-slate-500 font-mono">No stored scans yet. Click "Scan Now" on any repo above.</div>
+        <!-- STAGE 2 RESULT CARD: Post-Fix Security Scan -->
+        <div id="stage2-card" class="p-3.5 rounded-xl glass-card border border-slate-200/80 dark:border-slate-800 space-y-2 hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <span class="w-5 h-5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] flex items-center justify-center font-black">2</span>
+              Stage 2: Post-Fix Security Scan
+            </span>
+            <span id="stage2-pill" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 font-bold">Grade A+</span>
           </div>
+          <div id="stage2-findings" class="space-y-1.5 text-[11px]"></div>
         </div>
+
       </div>
 
       <!-- TAB 1: Live Code Lab & Target Repo Inspector -->
@@ -989,7 +988,7 @@
     let threadId = "wolf-session-" + Math.random().toString(36).substring(7);
     let activeTargetPath = "";
 
-    // Initial load: fetch status, live source, QA checklist & SAST audit
+    // Initial load: stay clean & idle — NEVER auto-scan user's repos until they click Execute!
     window.addEventListener("DOMContentLoaded", () => {
       const savedAtmosphere = localStorage.getItem("wolf_atmosphere");
       if (savedAtmosphere === "twilight") {
@@ -998,9 +997,181 @@
       }
 
       lucide.createIcons();
-      refreshCodebaseStatus();
-      refreshPlatformOverview();
     });
+
+    function focusRepoInput() {
+      switchRightTab("hub");
+      const el = document.getElementById("repo-link-input");
+      if (el) el.focus();
+    }
+
+    // On-Demand 2-Stage Executor: Paste GitHub URL or Local Path -> Stage 1 (Fix Bugs) -> Stage 2 (Security Scan)
+    async function runOnDemandRepo() {
+      const input = document.getElementById("repo-link-input");
+      const btn = document.getElementById("execute-repo-btn");
+      const btnLabel = document.getElementById("execute-repo-btn-label");
+      const target = input ? input.value.trim() : "";
+
+      if (!target) {
+        appendSystemMessage("⚠️ Please paste a GitHub repository URL or local folder path first.");
+        if (input) input.focus();
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+      if (btnLabel) btnLabel.innerText = "Executing Stage 1 (Bugs) & Stage 2 (Security)...";
+      appendSystemMessage(`🚀 Executing On-Demand Pipeline on '${target}': Stage 1 (Bug Fix) -> Stage 2 (Security Scan)...`);
+
+      try {
+        const res = await fetch("/api/execute_repo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ target: target })
+        });
+        const data = await res.json();
+
+        if (!res.ok || data.status !== "completed") {
+          renderExecutionError(data.error || "Execution failed.");
+          appendAgentMessage(`❌ **Execution Failed**: ${data.error || "Could not clone or read repository."}`, []);
+          return;
+        }
+
+        renderOnDemandResult(data);
+      } catch (err) {
+        console.error("Execute repo error:", err);
+        renderExecutionError("Network error contacting backend.");
+        appendAgentMessage("⚠️ **Network Error**: Could not reach Wolf backend.", []);
+      } finally {
+        if (btn) btn.disabled = false;
+        if (btnLabel) btnLabel.innerText = "Execute: Fix Bugs & Security Scan";
+      }
+    }
+
+    function renderExecutionError(errorMsg) {
+      const banner = document.getElementById("verdict-banner");
+      const title = document.getElementById("verdict-title");
+      const pill = document.getElementById("verdict-grade-pill");
+      const desc = document.getElementById("verdict-desc");
+      if (banner) banner.className = "p-4 rounded-xl border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/50 space-y-1";
+      if (title) title.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-rose-500"></i> Execution Failed`;
+      if (pill) { pill.innerText = "ERROR"; pill.className = "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-600 text-white"; }
+      if (desc) desc.innerText = errorMsg;
+      lucide.createIcons();
+    }
+
+    function renderOnDemandResult(data) {
+      const repoLabel = data.repo.repo_label;
+      const s1 = data.stage1_bugs;
+      const s2 = data.stage2_security;
+      const isSecure = s2.verdict === "SECURE";
+
+      // 1. Update Code Viewer & Security Tab with real results from this executed repo
+      renderLiveSourceCode(data.source, s2);
+      renderSecurityAudit(s2);
+
+      // Update top studio status pill
+      if (matrixPassRate) {
+        matrixPassRate.innerText = isSecure ? `SECURE (${s2.overall_grade})` : `INSECURE (${s2.vulnerabilities_count} Vulns)`;
+        matrixPassRate.className = isSecure
+          ? "px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0"
+          : "px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-600 text-white border border-rose-700 shrink-0 animate-pulse";
+      }
+
+      // 2. BIG SECURITY VERDICT INDICATOR BANNER
+      const banner = document.getElementById("verdict-banner");
+      const title = document.getElementById("verdict-title");
+      const pill = document.getElementById("verdict-grade-pill");
+      const desc = document.getElementById("verdict-desc");
+
+      if (isSecure) {
+        banner.className = "p-4 rounded-xl border-2 border-emerald-400 dark:border-emerald-700 bg-emerald-50/90 dark:bg-emerald-950/50 space-y-1";
+        title.className = "text-xs font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5";
+        title.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i> 🟢 CODE IS SECURE ✅`;
+        pill.className = "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-emerald-600 text-white";
+        pill.innerText = `GRADE ${s2.overall_grade} • 0 VULNS`;
+        desc.className = "text-[11px] text-emerald-700 dark:text-emerald-300";
+        desc.innerHTML = `<strong>${escapeHtml(repoLabel)}</strong> passed Stage 1 bug checks and all 6 OWASP/CWE cybersecurity rules (${data.duration_ms}ms).`;
+      } else {
+        banner.className = "p-4 rounded-xl border-2 border-rose-500 dark:border-rose-700 bg-rose-50/95 dark:bg-rose-950/60 space-y-1 shadow-md shadow-rose-500/15";
+        title.className = "text-xs font-extrabold text-rose-800 dark:text-rose-200 flex items-center gap-1.5";
+        title.innerHTML = `<i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i> 🔴 SECURITY RISK DETECTED 🚨`;
+        pill.className = "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-rose-600 text-white animate-pulse";
+        pill.innerText = `GRADE ${s2.overall_grade} • ${s2.vulnerabilities_count} VULN(S)`;
+        desc.className = "text-[11px] text-rose-700 dark:text-rose-300";
+        desc.innerHTML = `<strong>WARNING:</strong> After bug fixing, <strong>${escapeHtml(repoLabel)}</strong> has <strong>${s2.vulnerabilities_count} security vulnerability(s)</strong> (CRIT: ${s2.severity_counts.CRITICAL}, HIGH: ${s2.severity_counts.HIGH}). Do NOT deploy until resolved!`;
+      }
+
+      // 3. Stage 1 Card (Bugs Detected & Auto-Fixed)
+      const s1Card = document.getElementById("stage1-card");
+      if (s1Card) s1Card.classList.remove("hidden");
+      document.getElementById("s1-files").innerText = s1.files_analyzed;
+      document.getElementById("s1-fixed").innerText = s1.bugs_fixed_count;
+      document.getElementById("s1-remaining").innerText = s1.remaining_bugs_count;
+      document.getElementById("stage1-pill").innerText = `${s1.bugs_fixed_count} Auto-Fixed / ${s1.bugs_found_count} Found`;
+
+      const s1Details = document.getElementById("stage1-details");
+      if (s1.bugs_found_count === 0) {
+        s1Details.innerHTML = `<div class="p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 font-medium">✅ No syntax or static bugs found across ${s1.files_analyzed} Python file(s).</div>`;
+      } else {
+        let html = "";
+        (s1.fixes_applied || []).forEach(fx => {
+          html += `<div class="p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-900">
+            <div class="font-bold text-emerald-800 dark:text-emerald-300">🛠️ FIXED: ${escapeHtml(fx.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(fx.file)}:${fx.line})</span></div>
+            <div class="text-slate-600 dark:text-slate-300">${escapeHtml(fx.fix || fx.description)}</div>
+          </div>`;
+        });
+        (s1.remaining_bugs || []).forEach(rb => {
+          html += `<div class="p-2 rounded-lg bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900">
+            <div class="font-bold text-amber-800 dark:text-amber-300">⚠️ BUG FLAGGED: ${escapeHtml(rb.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(rb.file)}:${rb.line})</span></div>
+            <div class="text-slate-600 dark:text-slate-300">${escapeHtml(rb.description)}</div>
+          </div>`;
+        });
+        s1Details.innerHTML = html;
+      }
+
+      // 4. Stage 2 Card (Post-Fix Security Scan Findings)
+      const s2Card = document.getElementById("stage2-card");
+      if (s2Card) s2Card.classList.remove("hidden");
+      const s2Pill = document.getElementById("stage2-pill");
+      s2Pill.innerText = isSecure ? `SECURE • Grade ${s2.overall_grade}` : `INSECURE • ${s2.vulnerabilities_count} Flagged`;
+      s2Pill.className = isSecure
+        ? "text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold"
+        : "text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-600 text-white font-bold";
+
+      const s2List = document.getElementById("stage2-findings");
+      if (isSecure) {
+        s2List.innerHTML = `<div class="p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 font-medium">✅ All 6 OWASP Top 10 / CWE security rules passed cleanly.</div>`;
+      } else {
+        s2List.innerHTML = (s2.findings || []).slice(0, 8).map(f => `
+          <div class="p-2 rounded-lg bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 space-y-0.5">
+            <div class="flex items-center justify-between gap-1">
+              <span class="font-bold text-rose-800 dark:text-rose-300">${escapeHtml(f.title)}</span>
+              <span class="px-1.5 py-0.5 rounded bg-rose-600 text-white font-mono text-[9px] font-bold shrink-0">${escapeHtml(f.severity)}</span>
+            </div>
+            <div class="font-mono text-[10px] text-slate-500">${escapeHtml(f.rule_id)} • ${escapeHtml(f.cwe)} • <code>${escapeHtml(f.file)}:${f.line}</code></div>
+            <div class="text-slate-700 dark:text-slate-300"><strong>Fix:</strong> ${escapeHtml(f.remediation)}</div>
+          </div>
+        `).join("");
+      }
+
+      // 5. Post complete summary into Chat Stream
+      let chatMsg = `🚀 **On-Demand Execution Complete — \`${repoLabel}\`** (${data.duration_ms}ms)\n\n`;
+      chatMsg += isSecure
+        ? `### 🟢 SECURITY VERDICT: CODE IS SECURE ✅ (Grade ${s2.overall_grade} — 0 Vulnerabilities)\n\n`
+        : `### 🔴 SECURITY VERDICT: INSECURE CODE DETECTED 🚨 (Grade ${s2.overall_grade} — ${s2.vulnerabilities_count} Vulnerability(s))\n\n`;
+      chatMsg += `**Stage 1 — Bug Fixing**: Analyzed \`${s1.files_analyzed}\` Python file(s) • Bugs Found: **${s1.bugs_found_count}** • Auto-Fixed: **${s1.bugs_fixed_count}** • Needs Review: **${s1.remaining_bugs_count}**\n`;
+      if (s1.fixes_applied && s1.fixes_applied.length > 0) {
+        chatMsg += s1.fixes_applied.slice(0, 5).map(fx => `- 🛠️ Fixed \`${fx.file}:${fx.line}\`: ${fx.fix || fx.description}`).join("\n") + "\n";
+      }
+      chatMsg += `\n**Stage 2 — Post-Fix Security Scan**: Grade **${s2.overall_grade}** (${s2.score}/100) • CRITICAL: ${s2.severity_counts.CRITICAL} | HIGH: ${s2.severity_counts.HIGH} | MEDIUM: ${s2.severity_counts.MEDIUM} | LOW: ${s2.severity_counts.LOW}`;
+      if (!isSecure && s2.findings) {
+        chatMsg += "\n" + s2.findings.slice(0, 5).map(f =>
+          `- 🚨 **[${f.severity}] ${f.cwe}** \`${f.file}:${f.line}\` — ${f.title}`
+        ).join("\n");
+      }
+      appendAgentMessage(chatMsg, []);
+      lucide.createIcons();
+    }
 
     function toggleAtmosphere() {
       const isTwilight = document.body.classList.toggle("mode-twilight");
@@ -1622,9 +1793,6 @@
 
         const data = await res.json();
         appendAgentMessage(data.reply || "", data.tool_calls || []);
-        
-        // Refresh QA Matrix to sync any tool execution updates
-        refreshCodebaseStatus();
 
       } catch (err) {
         removeLoadingIndicator(loadingId);

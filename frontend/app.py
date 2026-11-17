@@ -325,6 +325,32 @@ async def api_platform_scan_repo(request):
     return JSONResponse({"report": report, "overview": overview})
 
 
+async def api_execute_repo(request):
+    """
+    On-demand 2-stage repository executor:
+    ONLY runs when the user explicitly provides a GitHub repo URL or local path.
+      Stage 1: Detect & fix bugs
+      Stage 2: Security SAST scan -> emits SECURE / INSECURE indicator
+    """
+    from core.repo_executor import OnDemandRepoExecutor
+    try:
+        body = await request.json()
+        target = str(body.get("target", "")).strip()
+    except Exception:
+        return JSONResponse({"status": "error", "error": "Invalid JSON payload"}, status_code=400)
+
+    if not target:
+        return JSONResponse(
+            {"status": "error", "error": "Please paste a GitHub repository URL or local folder path."},
+            status_code=400
+        )
+
+    executor = OnDemandRepoExecutor()
+    result = await asyncio.to_thread(executor.execute, target)
+    status_code = 200 if result.get("status") == "completed" else 400
+    return JSONResponse(result, status_code=status_code)
+
+
 # Define routes
 routes = [
     Route("/", homepage),
@@ -334,6 +360,7 @@ routes = [
     Route("/api/bug_status", api_bug_status),
     Route("/api/bug_action", api_bug_action, methods=["POST"]),
     Route("/api/security_audit", api_security_audit, methods=["GET", "POST"]),
+    Route("/api/execute_repo", api_execute_repo, methods=["POST"]),
     Route("/api/platform/overview", api_platform_overview),
     Route("/api/platform/sync", api_platform_sync, methods=["POST"]),
     Route("/api/platform/scan_repo", api_platform_scan_repo, methods=["POST"]),

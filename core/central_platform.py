@@ -229,6 +229,39 @@ class CentralSecurityPlatform:
         tree_url = f"https://api.github.com/repos/{full_name}/git/trees/{default_branch}?recursive=1"
         try:
             tree_resp = self._github_get_json(tree_url)
+        except urllib.error.HTTPError as e:
+            if e.code == 409:
+                # GitHub returns 409 Conflict when a repository is completely empty (0 commits)
+                return {
+                    "status": "completed",
+                    "target": full_name,
+                    "empty_repo": True,
+                    "note": "Repository is empty on GitHub (0 commits / 0 files).",
+                    "files_scanned": 0,
+                    "vulnerabilities_count": 0,
+                    "score": 100,
+                    "overall_grade": "EMPTY",
+                    "is_secure": True,
+                    "severity_counts": {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0},
+                    "checklist": [
+                        {
+                            "rule_id": rule["rule_id"],
+                            "cwe": rule["cwe"],
+                            "owasp": rule["owasp"],
+                            "title": rule["title"],
+                            "description": rule["description"],
+                            "passed": True,
+                            "status": "EMPTY REPO (0 files)",
+                            "findings_count": 0
+                        }
+                        for rule in RULE_CATALOG
+                    ],
+                    "findings": []
+                }
+            return {
+                "status": "error",
+                "error": f"Failed to read remote repo tree for {full_name}: HTTP {e.code} ({e.reason})"
+            }
         except Exception as e:
             return {
                 "status": "error",
