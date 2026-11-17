@@ -138,25 +138,51 @@
 
   <!-- FOCUSED ACTION BAR -->
   <div class="px-5 py-2 surface border-b flex items-center gap-2 overflow-x-auto text-xs whitespace-nowrap z-10 shrink-0">
-    <button onclick="runFixAndCertify()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white font-semibold flex items-center gap-1.5 shadow-sm transition">
-      <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
-      <span>Fix &amp; Certify</span>
-    </button>
+    <!-- DevSecOps On-Demand -->
+    <div class="flex items-center gap-1.5 pr-2.5 border-r border-slate-200 dark:border-slate-800 shrink-0">
+      <button onclick="runFixAndCertify()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white font-semibold flex items-center gap-1.5 shadow-sm transition">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+        <span>Fix &amp; Certify</span>
+      </button>
 
-    <button onclick="focusRepoInput()" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-indigo-400 flex items-center gap-1.5 transition">
-      <i data-lucide="git-branch" class="w-3.5 h-3.5 text-indigo-500"></i>
-      <span>Execute Repo Link</span>
-    </button>
+      <button onclick="focusRepoInput()" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-indigo-400 flex items-center gap-1.5 transition">
+        <i data-lucide="git-branch" class="w-3.5 h-3.5 text-indigo-500"></i>
+        <span>Execute Repo Link</span>
+      </button>
 
-    <button onclick="switchRightTab('sec')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-emerald-400 flex items-center gap-1.5 transition">
-      <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-emerald-500"></i>
-      <span>Security Sandbox</span>
-    </button>
+      <button onclick="switchRightTab('sec')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-emerald-400 flex items-center gap-1.5 transition">
+        <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-emerald-500"></i>
+        <span>Security Sandbox</span>
+      </button>
+    </div>
 
-    <button onclick="sendQuickPrompt('Search for OWASP Top 10 Python vulnerability remediation best practices')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-sky-400 flex items-center gap-1.5 transition">
-      <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-500"></i>
-      <span>Tech / CVE Search (Groq)</span>
-    </button>
+    <!-- Assistant & MCP Utilities -->
+    <div class="flex items-center gap-1.5 shrink-0">
+      <button onclick="sendQuickPrompt('Check my system specs, CPU, RAM, and disk storage using MCP.')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-indigo-400 flex items-center gap-1.5 transition">
+        <i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-500"></i>
+        <span>PC Specs</span>
+      </button>
+
+      <button onclick="sendQuickPrompt('Calculate statistics for [12, 45, 67, 89, 23, 56, 78] using MCP tool.')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-purple-400 flex items-center gap-1.5 transition">
+        <i data-lucide="calculator" class="w-3.5 h-3.5 text-purple-500"></i>
+        <span>Calculator</span>
+      </button>
+
+      <button onclick="sendQuickPrompt('What is the weather today in Kolkata?')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-amber-400 flex items-center gap-1.5 transition">
+        <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-amber-500"></i>
+        <span>Weather</span>
+      </button>
+
+      <button onclick="sendQuickPrompt('Search for OWASP Top 10 Python vulnerability remediation best practices')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-sky-400 flex items-center gap-1.5 transition">
+        <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-500"></i>
+        <span>Tech Search (Groq)</span>
+      </button>
+
+      <button onclick="sendQuickPrompt('List my GitHub repositories using your GitHub MCP tool.')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-teal-400 flex items-center gap-1.5 transition">
+        <i data-lucide="github" class="w-3.5 h-3.5 text-teal-500"></i>
+        <span>GitHub</span>
+      </button>
+    </div>
   </div>
 
   <!-- MAIN 2-PANE STUDIO -->
@@ -903,6 +929,9 @@
       { id: "repo", title: "Execute Repo Link", desc: "Focus repository URL / folder path input", icon: "git-branch", action: () => focusRepoInput() },
       { id: "sec", title: "Open Security Sandbox", desc: "Inspect OWASP/CWE report & audit inline code", icon: "shield-alert", action: () => switchRightTab("sec") },
       { id: "code", title: "Open Code Viewer", desc: "Inspect fixed & flagged lines from last run", icon: "code-2", action: () => switchRightTab("code") },
+      { id: "pc", title: "Check PC Specs & Storage", desc: "Query CPU, RAM, OS, and disk via MCP", icon: "cpu", action: () => sendQuickPrompt("Check my system specs, CPU, RAM, and disk storage using MCP.") },
+      { id: "calc", title: "Calculator & Math Stats", desc: "Evaluate expressions or statistics via MCP", icon: "calculator", action: () => sendQuickPrompt("Calculate (144 * 12) / (3.14159 * 2)") },
+      { id: "weather", title: "Check Live Weather", desc: "Get current weather conditions", icon: "cloud-sun", action: () => sendQuickPrompt("What is the weather today in Kolkata?") },
       { id: "cve", title: "Groq Tech / CVE Search", desc: "Search security fixes & docs via Groq", icon: "globe", action: () => sendQuickPrompt("Search for OWASP Top 10 Python vulnerability fixes") },
       { id: "theme", title: "Toggle Light / Dark Theme", desc: "Switch studio color mode", icon: "sun-moon", action: () => toggleTheme() }
     ];

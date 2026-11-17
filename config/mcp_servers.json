@@ -1,18 +1,32 @@
 {
   "mcpServers": {
+    "system_diagnostics": {
+      "transport": "stdio",
+      "command": ".venv\\Scripts\\python.exe",
+      "args": ["mcp_service\\servers\\system_server.py"],
+      "enabled": true,
+      "description": "Provides OS diagnostics, disk capacity, and directory inspection tools."
+    },
+    "advanced_math": {
+      "transport": "stdio",
+      "command": ".venv\\Scripts\\python.exe",
+      "args": ["mcp_service\\servers\\math_server.py"],
+      "enabled": true,
+      "description": "Provides statistics, prime checking, and factorial tools."
+    },
     "github_service": {
       "transport": "stdio",
       "command": ".venv\\Scripts\\python.exe",
       "args": ["mcp_service\\servers\\github_server.py"],
       "enabled": true,
-      "description": "Read-only GitHub MCP tools for inspecting repositories and issues on demand."
+      "description": "Provides read-only GitHub tools to inspect repositories and list issues."
     },
     "web_search_service": {
       "transport": "stdio",
       "command": ".venv\\Scripts\\python.exe",
       "args": ["mcp_service\\servers\\search_server.py"],
       "enabled": true,
-      "description": "Groq-powered technical web search for CVE research, security fixes, and documentation."
+      "description": "Provides live internet search and breaking news retrieval tools."
     }
   }
 }
