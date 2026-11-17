@@ -20,8 +20,9 @@ from tools.calculator_tool import calculate
 from tools.memory_tool import remember_user_fact, get_user_facts
 from tools.notes_tool import save_note, list_notes
 
-# 2. Autonomous Python Code Bug Fixer & QA Tools
+# 2. Autonomous Python Code Bug Fixer, QA & Cybersecurity SAST Tools
 from tools.bug_fixer_tool import run_bug_fixer_agent, run_code_quality_checklist
+from tools.security_tool import run_security_audit
 
 # 3. Import MCP Multi-Server tool loader (GitHub, Web Search, PC Specs, Statistics)
 from mcp_service.manager import get_mcp_tools_sync
@@ -38,9 +39,10 @@ _NATIVE_TOOLS: List[BaseTool] = [
     list_notes,
     remember_user_fact,
     get_user_facts,
-    # Software Engineering & Bug Remediation
+    # Software Engineering, Bug Remediation & Cybersecurity SAST
     run_bug_fixer_agent,
-    run_code_quality_checklist
+    run_code_quality_checklist,
+    run_security_audit
 ]
 
 

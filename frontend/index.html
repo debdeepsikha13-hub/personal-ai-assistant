@@ -208,10 +208,10 @@
             <span class="text-xs uppercase font-mono tracking-wider text-slate-700 dark:text-slate-200 font-bold">Autonomous Engineering System</span>
           </h1>
           <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold border border-indigo-200/80 dark:border-indigo-800">
-            v2.4 Production Engine
+            v3.0 Central Security Platform
           </span>
         </div>
-        <p class="text-[11px] text-slate-500">Autonomous Code Auto-Healer & Multi-MCP Intelligence</p>
+        <p class="text-[11px] text-slate-500">Central Security Scanning Platform &amp; Autonomous Bug Remediation</p>
       </div>
 
       <!-- Live Neural Reasoning Waveform -->
@@ -259,6 +259,17 @@
         <span id="atmosphere-label" class="hidden sm:inline">Pearl Light</span>
       </button>
 
+      <!-- Cybersecurity Health Pill -->
+      <button
+        onclick="switchRightTab('sec')"
+        id="header-security-pill"
+        title="View OWASP/CWE SAST Security Audit"
+        class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-semibold shadow-sm hover:opacity-90 transition"
+      >
+        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+        <span id="header-security-text">Security: A+ (0 Vulns)</span>
+      </button>
+
       <!-- System Health Pill -->
       <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-medium shadow-sm">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -282,26 +293,26 @@
   <!-- ========================================================== -->
   <div class="px-6 py-2.5 glass-card border-b flex items-center gap-2 overflow-x-auto text-xs whitespace-nowrap z-10 shrink-0 select-none">
     
-    <!-- Group 1: Engineering Autopilot Tools -->
+    <!-- Group 1: Enterprise DevSecOps Autopilot Tools -->
     <div class="flex items-center gap-1.5 shrink-0 pr-2 border-r border-slate-200 dark:border-slate-800">
-      <span class="text-[10px] uppercase font-mono text-slate-400 font-bold px-1">Autopilot:</span>
+      <span class="text-[10px] uppercase font-mono text-slate-400 font-bold px-1">DevSecOps:</span>
       
-      <!-- Autopilot Button -->
-      <button onclick="triggerBugAction('full_pipeline', '⚡ Autopilot Activated: Scanning AST, diagnosing traceback, and patching code...')" class="glass-dock-item shrink-0 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/20">
+      <!-- Autopilot Fix & Audit Button -->
+      <button onclick="triggerBugAction('full_pipeline', '⚡ DevSecOps Pipeline Activated: Stage 1 (Bug Fix & QA) + Stage 2 (OWASP/CWE Security Audit)...')" class="glass-dock-item shrink-0 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/20">
         <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
-        <span>Fix & Certify</span>
+        <span>Fix &amp; Certify</span>
       </button>
 
-      <!-- Simulate Bug -->
-      <button onclick="triggerBugAction('simulate_bug', '⚠️ Injected ZeroDivisionError into codebase/data_processor.py. Check the IDE panel!')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900 font-medium flex items-center gap-1.5">
-        <i data-lucide="bug" class="w-3.5 h-3.5 text-rose-500"></i>
-        <span>Simulate Bug</span>
+      <!-- Security Audit Button (SAST) -->
+      <button onclick="triggerBugAction('security_audit', '🛡️ Running OWASP Top 10 / CWE Static Application Security Testing (SAST) scan...')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-semibold flex items-center gap-1.5">
+        <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-emerald-500"></i>
+        <span>Security Audit</span>
       </button>
 
-      <!-- Scan -->
-      <button onclick="triggerBugAction('scan', '🔍 Scanning repository for syntax flaws, boundary conditions, and test assertions...')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
+      <!-- Scan AST & Tests -->
+      <button onclick="triggerBugAction('scan', '🔍 Scanning target repository for AST flaws, failing tests, and security risks...')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
         <i data-lucide="search" class="w-3.5 h-3.5 text-sky-500"></i>
-        <span>Scan AST</span>
+        <span>Scan Repo</span>
       </button>
     </div>
 
@@ -383,15 +394,21 @@
           </div>
 
           <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-            In modern engineering, codebases accumulate bugs and regressions that developers cannot manually triage by hand. 
-            I act as your autonomous engineering agent: scanning repositories, discovering root causes, retrieving fixes using multi-MCP intelligence, applying code patches, and certifying the production QA Checklist.
+            Point WOLF at any real repository or Python file to execute a <strong>2-Stage Enterprise DevSecOps Pipeline</strong>:
+            (1) autonomously detect, diagnose, and patch functional bugs against automated QA tests, and
+            (2) audit the codebase with our <strong>OWASP Top 10 / CWE SAST Cybersecurity Scanner</strong> to catch injection flaws, hardcoded secrets, SQLi, and unsafe deserialization before deployment.
           </p>
 
-          <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
-            <span>Target: <code class="font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md">codebase/data_processor.py</code></span>
-            <span class="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 6 QA Rules Active
-            </span>
+          <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 flex-wrap gap-2">
+            <span>Target: <code id="hero-target-label" class="font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md">codebase/data_processor.py</code></span>
+            <div class="flex items-center gap-3">
+              <span class="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 6 QA Rules
+              </span>
+              <span class="text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> 6 OWASP/CWE Controls
+              </span>
+            </div>
           </div>
         </div>
 
@@ -421,110 +438,95 @@
 
     </section>
 
-    <!-- RIGHT STAGE: Interactive Virtual IDE & QA Studio (40%) -->
-    <aside class="w-[430px] glass-card flex flex-col justify-between hidden lg:flex z-10 shrink-0 border-l border-slate-200/80 dark:border-slate-800">
+    <!-- RIGHT STAGE: Interactive DevSecOps IDE, SAST Security & QA Studio -->
+    <aside class="w-[480px] glass-card flex flex-col justify-between hidden lg:flex z-10 shrink-0 border-l border-slate-200/80 dark:border-slate-800">
       
       <!-- Studio Tabs Header -->
-      <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
-        <div class="flex items-center gap-1 p-1 rounded-xl bg-slate-200/60 dark:bg-slate-800 text-xs">
-          <button id="tab-ide-btn" onclick="switchRightTab('ide')" class="px-3 py-1 rounded-lg font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition flex items-center gap-1.5 shadow-sm text-xs">
+      <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-1 p-1 rounded-xl bg-slate-200/60 dark:bg-slate-800 text-[11px]">
+          <button id="tab-ide-btn" onclick="switchRightTab('ide')" class="px-2.5 py-1 rounded-lg font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition flex items-center gap-1 shadow-sm">
             <i data-lucide="code-2" class="w-3.5 h-3.5 text-indigo-500"></i> Code Lab
           </button>
-          <button id="tab-qa-btn" onclick="switchRightTab('qa')" class="px-3 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5 text-xs">
-            <i data-lucide="check-square" class="w-3.5 h-3.5 text-emerald-500"></i> QA Matrix
+          <button id="tab-sec-btn" onclick="switchRightTab('sec')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> Security
           </button>
-          <button id="tab-arch-btn" onclick="switchRightTab('arch')" class="px-3 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5 text-xs">
-            <i data-lucide="layers" class="w-3.5 h-3.5 text-sky-500"></i> Architecture
+          <button id="tab-qa-btn" onclick="switchRightTab('qa')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
+            <i data-lucide="check-square" class="w-3.5 h-3.5 text-teal-500"></i> QA
+          </button>
+          <button id="tab-arch-btn" onclick="switchRightTab('arch')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-sky-500"></i> Arch
           </button>
         </div>
 
-        <span id="matrix-pass-rate" class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-          6/6 Passed (100%)
+        <span id="matrix-pass-rate" class="px-2 py-0.5 text-[11px] font-bold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">
+          6/6 (100%)
         </span>
       </div>
 
-      <!-- TAB 1: Virtual Code IDE Lab (Interactive Innovation) -->
-      <div id="panel-ide-tab" class="flex-1 overflow-y-auto p-4 space-y-3.5">
+      <!-- TAB 1: Live Code Lab & Target Repo Inspector -->
+      <div id="panel-ide-tab" class="flex-1 overflow-y-auto p-4 space-y-3">
+
+        <!-- Target Repository / File Path Selector -->
+        <div class="p-2.5 rounded-xl glass-card border border-slate-200/80 dark:border-slate-800 space-y-1.5">
+          <div class="flex items-center justify-between text-[10px] font-mono uppercase text-slate-400 font-bold">
+            <span class="flex items-center gap-1"><i data-lucide="folder-git-2" class="w-3 h-3 text-indigo-500"></i> Active Target Repo / File</span>
+            <button onclick="resetTargetPath()" class="text-indigo-500 hover:underline normal-case font-semibold">Reset Default</button>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <input
+              id="target-repo-input"
+              type="text"
+              placeholder="codebase/data_processor.py or C:\path\to\repo"
+              class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 text-[11px] font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+              onkeydown="if(event.key==='Enter'){ applyTargetRepo(); }"
+            />
+            <button onclick="applyTargetRepo()" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold transition shrink-0">
+              Load &amp; Scan
+            </button>
+          </div>
+        </div>
         
-        <!-- Virtual IDE Window Mockup -->
+        <!-- Live Code Inspector Window -->
         <div class="ide-window">
-          <!-- IDE macOS Header -->
+          <!-- IDE Header -->
           <div class="ide-header">
-            <div class="flex items-center gap-1.5">
-              <span class="ide-dot bg-rose-500"></span>
-              <span class="ide-dot bg-amber-500"></span>
-              <span class="ide-dot bg-emerald-500"></span>
-              <span class="text-[11px] text-slate-400 font-mono ml-2">codebase/data_processor.py</span>
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="ide-dot bg-rose-500 shrink-0"></span>
+              <span class="ide-dot bg-amber-500 shrink-0"></span>
+              <span class="ide-dot bg-emerald-500 shrink-0"></span>
+              <span id="ide-filename-label" class="text-[11px] text-slate-300 font-mono ml-2 truncate">codebase/data_processor.py</span>
             </div>
 
-            <div class="flex items-center gap-2">
-              <!-- View Toggle: Editor vs Git Diff -->
-              <div class="flex items-center bg-slate-800 p-0.5 rounded-lg text-[10px] font-mono border border-slate-700/80">
-                <button id="view-editor-btn" onclick="setIdeView('code')" class="px-2 py-0.5 rounded bg-indigo-600 text-white font-semibold transition">Editor</button>
-                <button id="view-diff-btn" onclick="setIdeView('diff')" class="px-2 py-0.5 rounded text-slate-400 hover:text-white transition">Git Diff</button>
-              </div>
-
+            <div class="flex items-center gap-2 shrink-0">
               <span id="ide-status-pill" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                Clean Master
+                Certified Master
               </span>
             </div>
           </div>
 
-          <!-- Autonomous Healing Stepper (Live 4-Step Pipeline Visualizer) -->
+          <!-- 2-Stage DevSecOps Pipeline Stepper -->
           <div id="healing-stepper" class="px-3 py-1.5 bg-slate-950 border-b border-slate-800 text-[10px] font-mono grid grid-cols-4 gap-1.5">
             <div id="step-node-1" class="p-1 rounded border border-slate-800 bg-slate-900/60 text-slate-400 text-center flex items-center justify-center gap-1 transition">
               <span class="step-num text-[9px] w-3.5 h-3.5 rounded-full bg-slate-800 flex items-center justify-center">1</span>
-              <span>AST Scan</span>
+              <span>AST/Test</span>
             </div>
             <div id="step-node-2" class="p-1 rounded border border-slate-800 bg-slate-900/60 text-slate-400 text-center flex items-center justify-center gap-1 transition">
               <span class="step-num text-[9px] w-3.5 h-3.5 rounded-full bg-slate-800 flex items-center justify-center">2</span>
-              <span>Traceback</span>
+              <span>Diagnose</span>
             </div>
             <div id="step-node-3" class="p-1 rounded border border-slate-800 bg-slate-900/60 text-slate-400 text-center flex items-center justify-center gap-1 transition">
               <span class="step-num text-[9px] w-3.5 h-3.5 rounded-full bg-slate-800 flex items-center justify-center">3</span>
-              <span>Synthesize</span>
+              <span>Patch/QA</span>
             </div>
             <div id="step-node-4" class="p-1 rounded border border-emerald-800/80 bg-emerald-950/40 text-emerald-300 text-center flex items-center justify-center gap-1 transition font-bold">
               <span class="step-num text-[9px] w-3.5 h-3.5 rounded-full bg-emerald-800 text-emerald-100 flex items-center justify-center">✓</span>
-              <span>100% QA</span>
+              <span>SAST Sec</span>
             </div>
           </div>
 
-          <!-- Code View Area (Normal Editor) -->
-          <div id="ide-code-view" class="p-2 overflow-x-auto text-[11px]">
-            <div class="code-line"><span class="code-ln">11</span><span class="code-content"><span class="code-kw">class</span> <span class="code-fn">DataProcessor</span>:</span></div>
-            <div class="code-line"><span class="code-ln">12</span><span class="code-content">    <span class="code-cm">"""Universal business logic data engine."""</span></span></div>
-            <div class="code-line"><span class="code-ln">13</span><span class="code-content">    <span class="code-kw">@staticmethod</span></span></div>
-            <div class="code-line"><span class="code-ln">14</span><span class="code-content">    <span class="code-kw">def</span> <span class="code-fn">calculate_average</span>(numbers: List[float]) -> float:</span></div>
-            <div class="code-line"><span class="code-ln">15</span><span class="code-content">        <span class="code-cm">"""Calculates mean safely with ZeroDivision guard."""</span></span></div>
-            
-            <!-- Dynamic Code Lines (Swapped on Bug / Fix) -->
-            <div id="ide-dynamic-code">
-              <div class="code-line"><span class="code-ln">16</span><span class="code-content"><span class="code-kw">        if not</span> numbers: <span class="code-kw">return</span> <span class="code-str">0.0</span></span></div>
-              <div class="code-line"><span class="code-ln">17</span><span class="code-content">        <span class="code-kw">return</span> <span class="code-fn">round</span>(<span class="code-fn">sum</span>(numbers) / <span class="code-fn">len</span>(numbers), <span class="code-str">2</span>)</span></div>
-            </div>
-
-            <div class="code-line"><span class="code-ln">18</span><span class="code-content"></span></div>
-            <div class="code-line"><span class="code-ln">19</span><span class="code-content">    <span class="code-kw">@staticmethod</span></span></div>
-            <div class="code-line"><span class="code-ln">20</span><span class="code-content">    <span class="code-kw">def</span> <span class="code-fn">safe_divide</span>(numerator: float, denominator: float) -> float:</span></div>
-            <div class="code-line"><span class="code-ln">21</span><span class="code-content">        <span class="code-kw">if</span> denominator == <span class="code-str">0</span>: <span class="code-kw">return</span> <span class="code-str">0.0</span></span></div>
-            <div class="code-line"><span class="code-ln">22</span><span class="code-content">        <span class="code-kw">return</span> <span class="code-fn">round</span>(numerator / denominator, <span class="code-str">4</span>)</span></div>
-          </div>
-
-          <!-- Git Diff View Area (Unified Diff Mode) -->
-          <div id="ide-diff-view" class="hidden p-2 overflow-x-auto text-[11px] font-mono">
-            <div class="text-slate-500 px-2 py-0.5 select-none text-[10px]">--- a/codebase/data_processor.py (HEAD~1)</div>
-            <div class="text-slate-500 px-2 py-0.5 select-none text-[10px]">+++ b/codebase/data_processor.py (Certified Autonomous Patch)</div>
-            <div class="text-sky-400 px-2 py-1 select-none text-[10px]">@@ -14,4 +14,6 @@ class DataProcessor:</div>
-            <div class="code-line"><span class="code-ln">14</span><span class="code-content text-slate-400">    def calculate_average(numbers: List[float]) -> float:</span></div>
-            <div class="code-line"><span class="code-ln">15</span><span class="code-content text-slate-400">        """Calculates mean safely with ZeroDivision guard."""</span></div>
-            <div class="code-line diff-line-del"><span class="code-ln">-</span><span class="code-content font-bold">-        return round(sum(numbers) / len(numbers), 2)</span></div>
-            <div class="code-line diff-line-add"><span class="code-ln">+</span><span class="code-content font-bold">+        if not numbers:</span></div>
-            <div class="code-line diff-line-add"><span class="code-ln">+</span><span class="code-content font-bold">+            return 0.0</span></div>
-            <div class="code-line diff-line-add"><span class="code-ln">+</span><span class="code-content font-bold">+        return round(sum(numbers) / len(numbers), 2)</span></div>
-            <div class="code-line"><span class="code-ln">18</span><span class="code-content text-slate-400"></span></div>
-            <div class="code-line"><span class="code-ln">19</span><span class="code-content text-slate-400">    @staticmethod</span></div>
-            <div class="code-line"><span class="code-ln">20</span><span class="code-content text-slate-400">    def safe_divide(numerator: float, denominator: float) -> float:</span></div>
+          <!-- Live Source Code View (Populated from Disk via /api/bug_status) -->
+          <div id="ide-code-view" class="p-2 max-h-60 overflow-y-auto overflow-x-auto text-[11px]">
+            <div class="text-slate-400 p-2 font-mono text-[11px]">Loading live target source...</div>
           </div>
         </div>
 
@@ -535,32 +537,124 @@
             <span class="text-[10px] font-mono uppercase">100% Pass</span>
           </div>
           <p class="text-xs text-emerald-700 dark:text-emerald-400">
-            All 6 production quality rules are certified green. Zero regressions, division errors, or key flaws detected.
+            All production quality rules and OWASP/CWE security checks are certified green.
           </p>
         </div>
 
-        <!-- Interactive Health Dial Card -->
-        <div class="p-4 rounded-xl glass-card flex items-center justify-between">
-          <div class="space-y-0.5">
-            <div class="text-xs font-bold text-slate-800 dark:text-white">QA Quality Score</div>
-            <p class="text-xs text-slate-500">Autonomous Test Suite Coverage</p>
+        <!-- Dual Health Gauges: QA Score & Cybersecurity Grade -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <!-- QA Quality Dial -->
+          <div class="p-3 rounded-xl glass-card flex items-center justify-between">
+            <div class="space-y-0.5">
+              <div class="text-[11px] font-bold text-slate-800 dark:text-white">QA Quality</div>
+              <p class="text-[10px] text-slate-500">Test Coverage</p>
+            </div>
+            <div class="relative w-12 h-12 flex items-center justify-center shrink-0">
+              <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <path class="text-slate-200 dark:text-slate-800" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                <path id="radial-progress-circle" class="text-emerald-500 transition-all duration-700 ease-out" stroke-dasharray="100, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              </svg>
+              <span id="radial-score-text" class="absolute text-[10px] font-extrabold text-slate-800 dark:text-white font-mono">100%</span>
+            </div>
           </div>
-          
-          <!-- Circular Radial Progress -->
-          <div class="relative w-14 h-14 flex items-center justify-center">
-            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-              <path class="text-slate-200 dark:text-slate-800" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-              <path id="radial-progress-circle" class="text-emerald-500 transition-all duration-700 ease-out" stroke-dasharray="100, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-            </svg>
-            <span id="radial-score-text" class="absolute text-xs font-extrabold text-slate-800 dark:text-white font-mono">100%</span>
+
+          <!-- Cybersecurity SAST Dial -->
+          <div onclick="switchRightTab('sec')" class="p-3 rounded-xl glass-card flex items-center justify-between cursor-pointer hover:border-indigo-400 transition">
+            <div class="space-y-0.5">
+              <div class="text-[11px] font-bold text-slate-800 dark:text-white">SAST Security</div>
+              <p id="sec-gauge-sub" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">0 Vulns Found</p>
+            </div>
+            <div class="relative w-12 h-12 flex items-center justify-center shrink-0">
+              <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <path class="text-slate-200 dark:text-slate-800" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                <path id="sec-radial-circle" class="text-emerald-500 transition-all duration-700 ease-out" stroke-dasharray="100, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              </svg>
+              <span id="sec-grade-text" class="absolute text-xs font-black text-emerald-600 dark:text-emerald-400 font-mono">A+</span>
+            </div>
           </div>
         </div>
 
       </div>
 
-      <!-- TAB 2: QA Matrix Cards -->
+      <!-- TAB 2: Enterprise Cybersecurity SAST Panel -->
+      <div id="panel-sec-tab" class="flex-1 overflow-y-auto p-4 space-y-3 hidden">
+        <!-- Grade & Severity Summary Card -->
+        <div id="sec-summary-banner" class="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span id="sec-banner-grade" class="w-9 h-9 rounded-xl bg-emerald-600 text-white font-black text-sm font-mono flex items-center justify-center shadow-sm">A+</span>
+              <div>
+                <div class="text-xs font-extrabold text-slate-900 dark:text-white">Central Security Scanning Platform</div>
+                <div id="sec-banner-meta" class="text-[11px] text-slate-500 dark:text-slate-400">1 file scanned • Score 100/100</div>
+              </div>
+            </div>
+            <button onclick="triggerBugAction('security_audit', '🛡️ Re-running SAST cybersecurity audit on active target...')" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-semibold transition">
+              Re-Scan
+            </button>
+          </div>
+          <!-- Severity Pills -->
+          <div class="grid grid-cols-4 gap-1.5 text-center font-mono text-[10px]">
+            <div class="p-1.5 rounded-lg bg-white/70 dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-800">
+              <div class="text-rose-600 font-black" id="sev-critical">0</div>
+              <div class="text-slate-400 text-[9px]">CRIT</div>
+            </div>
+            <div class="p-1.5 rounded-lg bg-white/70 dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-800">
+              <div class="text-orange-500 font-black" id="sev-high">0</div>
+              <div class="text-slate-400 text-[9px]">HIGH</div>
+            </div>
+            <div class="p-1.5 rounded-lg bg-white/70 dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-800">
+              <div class="text-amber-500 font-black" id="sev-medium">0</div>
+              <div class="text-slate-400 text-[9px]">MED</div>
+            </div>
+            <div class="p-1.5 rounded-lg bg-white/70 dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-800">
+              <div class="text-sky-500 font-black" id="sev-low">0</div>
+              <div class="text-slate-400 text-[9px]">LOW</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flagged Vulnerabilities Container (only visible if findings > 0) -->
+        <div id="sec-findings-section" class="space-y-2 hidden">
+          <div class="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="alert-octagon" class="w-3.5 h-3.5"></i> Flagged Vulnerabilities
+          </div>
+          <div id="sec-findings-list" class="space-y-2 text-xs"></div>
+        </div>
+
+        <!-- 6-Rule OWASP / CWE Controls Checklist -->
+        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">6-Rule OWASP / CWE Security Controls</div>
+        <div id="sec-checklist-container" class="space-y-1.5 text-xs">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Live Code Snippet Security Auditor -->
+        <div class="p-3 rounded-xl glass-card border border-indigo-200/60 dark:border-indigo-900/60 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
+              <i data-lucide="terminal" class="w-3.5 h-3.5 text-indigo-500"></i> Live Snippet SAST Scanner
+            </span>
+            <span class="text-[9px] font-mono text-slate-400">Paste any Python code</span>
+          </div>
+          <textarea
+            id="sast-snippet-input"
+            rows="4"
+            placeholder="Paste any Python code to audit for eval(), shell=True, SQLi, hardcoded API keys, pickle, MD5..."
+            class="w-full p-2 rounded-lg bg-slate-950 text-slate-100 font-mono text-[11px] border border-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          ></textarea>
+          <div class="flex items-center justify-end gap-2">
+            <button onclick="document.getElementById('sast-snippet-input').value=''; refreshCodebaseStatus();" class="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-[11px] text-slate-500 hover:text-slate-800 dark:hover:text-white transition">
+              Clear
+            </button>
+            <button onclick="scanInlineCodeSnippet()" class="px-3 py-1 rounded-lg bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-[11px] font-semibold transition flex items-center gap-1">
+              <i data-lucide="shield-alert" class="w-3 h-3"></i> Audit Snippet
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: QA Matrix Cards -->
       <div id="panel-qa-tab" class="flex-1 overflow-y-auto p-4 space-y-3 hidden">
-        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">6-Point Production QA Checklist</div>
+        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Production QA Test Checklist</div>
         <div id="checklist-cards-container" class="space-y-2 text-xs">
           <!-- Dynamically populated by JavaScript -->
         </div>
@@ -626,11 +720,11 @@
                 <text x="217" y="112" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">Code Doctor</text>
               </g>
 
-              <!-- Node 5: Production Target Codebase -->
+              <!-- Node 5: OWASP/CWE SAST Security Engine -->
               <g onclick="selectTopologyNode('codebase')" class="cursor-pointer">
                 <rect x="275" y="82" width="62" height="40" rx="8" fill="#31102b" stroke="#f43f5e" stroke-width="1.5"/>
-                <text x="306" y="99" fill="#fca5a5" font-size="8" font-family="monospace" text-anchor="middle">TARGET</text>
-                <text x="306" y="112" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">6 QA Rules</text>
+                <text x="306" y="99" fill="#fca5a5" font-size="8" font-family="monospace" text-anchor="middle">DEVSECOPS</text>
+                <text x="306" y="112" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">SAST Audit</text>
               </g>
             </svg>
 
@@ -703,11 +797,11 @@
         <div class="p-3 rounded-xl glass-card space-y-1">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 6. Autonomous Code Doctor
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 6. DevSecOps Auto-Healer &amp; SAST
             </span>
-            <span class="text-[10px] font-mono text-emerald-500">6 QA Rules</span>
+            <span class="text-[10px] font-mono text-emerald-500">QA + OWASP/CWE</span>
           </div>
-          <p class="text-xs text-slate-600 dark:text-slate-300">AST traceback diagnostics and surgical code patch synthesis guaranteeing 100% test pass threshold.</p>
+          <p class="text-xs text-slate-600 dark:text-slate-300">2-stage pipeline: AST/test bug patching followed by OWASP Top 10 &amp; CWE static vulnerability auditing on real repositories.</p>
         </div>
       </div>
 
@@ -808,17 +902,18 @@
     const sendBtn = document.getElementById("send-btn");
     const matrixPassRate = document.getElementById("matrix-pass-rate");
     const checklistCards = document.getElementById("checklist-cards-container");
-    const ideDynamicCode = document.getElementById("ide-dynamic-code");
+    const ideCodeView = document.getElementById("ide-code-view");
+    const ideFilenameLabel = document.getElementById("ide-filename-label");
     const ideStatusPill = document.getElementById("ide-status-pill");
     const ideDiagnosticsBox = document.getElementById("ide-diagnostics-box");
     const radialCircle = document.getElementById("radial-progress-circle");
     const radialText = document.getElementById("radial-score-text");
 
     let threadId = "wolf-session-" + Math.random().toString(36).substring(7);
+    let activeTargetPath = "";
 
-    // Initial load: fetch status & checklist matrix
+    // Initial load: fetch status, live source, QA checklist & SAST audit
     window.addEventListener("DOMContentLoaded", () => {
-      // Restore atmosphere
       const savedAtmosphere = localStorage.getItem("wolf_atmosphere");
       if (savedAtmosphere === "twilight") {
         document.body.classList.add("mode-twilight");
@@ -842,129 +937,337 @@
       }
     }
 
+    function applyTargetRepo() {
+      const input = document.getElementById("target-repo-input");
+      activeTargetPath = input ? input.value.trim() : "";
+      appendSystemMessage(
+        activeTargetPath
+          ? `📂 Target switched to: ${activeTargetPath}. Running AST, Test & OWASP/CWE SAST audit...`
+          : "📂 Target reset to default workspace (codebase/data_processor.py)."
+      );
+      refreshCodebaseStatus();
+    }
+
+    function resetTargetPath() {
+      const input = document.getElementById("target-repo-input");
+      if (input) input.value = "";
+      activeTargetPath = "";
+      refreshCodebaseStatus();
+    }
+
     function switchRightTab(tab) {
-      const panelIde = document.getElementById("panel-ide-tab");
-      const panelQa = document.getElementById("panel-qa-tab");
-      const panelArch = document.getElementById("panel-arch-tab");
-      const tabIdeBtn = document.getElementById("tab-ide-btn");
-      const tabQaBtn = document.getElementById("tab-qa-btn");
-      const tabArchBtn = document.getElementById("tab-arch-btn");
+      const panels = {
+        ide: document.getElementById("panel-ide-tab"),
+        sec: document.getElementById("panel-sec-tab"),
+        qa: document.getElementById("panel-qa-tab"),
+        arch: document.getElementById("panel-arch-tab")
+      };
+      const btns = {
+        ide: document.getElementById("tab-ide-btn"),
+        sec: document.getElementById("tab-sec-btn"),
+        qa: document.getElementById("tab-qa-btn"),
+        arch: document.getElementById("tab-arch-btn")
+      };
 
-      // Hide all panels
-      panelIde.classList.add("hidden");
-      panelQa.classList.add("hidden");
-      panelArch.classList.add("hidden");
+      const inactiveClass = "px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1";
+      const activeClass = "px-2.5 py-1 rounded-lg font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition flex items-center gap-1 shadow-sm";
 
-      // Reset button styles
-      tabIdeBtn.className = "px-3 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5 text-xs";
-      tabQaBtn.className = "px-3 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5 text-xs";
-      tabArchBtn.className = "px-3 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5 text-xs";
+      Object.keys(panels).forEach(k => {
+        if (panels[k]) panels[k].classList.add("hidden");
+        if (btns[k]) btns[k].className = inactiveClass;
+      });
 
-      if (tab === 'ide') {
-        panelIde.classList.remove("hidden");
-        tabIdeBtn.className = "px-3 py-1 rounded-lg font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition flex items-center gap-1.5 shadow-sm text-xs";
-      } else if (tab === 'qa') {
-        panelQa.classList.remove("hidden");
-        tabQaBtn.className = "px-3 py-1 rounded-lg font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition flex items-center gap-1.5 shadow-sm text-xs";
-      } else {
-        panelArch.classList.remove("hidden");
-        tabArchBtn.className = "px-3 py-1 rounded-lg font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition flex items-center gap-1.5 shadow-sm text-xs";
-      }
+      const key = panels[tab] ? tab : "ide";
+      if (panels[key]) panels[key].classList.remove("hidden");
+      if (btns[key]) btns[key].className = activeClass;
       lucide.createIcons();
     }
 
-    // Refresh Codebase QA Status & Checklist Matrix
+    // Refresh Codebase QA Status, Source Snapshot & SAST Security Audit
     async function refreshCodebaseStatus() {
       try {
-        const res = await fetch("/api/bug_status");
+        const qs = activeTargetPath ? `?target=${encodeURIComponent(activeTargetPath)}` : "";
+        const res = await fetch("/api/bug_status" + qs);
         if (!res.ok) return;
         const data = await res.json();
-        renderCodeLabAndMatrix(data.tests, data.bug_found);
+        renderCodeLabAndMatrix(data.tests, data.bug_found, data.diagnosis, data.source, data.security);
+        renderSecurityAudit(data.security);
       } catch (err) {
-        console.error("Failed to fetch bug status:", err);
+        console.error("Failed to fetch DevSecOps status:", err);
       }
     }
 
-    // Render Virtual IDE Code Lab and Checklist Cards
-    function renderCodeLabAndMatrix(tests, bugFound) {
-      if (!tests || !tests.checklist) return;
+    // Render Live Source Code Lines in Code Lab
+    function renderLiveSourceCode(source, security) {
+      if (!ideCodeView) return;
+      if (!source || !source.exists || !source.lines || source.lines.length === 0) {
+        ideCodeView.innerHTML = `<div class="p-3 font-mono text-xs text-amber-400">Target path not found or contains no Python source files.</div>`;
+        return;
+      }
 
-      matrixPassRate.innerText = `${tests.passed_count}/${tests.total_tests} Passed (${tests.pass_rate})`;
-      
-      if (bugFound || tests.failed_count > 0) {
-        // Bug detected in IDE view
+      if (ideFilenameLabel) ideFilenameLabel.innerText = source.file;
+      const heroLabel = document.getElementById("hero-target-label");
+      if (heroLabel) heroLabel.innerText = source.file;
+
+      const flaggedLines = new Set();
+      if (security && Array.isArray(security.findings)) {
+        security.findings.forEach(f => {
+          if (f.line) flaggedLines.add(Number(f.line));
+        });
+      }
+
+      const maxLines = Math.min(source.lines.length, 120);
+      let html = "";
+      for (let i = 0; i < maxLines; i++) {
+        const ln = i + 1;
+        const isFlagged = flaggedLines.has(ln);
+        const cls = isFlagged ? "code-line code-highlight-bug" : "code-line";
+        html += `<div class="${cls}"><span class="code-ln">${ln}</span><span class="code-content whitespace-pre">${escapeHtml(source.lines[i])}</span></div>`;
+      }
+      if (source.lines.length > maxLines) {
+        html += `<div class="px-3 py-1 text-[10px] font-mono text-slate-500">... (${source.lines.length - maxLines} more lines)</div>`;
+      }
+      ideCodeView.innerHTML = html;
+    }
+
+    // Render Virtual IDE Code Lab and QA Checklist Cards
+    function renderCodeLabAndMatrix(tests, bugFound, diagnosis, source, security) {
+      renderLiveSourceCode(source, security);
+      if (!tests) return;
+
+      const total = tests.total_tests || 0;
+      const passed = tests.passed_count || 0;
+      const failed = tests.failed_count || 0;
+      const pct = total > 0 ? Math.round((passed / total) * 100) : (bugFound ? 0 : 100);
+
+      matrixPassRate.innerText = total > 0 ? `${passed}/${total} (${pct}%)` : (bugFound ? "AST Issue" : "Clean");
+      radialCircle.setAttribute("stroke-dasharray", `${pct}, 100`);
+      radialText.innerText = `${pct}%`;
+
+      if (bugFound || failed > 0) {
         ideStatusPill.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30";
-        ideStatusPill.innerText = "Flaw Detected (FAIL)";
+        ideStatusPill.innerText = "Bug Detected";
+        radialCircle.className = "text-rose-500 transition-all duration-700 ease-out";
 
-        ideDynamicCode.innerHTML = `
-          <div class="code-line code-highlight-bug"><span class="code-ln">16</span><span class="code-content"><span class="code-cm">        # BUG INTRODUCED: Missing empty list guard -> ZeroDivisionError!</span></span></div>
-          <div class="code-line code-highlight-bug"><span class="code-ln">17</span><span class="code-content">        <span class="code-kw">return</span> <span class="code-fn">round</span>(<span class="code-fn">sum</span>(numbers) / <span class="code-fn">len</span>(numbers), <span class="code-str">2</span>)</span></div>
-        `;
+        const title = diagnosis ? diagnosis.bug_title : "Functional / AST Bug Detected";
+        const detail = diagnosis ? diagnosis.root_cause : "One or more unit tests or static checks failed.";
 
         ideDiagnosticsBox.className = "p-3.5 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/80 dark:bg-rose-950/40 space-y-1";
         ideDiagnosticsBox.innerHTML = `
           <div class="flex items-center justify-between text-xs font-bold text-rose-800 dark:text-rose-300">
-            <span class="flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-4 h-4 text-rose-500"></i> ZeroDivisionError Flaw Active</span>
-            <span class="text-[10px] font-mono uppercase bg-rose-200/60 dark:bg-rose-900 px-1.5 py-0.2 rounded">Critical</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-4 h-4 text-rose-500"></i> ${escapeHtml(title)}</span>
+            <span class="text-[10px] font-mono uppercase bg-rose-200/60 dark:bg-rose-900 px-1.5 py-0.2 rounded">Action Needed</span>
           </div>
           <p class="text-xs text-rose-700 dark:text-rose-400">
-            Empty list crash: <code>len(numbers) == 0</code> triggers ZeroDivisionError. Click <strong>"Fix & Certify"</strong> to auto-patch.
+            ${escapeHtml(detail)} Click <strong>"Fix &amp; Certify"</strong> to auto-patch and audit.
           </p>
         `;
-
-        // Update radial progress to 83%
-        radialCircle.setAttribute("stroke-dasharray", "83, 100");
-        radialCircle.className = "text-rose-500 transition-all duration-700 ease-out";
-        radialText.innerText = "83%";
       } else {
-        // Certified Clean Master in IDE view
         ideStatusPill.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30";
         ideStatusPill.innerText = "Certified Master";
-
-        ideDynamicCode.innerHTML = `
-          <div class="code-line"><span class="code-ln">16</span><span class="code-content"><span class="code-kw">        if not</span> numbers: <span class="code-kw">return</span> <span class="code-str">0.0</span></span></div>
-          <div class="code-line"><span class="code-ln">17</span><span class="code-content">        <span class="code-kw">return</span> <span class="code-fn">round</span>(<span class="code-fn">sum</span>(numbers) / <span class="code-fn">len</span>(numbers), <span class="code-str">2</span>)</span></div>
-        `;
-
-        ideDiagnosticsBox.className = "p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 space-y-1";
-        ideDiagnosticsBox.innerHTML = `
-          <div class="flex items-center justify-between text-xs font-bold text-emerald-800 dark:text-emerald-300">
-            <span class="flex items-center gap-1.5"><i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i> Code Health Certified</span>
-            <span class="text-[10px] font-mono uppercase bg-emerald-200/60 dark:bg-emerald-900 px-1.5 py-0.2 rounded">100% Pass</span>
-          </div>
-          <p class="text-xs text-emerald-700 dark:text-emerald-400">
-            All 6 production quality rules are certified green. Zero regressions, division errors, or key flaws detected.
-          </p>
-        `;
-
-        // Update radial progress to 100%
-        radialCircle.setAttribute("stroke-dasharray", "100, 100");
         radialCircle.className = "text-emerald-500 transition-all duration-700 ease-out";
-        radialText.innerText = "100%";
+
+        const secVulns = security ? (security.vulnerabilities_count || 0) : 0;
+        if (secVulns > 0) {
+          ideDiagnosticsBox.className = "p-3.5 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/40 space-y-1";
+          ideDiagnosticsBox.innerHTML = `
+            <div class="flex items-center justify-between text-xs font-bold text-amber-800 dark:text-amber-300">
+              <span class="flex items-center gap-1.5"><i data-lucide="shield-alert" class="w-4 h-4 text-amber-500"></i> QA Passed • Security Flagged</span>
+              <span class="text-[10px] font-mono uppercase">${secVulns} Vuln(s)</span>
+            </div>
+            <p class="text-xs text-amber-700 dark:text-amber-400">
+              Functional tests pass, but SAST detected <strong>${secVulns}</strong> cybersecurity issue(s). Open the <strong>Security</strong> tab for remediation.
+            </p>
+          `;
+        } else {
+          ideDiagnosticsBox.className = "p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 space-y-1";
+          ideDiagnosticsBox.innerHTML = `
+            <div class="flex items-center justify-between text-xs font-bold text-emerald-800 dark:text-emerald-300">
+              <span class="flex items-center gap-1.5"><i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i> QA &amp; Cybersecurity Certified</span>
+              <span class="text-[10px] font-mono uppercase">${pct}% Pass</span>
+            </div>
+            <p class="text-xs text-emerald-700 dark:text-emerald-400">
+              Zero functional bugs and zero OWASP/CWE security vulnerabilities detected across target codebase.
+            </p>
+          `;
+        }
       }
 
       // Render cards in QA Matrix Tab
       checklistCards.innerHTML = "";
-      tests.checklist.forEach(item => {
-        const isPass = item.passed;
-        const card = document.createElement("div");
-        card.className = `p-3 rounded-xl border flex items-center justify-between transition ${isPass ? 'glass-card' : 'bg-rose-50/70 border-rose-200 dark:bg-rose-950/30 dark:border-rose-900'}`;
-        card.innerHTML = `
-          <div class="flex items-center gap-2.5">
-            <span class="text-base">${isPass ? '✅' : '❌'}</span>
-            <div>
-              <div class="font-bold text-slate-800 dark:text-white">${formatTestTitle(item.test_id)}</div>
-              <div class="text-[11px] text-slate-500 dark:text-slate-400">${item.description}</div>
+      const list = tests.checklist || [];
+      if (list.length === 0) {
+        checklistCards.innerHTML = `<div class="p-3 rounded-xl glass-card text-slate-500 font-mono text-xs">No unittest files discovered in this target path. Static AST and SAST security checks remain active.</div>`;
+      } else {
+        list.forEach(item => {
+          const isPass = item.passed;
+          const card = document.createElement("div");
+          card.className = `p-3 rounded-xl border flex items-center justify-between transition ${isPass ? 'glass-card' : 'bg-rose-50/70 border-rose-200 dark:bg-rose-950/30 dark:border-rose-900'}`;
+          card.innerHTML = `
+            <div class="flex items-center gap-2.5">
+              <span class="text-base">${isPass ? '✅' : '❌'}</span>
+              <div>
+                <div class="font-bold text-slate-800 dark:text-white">${escapeHtml(formatTestTitle(item.test_id))}</div>
+                <div class="text-[11px] text-slate-500 dark:text-slate-400">${escapeHtml(item.description)}</div>
+              </div>
             </div>
-          </div>
-          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isPass ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300'}">
-            ${isPass ? 'PASS' : 'FAIL'}
-          </span>
-        `;
-        checklistCards.appendChild(card);
-      });
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isPass ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300'}">
+              ${isPass ? 'PASS' : 'FAIL'}
+            </span>
+          `;
+          checklistCards.appendChild(card);
+        });
+      }
 
       lucide.createIcons();
+    }
+
+    // Render Cybersecurity SAST Audit Panel, Code Lab Gauge & Header Pill
+    function renderSecurityAudit(security) {
+      if (!security) return;
+
+      const grade = security.overall_grade || "N/A";
+      const score = security.score !== undefined ? security.score : 0;
+      const vulns = security.vulnerabilities_count || 0;
+      const filesScanned = security.files_scanned || 0;
+      const isSecure = Boolean(security.is_secure);
+      const sev = security.severity_counts || { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+
+      // 1. Header Security Pill
+      const headerPill = document.getElementById("header-security-pill");
+      const headerText = document.getElementById("header-security-text");
+      if (headerPill && headerText) {
+        headerText.innerText = `Security: ${grade} (${vulns} Vuln${vulns === 1 ? '' : 's'})`;
+        if (isSecure) {
+          headerPill.className = "hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-semibold shadow-sm hover:opacity-90 transition";
+        } else {
+          headerPill.className = "hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold shadow-sm hover:opacity-90 transition";
+        }
+      }
+
+      // 2. Code Lab Security Radial Gauge
+      const secCircle = document.getElementById("sec-radial-circle");
+      const secGradeText = document.getElementById("sec-grade-text");
+      const secGaugeSub = document.getElementById("sec-gauge-sub");
+      if (secCircle && secGradeText && secGaugeSub) {
+        secCircle.setAttribute("stroke-dasharray", `${score}, 100`);
+        secGradeText.innerText = grade;
+        secGaugeSub.innerText = `${vulns} Vuln${vulns === 1 ? '' : 's'} Found`;
+        if (isSecure) {
+          secCircle.className = "text-emerald-500 transition-all duration-700 ease-out";
+          secGradeText.className = "absolute text-xs font-black text-emerald-600 dark:text-emerald-400 font-mono";
+          secGaugeSub.className = "text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold";
+        } else {
+          secCircle.className = "text-rose-500 transition-all duration-700 ease-out";
+          secGradeText.className = "absolute text-xs font-black text-rose-600 dark:text-rose-400 font-mono";
+          secGaugeSub.className = "text-[10px] text-rose-600 dark:text-rose-400 font-semibold";
+        }
+      }
+
+      // 3. Security Tab Banner & Severity Counts
+      const banner = document.getElementById("sec-summary-banner");
+      const bannerGrade = document.getElementById("sec-banner-grade");
+      const bannerMeta = document.getElementById("sec-banner-meta");
+      if (banner && bannerGrade && bannerMeta) {
+        bannerGrade.innerText = grade;
+        bannerMeta.innerText = `${filesScanned} file${filesScanned === 1 ? '' : 's'} scanned • Score ${score}/100`;
+        if (isSecure) {
+          banner.className = "p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 space-y-2";
+          bannerGrade.className = "w-9 h-9 rounded-xl bg-emerald-600 text-white font-black text-sm font-mono flex items-center justify-center shadow-sm";
+        } else {
+          banner.className = "p-3.5 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/70 dark:bg-rose-950/40 space-y-2";
+          bannerGrade.className = "w-9 h-9 rounded-xl bg-rose-600 text-white font-black text-sm font-mono flex items-center justify-center shadow-sm";
+        }
+      }
+
+      const setText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+      setText("sev-critical", sev.CRITICAL || 0);
+      setText("sev-high", sev.HIGH || 0);
+      setText("sev-medium", sev.MEDIUM || 0);
+      setText("sev-low", sev.LOW || 0);
+
+      // 4. Detailed Vulnerability Findings
+      const findingsSection = document.getElementById("sec-findings-section");
+      const findingsList = document.getElementById("sec-findings-list");
+      if (findingsSection && findingsList) {
+        const findings = security.findings || [];
+        if (findings.length > 0) {
+          findingsSection.classList.remove("hidden");
+          findingsList.innerHTML = findings.map(f => `
+            <div class="p-3 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/70 dark:bg-rose-950/30 space-y-1">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-rose-800 dark:text-rose-300 text-[11px]">${escapeHtml(f.title)}</span>
+                <span class="px-1.5 py-0.5 rounded bg-rose-600 text-white font-mono text-[9px] font-bold shrink-0">${escapeHtml(f.severity)}</span>
+              </div>
+              <div class="text-[10px] font-mono text-slate-600 dark:text-slate-400">
+                ${escapeHtml(f.rule_id)} • ${escapeHtml(f.cwe)} • <code>${escapeHtml(f.file)}:${f.line}</code>
+              </div>
+              <pre class="bg-slate-950 text-rose-300 p-1.5 rounded text-[10px] overflow-x-auto">${escapeHtml(f.snippet || '')}</pre>
+              <div class="text-[11px] text-slate-700 dark:text-slate-300"><strong>Fix:</strong> ${escapeHtml(f.remediation)}</div>
+            </div>
+          `).join("");
+        } else {
+          findingsSection.classList.add("hidden");
+          findingsList.innerHTML = "";
+        }
+      }
+
+      // 5. 6-Rule OWASP / CWE Checklist
+      const secChecklistEl = document.getElementById("sec-checklist-container");
+      if (secChecklistEl && Array.isArray(security.checklist)) {
+        secChecklistEl.innerHTML = security.checklist.map(rule => {
+          const ok = rule.passed;
+          return `
+            <div class="p-2.5 rounded-xl border flex items-center justify-between gap-2 ${ok ? 'glass-card' : 'bg-rose-50/70 border-rose-200 dark:bg-rose-950/30 dark:border-rose-900'}">
+              <div class="min-w-0">
+                <div class="font-bold text-slate-800 dark:text-white text-[11px] flex items-center gap-1.5">
+                  <span>${ok ? '🛡️' : '🚨'}</span>
+                  <span class="truncate">${escapeHtml(rule.rule_id)}: ${escapeHtml(rule.title)}</span>
+                </div>
+                <div class="text-[10px] font-mono text-slate-500">${escapeHtml(rule.cwe)} • ${escapeHtml(rule.owasp)}</div>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${ok ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300'}">
+                ${ok ? 'SECURE' : `${rule.findings_count} FLAGGED`}
+              </span>
+            </div>
+          `;
+        }).join("");
+      }
+
+      lucide.createIcons();
+    }
+
+    // Live Snippet SAST Security Scanner
+    async function scanInlineCodeSnippet() {
+      const textarea = document.getElementById("sast-snippet-input");
+      const code = textarea ? textarea.value : "";
+      if (!code.trim()) {
+        appendSystemMessage("⚠️ Paste a Python code snippet first to run live SAST auditing.");
+        return;
+      }
+
+      appendSystemMessage("🛡️ Running OWASP/CWE Static Security Audit on submitted Python snippet...");
+      try {
+        const res = await fetch("/api/security_audit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: code, filename: "submitted_snippet.py" })
+        });
+        const report = await res.json();
+        renderSecurityAudit(report);
+
+        let msg = `🛡️ **Inline SAST Security Audit Complete — Grade ${report.overall_grade} (${report.score}/100)**\n- Vulnerabilities Found: **${report.vulnerabilities_count}**`;
+        if (report.findings && report.findings.length > 0) {
+          msg += "\n\n" + report.findings.map(f =>
+            `- 🚨 **[${f.severity}] ${f.rule_id} (${f.cwe})** Line ${f.line}: ${f.title}\n  - *Remediation*: ${f.remediation}`
+          ).join("\n");
+        } else {
+          msg += "\n- ✅ All 6 OWASP/CWE security checks passed cleanly.";
+        }
+        appendAgentMessage(msg, []);
+      } catch (err) {
+        console.error("Inline SAST scan failed:", err);
+      }
     }
 
     function formatTestTitle(testId) {
@@ -977,30 +1280,46 @@
       return testId;
     }
 
-    // Trigger Quick Action Command Button
+    // Trigger Enterprise DevSecOps Action Button
     async function triggerBugAction(action, systemNotice) {
       appendSystemMessage(systemNotice);
       try {
         const res = await fetch("/api/bug_action", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: action })
+          body: JSON.stringify({ action: action, target_path: activeTargetPath })
         });
         const data = await res.json();
         if (action === "full_pipeline") {
           await animateHealingStepper();
         }
-        renderCodeLabAndMatrix(data.tests, (data.tests.failed_count > 0));
+        renderCodeLabAndMatrix(data.tests, Boolean(data.result && data.result.bug_found) || (data.tests && data.tests.failed_count > 0), data.result && data.result.diagnosis, data.source, data.security);
+        renderSecurityAudit(data.security);
 
+        const sec = data.security || {};
         let reportMsg = "";
-        if (action === "simulate_bug") {
-          reportMsg = "⚠️ **ZeroDivisionError Bug Injected into Codebase!**\n- Target: `codebase/data_processor.py` -> `calculate_average()`\n- Impact: Code crashes with `ZeroDivisionError: division by zero` whenever numbers list is empty.\n- **Test [CHECKLIST-2] is now FAILING (❌)**. Click **'Fix & Certify'** to heal it!";
+
+        if (action === "security_audit") {
+          switchRightTab("sec");
+          reportMsg = `🛡️ **Cybersecurity SAST Audit — Grade ${sec.overall_grade || 'N/A'} (${sec.score ?? 0}/100)**\n- Target: \`${data.target}\`\n- Files Scanned: \`${sec.files_scanned || 0}\` | Vulnerabilities Found: **${sec.vulnerabilities_count || 0}**`;
+          if (sec.findings && sec.findings.length > 0) {
+            reportMsg += "\n\n" + sec.findings.slice(0, 6).map(f =>
+              `- 🚨 **[${f.severity}] ${f.rule_id} (${f.cwe})** \`${f.file}:${f.line}\`: ${f.title}\n  - *Fix*: ${f.remediation}`
+            ).join("\n");
+          } else {
+            reportMsg += "\n- ✅ All 6 OWASP/CWE controls passed (Injection, Hardcoded Secrets, SQLi, Deserialization, Crypto/TLS, Path Safety).";
+          }
         } else if (action === "scan") {
-          reportMsg = data.result.bug_found 
-            ? `🚨 **Bug Found**: ${data.result.diagnosis.bug_title}\n- File: \`${data.result.diagnosis.file}\`\n- Severity: **${data.result.diagnosis.severity}**\n- Impact: ${data.result.diagnosis.impact}`
-            : "✅ **Code Scan Clean**: All 6 QA checklist tests are passing!";
+          const bugHeader = data.result.bug_found
+            ? `🚨 **Stage 1 — Bug Found**: ${data.result.diagnosis.bug_title}\n- File: \`${data.result.diagnosis.file}\`\n- Severity: **${data.result.diagnosis.severity}**\n- Impact: ${data.result.diagnosis.impact}`
+            : `✅ **Stage 1 — AST & Test Scan Clean**: All ${data.tests.passed_count}/${data.tests.total_tests} QA tests are passing!`;
+          reportMsg = `${bugHeader}\n\n🛡️ **Stage 2 — Cybersecurity SAST**: Grade **${sec.overall_grade || 'A+'}** (${sec.score ?? 100}/100) • **${sec.vulnerabilities_count || 0}** vulnerabilities detected.`;
         } else if (action === "full_pipeline") {
-          reportMsg = "🎉 **Autonomous Bug Fixer Finished**:\n1. 🔍 Discovered failing `ZeroDivisionError` bug.\n2. 🛠️ Applied verified guard patch to `codebase/data_processor.py`.\n3. 📋 **100% QA Checklist Verified**: All 6/6 tests PASSING.";
+          const stage1 = data.result.initial_bug_found
+            ? `1. 🔍 **Stage 1 (Bug Remediation)**: Detected & patched \`${data.result.diagnosis.bug_title}\`.\n2. 🧪 **QA Certification**: ${data.tests.passed_count}/${data.tests.total_tests} tests PASSING (${data.tests.pass_rate}).`
+            : `1. ✅ **Stage 1 (QA Verification)**: Codebase healthy — ${data.tests.passed_count}/${data.tests.total_tests} tests PASSING (${data.tests.pass_rate}).`;
+          const stage2 = `3. 🛡️ **Stage 2 (Cybersecurity SAST)**: Grade **${sec.overall_grade || 'A+'}** (${sec.score ?? 100}/100) — **${sec.vulnerabilities_count || 0}** OWASP/CWE vulnerabilities detected.`;
+          reportMsg = `🤖 **Autonomous DevSecOps Pipeline Complete**\n${stage1}\n${stage2}`;
         }
         appendAgentMessage(reportMsg, []);
       } catch (err) {
@@ -1253,11 +1572,11 @@
       if (!nameEl || !descEl) return;
 
       const info = {
-        client: { name: "Node: Client HTTP / REST UI", desc: "Starlette async event loop • WebSocket & REST gateway" },
+        client: { name: "Node: Client HTTP / REST UI", desc: "Starlette async event loop • DevSecOps Studio" },
         langgraph: { name: "Node: LangGraph StateGraph Loop", desc: "Cyclic multi-turn memory graph • 12ms router" },
-        mcp: { name: "Node: FastMCP Protocol Bridge", desc: "JSON-RPC 2.0 stdio protocol • Isolated microservice sandbox" },
-        doctor: { name: "Node: Autonomous Code Doctor", desc: "Traceback AST diagnoser • Surgical AST patch synthesis" },
-        codebase: { name: "Node: Target Production Codebase", desc: "codebase/data_processor.py • 6/6 QA Pass certified" }
+        mcp: { name: "Node: FastMCP Protocol Bridge", desc: "JSON-RPC 2.0 stdio protocol • Groq-powered Tech Search" },
+        doctor: { name: "Node: Autonomous Code Doctor", desc: "Stage 1: Real repo AST/test diagnosis & surgical patching" },
+        codebase: { name: "Node: OWASP/CWE SAST Auditor", desc: "Stage 2: 6-rule cybersecurity vulnerability scanner" }
       };
 
       const selected = info[nodeKey] || info.langgraph;
@@ -1269,19 +1588,19 @@
     // 4. Omni Command Palette (Ctrl + K / Cmd + K)
     // ==========================================================
     const paletteActions = [
-      { id: "fix", title: "Autopilot: Fix & Certify Codebase", desc: "Run full autonomous AST repair pipeline", icon: "sparkles", action: () => triggerBugAction('full_pipeline', '⚡ Autopilot Activated via Command Palette: Scanning AST, diagnosing traceback, and patching code...') },
-      { id: "bug", title: "Autopilot: Simulate ZeroDivisionError", desc: "Inject edge-case bug into codebase/data_processor.py", icon: "bug", action: () => triggerBugAction('simulate_bug', '⚠️ Injected ZeroDivisionError into codebase/data_processor.py.') },
-      { id: "scan", title: "Autopilot: Scan AST Flaws", desc: "Analyze syntax tree and run 6-point QA checklist", icon: "search", action: () => triggerBugAction('scan', '🔍 Scanning repository for AST flaws...') },
+      { id: "fix", title: "DevSecOps: Fix & Certify + SAST Audit", desc: "Run 2-stage pipeline (Bug Remediation + OWASP/CWE Audit)", icon: "sparkles", action: () => triggerBugAction('full_pipeline', '⚡ DevSecOps Pipeline Activated: Stage 1 (Bug Fix & QA) + Stage 2 (SAST Security Audit)...') },
+      { id: "sec", title: "DevSecOps: Run OWASP/CWE Security Audit", desc: "Scan active repository for injection, secrets, SQLi & crypto flaws", icon: "shield-alert", action: () => triggerBugAction('security_audit', '🛡️ Running OWASP Top 10 / CWE SAST cybersecurity audit...') },
+      { id: "scan", title: "DevSecOps: Scan Repository AST & Tests", desc: "Analyze Python AST, run tests, and check security posture", icon: "search", action: () => triggerBugAction('scan', '🔍 Scanning target repository for AST flaws and failing tests...') },
       { id: "pitch", title: "Presentation: Open Executive Pitch Deck", desc: "Launch 3-slide client presentation mode", icon: "presentation", action: () => openPitchDeck() },
       { id: "git", title: "FastMCP: List GitHub Repositories", desc: "Query connected GitHub read-only microservice", icon: "github", action: () => sendQuickPrompt('List my GitHub repositories using the GitHub MCP tool.') },
-      { id: "web", title: "FastMCP: Live Web Search", desc: "Query real-time web search MCP tool", icon: "globe", action: () => sendQuickPrompt('Search the web for the latest LangChain and LangGraph release updates.') },
+      { id: "web", title: "FastMCP: Groq Technical Search", desc: "Search live docs & CVEs synthesized via Groq LPU", icon: "globe", action: () => sendQuickPrompt('Search the web for OWASP Top 10 Python security best practices.') },
       { id: "math", title: "FastMCP: Safe Math AST Evaluator", desc: "Evaluate complex arithmetic expressions safely", icon: "calculator", action: () => sendQuickPrompt('Calculate (144 * 12) / (3.14159 * 2)') },
-      { id: "mem", title: "FastMCP: Permanent User Memory", desc: "Inspect long-term SQLite profile facts", icon: "database", action: () => sendQuickPrompt('What do you remember about my user profile and active projects?') },
+      { id: "mem", title: "FastMCP: Permanent User Memory", desc: "Inspect long-term profile facts", icon: "database", action: () => sendQuickPrompt('What do you remember about my user profile and active projects?') },
       { id: "dark", title: "Appearance: Toggle Twilight / Pearl Mode", desc: "Switch between Frosted Glass and Twilight Dark", icon: "sun-moon", action: () => toggleAtmosphere() },
-      { id: "tab_ide", title: "View: Switch to Code Lab", desc: "View codebase/data_processor.py editor", icon: "code-2", action: () => switchRightTab('ide') },
-      { id: "tab_qa", title: "View: Switch to QA Matrix", desc: "View 6-point quality checklist", icon: "check-square", action: () => switchRightTab('qa') },
-      { id: "tab_arch", title: "View: Switch to Architecture Topology", desc: "View interactive SVG data-flow diagram", icon: "layers", action: () => switchRightTab('arch') },
-      { id: "diff", title: "Code: Toggle Git Diff View", desc: "Inspect red/green unified git diff patch", icon: "git-commit", action: () => setIdeView('diff') }
+      { id: "tab_ide", title: "View: Switch to Code Lab", desc: "Inspect live source code and load target repository", icon: "code-2", action: () => switchRightTab('ide') },
+      { id: "tab_sec", title: "View: Switch to Security SAST Panel", desc: "Inspect OWASP/CWE controls, findings & live snippet auditor", icon: "shield-check", action: () => switchRightTab('sec') },
+      { id: "tab_qa", title: "View: Switch to QA Matrix", desc: "View production unit test quality checklist", icon: "check-square", action: () => switchRightTab('qa') },
+      { id: "tab_arch", title: "View: Switch to Architecture Topology", desc: "View interactive SVG data-flow diagram", icon: "layers", action: () => switchRightTab('arch') }
     ];
 
     function openCommandPalette() {
@@ -1413,13 +1732,13 @@
         badge: "Slide 2 of 3"
       },
       {
-        tag: "Autonomous Reliability",
-        title: "Certified 6-Point Production QA Checklist",
-        desc: "Every automated fix must pass a rigorous regression test suite before human sign-off or production deployment.",
+        tag: "Enterprise DevSecOps",
+        title: "2-Stage Autonomous Bug Remediation & Cybersecurity SAST",
+        desc: "Point WOLF at any real repository: Stage 1 heals functional bugs & verifies QA tests; Stage 2 runs OWASP Top 10 / CWE static security scanning.",
         metrics: [
-          { label: "Pass Rate", val: "100% Certified", sub: "6/6 automated rules verified" },
-          { label: "MTTR", val: "< 2 Seconds", sub: "Mean time to resolution" },
-          { label: "Audit Trail", val: "Full Git Diff", sub: "Traceable patches & logs" }
+          { label: "Stage 1", val: "Auto-Healer", sub: "Real repo AST & test patching" },
+          { label: "Stage 2", val: "OWASP SAST", sub: "6-rule CWE vulnerability audit" },
+          { label: "Security Gate", val: "Grade A+..F", sub: "Blocks exploits pre-deploy" }
         ],
         badge: "Slide 3 of 3"
       }

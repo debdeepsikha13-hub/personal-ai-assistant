@@ -5,11 +5,15 @@ Built with Starlette & Uvicorn.
 Provides a REST backend and serves the interactive frontend UI.
 
 Endpoints:
-  GET  /             -> Serves the single-page chat application
-  GET  /api/status   -> Returns agent configuration and MCP server status
-  GET  /api/tools    -> Lists all native and MCP tools
-  GET  /api/memory   -> Returns persistent user profile facts
-  POST /api/chat     -> Processes conversational message via LangGraph
+  GET  /                   -> Serves the single-page DevSecOps Studio UI
+  GET  /api/status         -> Returns agent configuration and MCP server status
+  GET  /api/tools          -> Lists all native and MCP tools
+  GET  /api/memory         -> Returns persistent user profile facts
+  GET  /api/bug_status     -> Returns live codebase AST/test status, source snapshot & SAST report
+  POST /api/bug_action     -> Executes DevSecOps actions (scan, fix, full_pipeline, security_audit)
+  GET  /api/security_audit -> Runs OWASP/CWE SAST cybersecurity scan on target file/repository
+  POST /api/security_audit -> Runs OWASP/CWE SAST scan on custom path or inline Python source
+  POST /api/chat           -> Processes conversational message via LangGraph
 """
 
 import sys
@@ -148,7 +152,6 @@ async def api_chat(request):
 
         # Fallback guidance if API key is not yet configured in .env
         if not api_key_set and cfg.MODEL_PROVIDER != "ollama":
-            # Check if this was a direct calculation or system inquiry we can simulate
             return JSONResponse({
                 "reply": (
                     f"⚠️ **API Key Required for Live Autonomous Chatting**\n\n"
@@ -179,43 +182,99 @@ async def api_chat(request):
 
 
 async def api_bug_status(request):
-    """Return live codebase status, active bugs, and test checklist matrix."""
+    """Return live codebase status, active bugs, test checklist matrix, source snapshot, and SAST report."""
     from core.bug_fixer_agent import GeneralCodeBugFixerAgent
-    agent = GeneralCodeBugFixerAgent()
+    target_path = request.query_params.get("target", "").strip() or None
+    agent = GeneralCodeBugFixerAgent(target_path=target_path)
     scan = await asyncio.to_thread(agent.scan_for_bugs)
-    tests = await asyncio.to_thread(agent.run_tests)
+    tests = scan["test_results"]
+    security = await asyncio.to_thread(agent.run_security_audit)
+    source = await asyncio.to_thread(agent.get_source_snapshot)
     return JSONResponse({
+        "target": agent.target_path,
         "bug_found": scan["bug_found"],
         "diagnosis": scan.get("diagnosis"),
-        "tests": tests
+        "ast_issues": scan.get("ast_issues", []),
+        "tests": tests,
+        "security": security,
+        "source": source
     })
 
 
 async def api_bug_action(request):
-    """Execute autonomous bug fixer action (scan, fix, simulate_bug, full_pipeline)."""
+    """Execute autonomous DevSecOps action (scan, fix, full_pipeline, security_audit)."""
     from core.bug_fixer_agent import GeneralCodeBugFixerAgent
-    agent = GeneralCodeBugFixerAgent()
     try:
         body = await request.json()
-        action = body.get("action", "full_pipeline")
+        action = str(body.get("action", "full_pipeline")).strip().lower()
+        target_path = str(body.get("target_path", "")).strip() or None
     except Exception:
         action = "full_pipeline"
+        target_path = None
 
-    if action == "simulate_bug":
-        res = await asyncio.to_thread(agent.inject_demo_bug, "zero_division")
+    if action not in {"scan", "fix", "full_pipeline", "security_audit"}:
+        return JSONResponse(
+            {"error": f"Unsupported action '{action}'. Allowed: scan, fix, full_pipeline, security_audit."},
+            status_code=400
+        )
+
+    agent = GeneralCodeBugFixerAgent(target_path=target_path)
+
+    if action == "security_audit":
+        res = await asyncio.to_thread(agent.run_security_audit)
+        tests = await asyncio.to_thread(agent.run_tests)
+        security = res
     elif action == "fix":
         res = await asyncio.to_thread(agent.apply_fix)
+        tests = await asyncio.to_thread(agent.run_tests)
+        security = await asyncio.to_thread(agent.run_security_audit)
     elif action == "scan":
         res = await asyncio.to_thread(agent.scan_for_bugs)
+        tests = res["test_results"]
+        security = await asyncio.to_thread(agent.run_security_audit)
     else:
         res = await asyncio.to_thread(agent.run_full_pipeline)
+        tests = res["verification_results"]
+        security = res["security_audit"]
 
-    tests = await asyncio.to_thread(agent.run_tests)
+    source = await asyncio.to_thread(agent.get_source_snapshot)
     return JSONResponse({
         "action": action,
+        "target": agent.target_path,
         "result": res,
-        "tests": tests
+        "tests": tests,
+        "security": security,
+        "source": source
     })
+
+
+async def api_security_audit(request):
+    """Run OWASP Top 10 / CWE SAST cybersecurity scan on a repository path, file, or inline code."""
+    from core.bug_fixer_agent import TARGET_FILE_PATH
+    from core.security_scanner import SecurityVulnerabilityScanner
+
+    scanner = SecurityVulnerabilityScanner()
+
+    if request.method == "POST":
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+        inline_code = body.get("code")
+        target_path = str(body.get("target_path", "")).strip() or None
+        filename = str(body.get("filename", "<submitted_snippet.py>")).strip() or "<submitted_snippet.py>"
+
+        if inline_code is not None and str(inline_code).strip():
+            report = await asyncio.to_thread(scanner.scan_code, str(inline_code), filename)
+            return JSONResponse(report)
+
+        effective_target = target_path or TARGET_FILE_PATH
+        report = await asyncio.to_thread(scanner.scan_directory, effective_target)
+        return JSONResponse(report)
+
+    target_path = request.query_params.get("target", "").strip() or TARGET_FILE_PATH
+    report = await asyncio.to_thread(scanner.scan_directory, target_path)
+    return JSONResponse(report)
 
 
 # Define routes
@@ -226,6 +285,7 @@ routes = [
     Route("/api/tools", api_tools),
     Route("/api/bug_status", api_bug_status),
     Route("/api/bug_action", api_bug_action, methods=["POST"]),
+    Route("/api/security_audit", api_security_audit, methods=["GET", "POST"]),
     Route("/api/chat", api_chat, methods=["POST"]),
 ]
 

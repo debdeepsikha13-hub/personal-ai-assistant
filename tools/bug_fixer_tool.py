@@ -1,76 +1,104 @@
 """
-General Python Code Bug Fixer & QA Checklist Native Tools.
-==========================================================
-Exposes autonomous bug hunting, diagnosis, and code quality verification tools.
+Autonomous Python Code Bug Fixer, QA Checklist & Security Audit Native Tools.
+=============================================================================
+Exposes 2-Stage DevSecOps engineering tools:
+  Stage 1: Functional bug scanning, diagnosis, autonomous patching, and QA certification.
+  Stage 2: OWASP/CWE SAST cybersecurity scanning on every executed codebase.
 """
 
+from typing import Optional
 from langchain_core.tools import tool
 
 
-def _get_bug_fixer_agent():
+def _get_bug_fixer_agent(target_path: Optional[str] = None):
     """Lazy import to eliminate circular dependencies."""
     from core.bug_fixer_agent import GeneralCodeBugFixerAgent
-    return GeneralCodeBugFixerAgent()
+    return GeneralCodeBugFixerAgent(target_path=target_path)
+
+
+def _format_security_summary(sec: dict) -> str:
+    """Format Stage 2 SAST cybersecurity summary for chat output."""
+    grade = sec.get("overall_grade", "N/A")
+    score = sec.get("score", 0)
+    vulns = sec.get("vulnerabilities_count", 0)
+    files_scanned = sec.get("files_scanned", 0)
+    lines = [
+        f"🛡️ **Stage 2: Cybersecurity SAST Audit — Grade {grade} ({score}/100)**",
+        f"- Files Scanned: `{files_scanned}` | Vulnerabilities Found: **{vulns}**"
+    ]
+    if vulns == 0:
+        lines.append("- ✅ All 6 OWASP/CWE security controls passed (Injection, Secrets, SQLi, Deserialization, Crypto/TLS, Path Safety).")
+    else:
+        for f in sec.get("findings", [])[:5]:
+            lines.append(
+                f"- 🚨 **[{f['severity']}] {f['rule_id']} ({f['cwe']})** in `{f['file']}:{f['line']}` — {f['title']}\n"
+                f"  - Fix: {f['remediation']}"
+            )
+    return "\n".join(lines)
 
 
 @tool
-def run_bug_fixer_agent(action: str = "full_pipeline") -> str:
+def run_bug_fixer_agent(action: str = "full_pipeline", target_path: str = "") -> str:
     """
-    Autonomous Python Code Bug Fixer Agent.
-    Scans codebases for bugs, diagnoses root causes, applies code patches, and verifies test suites.
+    Autonomous DevSecOps Bug Fixer & Security Verification Agent.
+    Executes on real Python files or repositories to detect/fix functional bugs and audit cybersecurity.
 
     Args:
-        action: The action to perform.
+        action: The engineering action to perform.
             Options:
-            - 'full_pipeline' (default): Runs complete Scan -> Diagnose -> Patch -> Verify cycle.
-            - 'scan': Only scans the codebase and tests to check for existing bugs.
-            - 'fix': Applies the verified bug fix to codebase/data_processor.py.
-            - 'verify': Runs the test suite to verify code compliance.
-            - 'simulate_bug': Injects a demo ZeroDivisionError bug to demonstrate detection.
+            - 'full_pipeline' (default): Runs complete Stage 1 (Scan -> Diagnose -> Patch -> QA Verify) + Stage 2 (OWASP/CWE Security Audit).
+            - 'scan': Scans the target repository/file for failing tests, AST bugs, and security flaws.
+            - 'fix': Applies verified patches to resolve detected bugs and unsafe patterns.
+            - 'verify': Runs the automated unit test suite and QA checklist.
+            - 'security_audit': Runs deep Static Application Security Testing (SAST) against OWASP/CWE rules.
+        target_path: Optional local file or repository directory path to analyze (defaults to active workspace target).
 
     Returns:
-        str: Formatted QA / Bug Fixer report.
+        str: Formatted DevSecOps QA & Security Certification report.
     """
-    agent = _get_bug_fixer_agent()
+    resolved_target = target_path.strip() or None
+    agent = _get_bug_fixer_agent(target_path=resolved_target)
     action = action.lower().strip()
 
-    if action == "simulate_bug":
-        res = agent.inject_demo_bug("zero_division")
-        return (
-            "⚠️ **Demo Python Bug Injected!**\n"
-            "- Target: `codebase/data_processor.py`\n"
-            "- Introduced Flaw: Removed empty list guard in `calculate_average()`. It will now crash with `ZeroDivisionError: division by zero` on empty input!\n"
-            "- You can now run `run_bug_fixer_agent('scan')` or `run_bug_fixer_agent('full_pipeline')` to watch Wolf detect and fix it!"
-        )
+    if action == "security_audit":
+        sec = agent.run_security_audit()
+        if sec.get("status") == "error":
+            return f"❌ **Security Audit Error**: {sec.get('error')}"
+        return _format_security_summary(sec)
 
     elif action == "scan":
         scan = agent.scan_for_bugs()
+        sec = agent.run_security_audit()
         if not scan["bug_found"]:
-            return (
-                "✅ **Codebase Scan Complete: Healthy**\n"
-                f"- All {scan['test_results']['total_tests']} QA checklist tests are PASSING (100% Pass Rate).\n"
+            header = (
+                "✅ **Stage 1 — Codebase Scan Complete: Healthy**\n"
+                f"- Target: `{scan.get('target')}`\n"
+                f"- All {scan['test_results']['total_tests']} QA checklist tests are PASSING ({scan['test_results']['pass_rate']}).\n"
                 "- Zero runtime crashes, syntax flaws, or regressions found."
             )
-        diag = scan["diagnosis"]
-        return (
-            "🚨 **BUG DETECTED in Codebase!**\n"
-            f"- **Title**: {diag['bug_title']}\n"
-            f"- **File**: `{diag['file']}`\n"
-            f"- **Function**: `{diag['function']}`\n"
-            f"- **Severity**: {diag['severity']}\n"
-            f"- **Impact**: {diag['impact']}\n"
-            f"- **Root Cause**: {diag['root_cause']}\n"
-            f"- **Recommended Fix**: {diag['recommended_fix']}\n\n"
-            "👉 Run `run_bug_fixer_agent('fix')` or `full_pipeline` to autonomously patch and verify."
-        )
+        else:
+            diag = scan["diagnosis"]
+            header = (
+                "🚨 **Stage 1 — BUG DETECTED in Codebase!**\n"
+                f"- **Title**: {diag['bug_title']}\n"
+                f"- **File**: `{diag['file']}`\n"
+                f"- **Function**: `{diag['function']}`\n"
+                f"- **Severity**: {diag['severity']}\n"
+                f"- **Impact**: {diag['impact']}\n"
+                f"- **Root Cause**: {diag['root_cause']}\n"
+                f"- **Recommended Fix**: {diag['recommended_fix']}\n"
+                "👉 Run `run_bug_fixer_agent(action='full_pipeline')` to autonomously patch and certify."
+            )
+        return header + "\n\n" + _format_security_summary(sec)
 
     elif action == "fix":
         fix_res = agent.apply_fix()
+        sec = agent.run_security_audit()
         return (
             "🛠️ **Bug Fix Applied to Codebase**\n"
             f"- File Modified: `{fix_res.get('file_modified')}`\n"
-            f"- Fix Description: {fix_res.get('fix_applied')}\n"
-            "- Recommended Next Step: Run test verification to ensure checklist passes."
+            f"- Fix Description: {fix_res.get('fix_applied')}\n\n"
+            + _format_security_summary(sec)
         )
 
     elif action == "verify":
@@ -83,47 +111,59 @@ def run_bug_fixer_agent(action: str = "full_pipeline") -> str:
         return "\n".join(lines)
 
     else:
-        # Full Pipeline: Scan -> Diagnose -> Fix -> Verify
+        # Full 2-Stage DevSecOps Pipeline: Bug Remediation + Cybersecurity Audit
         result = agent.run_full_pipeline()
         v = result["verification_results"]
-        
+        sec = result["security_audit"]
+
         lines = [
-            "🤖 **Autonomous Bug Fixer Agent Pipeline Executed**\n"
+            "🤖 **Autonomous DevSecOps Pipeline Executed (Bug Fix + SAST Audit)**",
+            f"- Target: `{result.get('target')}`\n"
         ]
-        
+
         if result["initial_bug_found"]:
             diag = result["diagnosis"]
-            lines.append("🔍 **Step 1: Bug Detection & Diagnosis**")
+            lines.append("🔍 **Stage 1A — Bug Detection & Diagnosis**")
             lines.append(f"- **Bug Found**: {diag['bug_title']}")
             lines.append(f"- **Target File**: `{diag['file']}` -> `{diag['function']}`")
             lines.append(f"- **Root Cause**: {diag['root_cause']}")
             lines.append(f"- **Severity**: {diag['severity']}\n")
 
-            lines.append("🛠️ **Step 2: Autonomous Patch Applied**")
+            lines.append("🛠️ **Stage 1B — Autonomous Patch Applied**")
             lines.append(f"- **Resolution**: {result['fix_applied']['fix_applied']}\n")
         else:
-            lines.append("🔍 **Step 1: Code Scan**: No breaking bugs were initially found. Validating baseline.\n")
+            lines.append("🔍 **Stage 1 — Code Scan**: No breaking functional bugs detected. Validating QA baseline.\n")
 
-        lines.append(f"🧪 **Step 3: Verification & Test Checklist ({v['passed_count']}/{v['total_tests']} Passed - {v['pass_rate']})**")
+        lines.append(f"🧪 **QA Verification ({v['passed_count']}/{v['total_tests']} Passed - {v['pass_rate']})**")
         for item in v["checklist"]:
             lines.append(f"- {item['status']} **{item['test_id']}**: {item['description']}")
 
-        lines.append("\n🎉 **Status**: ALL CHECKLIST ITEMS CERTIFIED. Code is 100% bug-free and ready for production!")
+        lines.append("\n" + _format_security_summary(sec))
+
+        if v["all_passed"] and sec.get("is_secure"):
+            lines.append("\n🎉 **Certification**: ALL QA & CYBERSECURITY GATES PASSED. Code is production-ready!")
+        elif not sec.get("is_secure"):
+            lines.append("\n⚠️ **Security Gate Warning**: Functional tests passed, but SAST flagged security vulnerabilities requiring remediation.")
+        else:
+            lines.append("\n⚠️ **QA Gate Warning**: One or more tests require manual review.")
         return "\n".join(lines)
 
 
 @tool
-def run_code_quality_checklist() -> str:
+def run_code_quality_checklist(target_path: str = "") -> str:
     """
-    Runs the comprehensive QA Code Quality Checklist.
+    Runs the comprehensive QA Code Quality Checklist on the target codebase.
     Validates arithmetic, zero division handling, dictionary key safety, and input sanitization.
+
+    Args:
+        target_path: Optional local repository or file path.
 
     Returns:
         str: Checklist execution report.
     """
-    agent = _get_bug_fixer_agent()
+    agent = _get_bug_fixer_agent(target_path=target_path.strip() or None)
     tests = agent.run_tests()
-    
+
     lines = [
         f"📋 **Code Quality Production Checklist ({tests['passed_count']}/{tests['total_tests']} Passed - {tests['pass_rate']})**\n"
     ]
@@ -131,10 +171,10 @@ def run_code_quality_checklist() -> str:
         lines.append(f"- {item['status']} **{item['test_id']}**: {item['description']}")
 
     if tests["all_passed"]:
-        lines.append("\n✅ All 6 code safety rules verified. Code is production ready.")
+        lines.append("\n✅ All code safety rules verified. Code is production ready.")
     else:
         lines.append(f"\n❌ {tests['failed_count']} checklist items failed. Call `run_bug_fixer_agent` to fix.")
-        
+
     return "\n".join(lines)
 
 
