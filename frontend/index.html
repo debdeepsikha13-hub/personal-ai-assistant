@@ -3,134 +3,205 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WOLF — DevSecOps Bug Remediation &amp; Security Scanner</title>
+  <title>WOLF // Autonomous DevSecOps &amp; AI Engineering System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.55); }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.6); }
 
+    /* Luminous Prismatic Aurora Theme */
     :root {
-      --canvas-bg: #f8fafc;
-      --surface-bg: rgba(255, 255, 255, 0.92);
-      --border-col: rgba(226, 232, 240, 0.95);
+      --canvas-bg: #f1f5f9;
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --card-border: rgba(226, 232, 240, 0.9);
+      --card-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
       --text-main: #0f172a;
       --text-muted: #64748b;
     }
 
-    body.mode-dark {
+    body.mode-twilight {
       --canvas-bg: #090d16;
-      --surface-bg: rgba(15, 23, 42, 0.9);
-      --border-col: rgba(51, 65, 85, 0.7);
+      --card-bg: rgba(15, 23, 42, 0.86);
+      --card-border: rgba(56, 189, 248, 0.2);
+      --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
     }
 
     body {
       background-color: var(--canvas-bg);
+      background-image:
+        radial-gradient(circle at 10% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 90% 10%, rgba(6, 182, 212, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 50% 90%, rgba(236, 72, 153, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 80% 85%, rgba(16, 185, 129, 0.12) 0%, transparent 40%),
+        linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+      background-attachment: fixed;
       color: var(--text-main);
-      transition: background-color 0.25s ease, color 0.25s ease;
+      transition: background-color 0.4s ease, color 0.4s ease;
     }
 
-    .surface {
-      background: var(--surface-bg);
-      border-color: var(--border-col);
-      backdrop-filter: blur(18px);
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--card-shadow);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-dock-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .glass-dock-item:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.25);
+      border-color: rgba(99, 102, 241, 0.45);
     }
 
     .ide-window {
       background: #0f172a;
-      border: 1px solid rgba(148, 163, 184, 0.15);
-      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+      border-radius: 14px;
       overflow: hidden;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
+    .ide-header {
+      background: #1e293b;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ide-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
-    .code-line { display: flex; padding: 2px 10px; font-size: 11.5px; line-height: 1.55; }
-    .code-ln { width: 32px; color: #64748b; user-select: none; text-align: right; margin-right: 12px; flex-shrink: 0; }
+    .code-line { display: flex; padding: 2px 10px; font-size: 11.5px; line-height: 1.6; }
+    .code-ln { width: 32px; color: #475569; user-select: none; text-align: right; margin-right: 12px; flex-shrink: 0; }
     .code-content { color: #e2e8f0; flex: 1; white-space: pre; }
     .code-highlight-bug {
       background: rgba(244, 63, 94, 0.22);
       border-left: 3px solid #f43f5e;
+      color: #fda4af;
+    }
+
+    @keyframes flowDash {
+      to { stroke-dashoffset: -24; }
+    }
+    .flow-line {
+      stroke-dasharray: 6 6;
+      animation: flowDash 1.2s linear infinite;
     }
 
     .prose code {
-      background: rgba(99, 102, 241, 0.1);
+      background: rgba(99, 102, 241, 0.09);
       color: #4f46e5;
-      padding: 1px 5px;
+      padding: 2px 5px;
       border-radius: 4px;
       font-size: 0.88em;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      border: 1px solid rgba(99, 102, 241, 0.15);
     }
-    body.mode-dark .prose code {
-      background: rgba(99, 102, 241, 0.2);
+    body.mode-twilight .prose code {
+      background: rgba(99, 102, 241, 0.22);
       color: #a5b4fc;
     }
     .prose pre {
       background: #0f172a;
       color: #f8fafc;
-      padding: 10px 12px;
-      border-radius: 8px;
+      padding: 12px 14px;
+      border-radius: 10px;
       overflow-x: auto;
       margin: 8px 0;
-      font-size: 11.5px;
+      font-size: 12px;
     }
-    .prose h3 { font-weight: 700; margin-top: 8px; margin-bottom: 4px; }
+    .prose h3 { font-weight: 800; margin-top: 8px; margin-bottom: 4px; }
     .prose ul { list-style-type: disc; padding-left: 18px; margin: 4px 0; }
   </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden font-sans antialiased text-sm">
 
-  <!-- TOP HEADER -->
-  <header class="h-14 surface border-b flex items-center justify-between px-5 z-20 shrink-0">
-    <div class="flex items-center gap-3">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-sky-500 flex items-center justify-center text-white font-black text-xs shadow-sm">
-        W
+  <!-- ========================================================== -->
+  <!-- TOP STUDIO HEADER: Prismatic Wolf Emblem & Controls        -->
+  <!-- ========================================================== -->
+  <header class="h-16 glass-card border-b flex items-center justify-between px-6 z-20 shrink-0">
+
+    <!-- Wolf Geometric 3D-Style Emblem & Brand -->
+    <div class="flex items-center space-x-3.5">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-indigo-800 p-1 flex items-center justify-center shadow-md shadow-indigo-500/25 text-white relative">
+        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow">
+          <polygon points="50,4 92,25 92,75 50,96 8,75 8,25" fill="#0f172a" stroke="#ffffff" stroke-width="2.5"/>
+          <polygon points="28,26 18,5 42,22" fill="#1e293b" stroke="#38bdf8"/>
+          <polygon points="72,26 82,5 58,22" fill="#1e293b" stroke="#38bdf8"/>
+          <polygon points="50,22 36,36 50,48 64,36" fill="#0f172a"/>
+          <polygon points="50,48 40,64 50,82 60,64" fill="#1e293b" stroke="#38bdf8"/>
+          <polygon points="35,46 45,47 38,51" fill="#38bdf8"/>
+          <polygon points="65,46 55,47 62,51" fill="#38bdf8"/>
+        </svg>
       </div>
+
       <div>
         <div class="flex items-center gap-2">
-          <span class="font-black tracking-wide text-slate-900 dark:text-white">WOLF</span>
-          <span class="text-slate-300 dark:text-slate-700">|</span>
-          <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Automated Bug Remediation &amp; Security Scanner</span>
+          <h1 class="font-extrabold text-base tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+            <span class="tracking-wide bg-gradient-to-r from-indigo-600 to-sky-500 bg-clip-text text-transparent font-black">WOLF</span>
+            <span class="text-slate-300 dark:text-slate-700 font-light">|</span>
+            <span class="text-xs uppercase font-mono tracking-wider text-slate-700 dark:text-slate-200 font-bold">Autonomous Engineering System</span>
+          </h1>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold border border-indigo-200/80 dark:border-indigo-800">
+            v3.0 DevSecOps
+          </span>
         </div>
+        <p class="text-[11px] text-slate-500">On-Demand Bug Remediation, OWASP/CWE Security Auditing &amp; Multi-MCP Intelligence</p>
       </div>
     </div>
 
-    <div class="flex items-center gap-2">
+    <!-- Right Controls -->
+    <div class="flex items-center space-x-2.5">
+      <!-- Command Palette Button -->
+      <button
+        onclick="openCommandPalette()"
+        title="Open Omni Command Palette (Ctrl+K)"
+        class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl glass-dock-item text-xs font-medium text-slate-700 dark:text-slate-200 shadow-sm"
+      >
+        <i data-lucide="command" class="w-3.5 h-3.5 text-indigo-500"></i>
+        <span>Command</span>
+        <kbd class="px-1.5 py-0.5 text-[9px] font-mono rounded bg-slate-200/80 dark:bg-slate-800 text-slate-500 font-bold">Ctrl+K</kbd>
+      </button>
+
+      <!-- Atmosphere Switcher -->
+      <button
+        onclick="toggleAtmosphere()"
+        id="atmosphere-btn"
+        title="Toggle Pearl Light / Twilight Dark"
+        class="px-3 py-1.5 rounded-xl glass-dock-item text-xs font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200"
+      >
+        <i data-lucide="sun-moon" class="w-3.5 h-3.5 text-indigo-500"></i>
+        <span id="atmosphere-label" class="hidden sm:inline">Pearl Light</span>
+      </button>
+
       <!-- Live Security Verdict Pill -->
       <button
         onclick="switchRightTab('hub')"
         id="header-security-pill"
-        class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold transition"
+        class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl glass-dock-item text-slate-700 dark:text-slate-200 text-xs font-semibold shadow-sm"
       >
-        <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+        <i data-lucide="shield" class="w-3.5 h-3.5 text-indigo-500"></i>
         <span id="header-security-text">Security: Ready</span>
       </button>
 
-      <!-- Command Palette -->
-      <button
-        onclick="openCommandPalette()"
-        class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg surface border text-xs font-medium text-slate-600 dark:text-slate-300 hover:border-indigo-400 transition"
-      >
-        <i data-lucide="command" class="w-3.5 h-3.5 text-indigo-500"></i>
-        <kbd class="text-[10px] font-mono text-slate-400">Ctrl+K</kbd>
-      </button>
-
-      <!-- Theme Switcher -->
-      <button
-        onclick="toggleTheme()"
-        class="px-2.5 py-1 rounded-lg surface border text-xs font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1.5 hover:border-indigo-400 transition"
-      >
-        <i data-lucide="sun-moon" class="w-3.5 h-3.5 text-indigo-500"></i>
-        <span id="theme-label" class="hidden sm:inline">Light</span>
-      </button>
-
-      <!-- Operational Indicator -->
-      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-medium">
-        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+      <!-- Operational Pill -->
+      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-medium shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
         <span>Operational</span>
       </div>
 
@@ -138,7 +209,7 @@
       <a
         href="https://github.com/debdeepsikha13-hub/personal-ai-assistant"
         target="_blank"
-        class="px-2.5 py-1 rounded-lg surface border text-xs font-medium text-slate-700 dark:text-slate-200 hover:border-indigo-400 flex items-center gap-1.5 transition"
+        class="px-3 py-1.5 rounded-xl glass-dock-item text-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 shadow-sm"
       >
         <i data-lucide="github" class="w-3.5 h-3.5"></i>
         <span class="hidden sm:inline">Repository</span>
@@ -146,192 +217,251 @@
     </div>
   </header>
 
-  <!-- FOCUSED ACTION BAR -->
-  <div class="px-5 py-2 surface border-b flex items-center gap-2 overflow-x-auto text-xs whitespace-nowrap z-10 shrink-0">
-    <!-- DevSecOps On-Demand -->
-    <div class="flex items-center gap-1.5 pr-2.5 border-r border-slate-200 dark:border-slate-800 shrink-0">
-      <button onclick="runFixAndCertify()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white font-semibold flex items-center gap-1.5 shadow-sm transition">
+  <!-- ========================================================== -->
+  <!-- FLOATING COMMAND DOCK (DevSecOps + MCP Suite)              -->
+  <!-- ========================================================== -->
+  <div class="px-6 py-2.5 glass-card border-b flex items-center gap-2 overflow-x-auto text-xs whitespace-nowrap z-10 shrink-0 select-none">
+
+    <!-- Group 1: On-Demand DevSecOps Pipeline -->
+    <div class="flex items-center gap-1.5 shrink-0 pr-2.5 border-r border-slate-200 dark:border-slate-800">
+      <span class="text-[10px] uppercase font-mono text-slate-400 font-bold px-1">DevSecOps:</span>
+
+      <button onclick="runFixAndCertify()" class="glass-dock-item shrink-0 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/20">
         <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
         <span>Fix &amp; Certify</span>
       </button>
 
-      <button onclick="focusRepoInput()" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-indigo-400 flex items-center gap-1.5 transition">
+      <button onclick="focusRepoInput()" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-semibold flex items-center gap-1.5">
         <i data-lucide="git-branch" class="w-3.5 h-3.5 text-indigo-500"></i>
         <span>Execute Repo Link</span>
       </button>
 
-      <button onclick="switchRightTab('sec')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-emerald-400 flex items-center gap-1.5 transition">
+      <button onclick="switchRightTab('sec')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-semibold flex items-center gap-1.5">
         <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-emerald-500"></i>
         <span>Security Sandbox</span>
       </button>
     </div>
 
-    <!-- Assistant & MCP Utilities -->
-    <div class="flex items-center gap-1.5 shrink-0">
-      <button onclick="sendQuickPrompt('Check my system specs, CPU, RAM, and disk storage using MCP.')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-indigo-400 flex items-center gap-1.5 transition">
+    <!-- Group 2: Connected MCP Microservices & Utilities -->
+    <div class="flex items-center gap-1.5 shrink-0 pl-1">
+      <span class="text-[10px] uppercase font-mono text-slate-400 font-bold px-1">MCP Suite:</span>
+
+      <button onclick="sendQuickPrompt('Check my system specs, CPU, RAM, and disk storage using MCP.')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
         <i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-500"></i>
         <span>PC Specs</span>
       </button>
 
-      <button onclick="sendQuickPrompt('Calculate statistics for [12, 45, 67, 89, 23, 56, 78] using MCP tool.')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-purple-400 flex items-center gap-1.5 transition">
-        <i data-lucide="calculator" class="w-3.5 h-3.5 text-purple-500"></i>
-        <span>Calculator</span>
-      </button>
-
-      <button onclick="sendQuickPrompt('What is the weather today in Kolkata?')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-amber-400 flex items-center gap-1.5 transition">
-        <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-amber-500"></i>
-        <span>Weather</span>
-      </button>
-
-      <button onclick="sendQuickPrompt('Search for OWASP Top 10 Python vulnerability remediation best practices')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-sky-400 flex items-center gap-1.5 transition">
-        <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-500"></i>
-        <span>Tech Search (Groq)</span>
-      </button>
-
-      <button onclick="sendQuickPrompt('List my GitHub repositories using your GitHub MCP tool.')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-teal-400 flex items-center gap-1.5 transition">
+      <button onclick="sendQuickPrompt('List my GitHub repositories using your GitHub MCP tool.')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
         <i data-lucide="github" class="w-3.5 h-3.5 text-teal-500"></i>
         <span>GitHub Repos</span>
       </button>
 
-      <button onclick="sendQuickPrompt('Remember that my project is Wolf and my active repository is personal-ai-assistant.')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-pink-400 flex items-center gap-1.5 transition">
+      <button onclick="sendQuickPrompt('Search technical documentation for OWASP Top 10 Python security remediation patterns')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
+        <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-500"></i>
+        <span>Tech Search</span>
+      </button>
+
+      <button onclick="sendQuickPrompt('Calculate statistics for [12, 45, 67, 89, 23, 56, 78] using MCP tool.')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
+        <i data-lucide="calculator" class="w-3.5 h-3.5 text-purple-500"></i>
+        <span>Calculator</span>
+      </button>
+
+      <button onclick="sendQuickPrompt('What is the weather today in Kolkata?')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
+        <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-amber-500"></i>
+        <span>Weather</span>
+      </button>
+
+      <button onclick="sendQuickPrompt('Remember that my project is Wolf and my active repository is personal-ai-assistant.')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 mr-4 text-slate-700 dark:text-slate-200">
         <i data-lucide="bookmark" class="w-3.5 h-3.5 text-pink-500"></i>
         <span>Save Memory</span>
       </button>
     </div>
   </div>
 
-  <!-- MAIN 2-PANE STUDIO -->
+  <!-- ========================================================== -->
+  <!-- MAIN WORKSPACE: Executive Studio Split View                -->
+  <!-- ========================================================== -->
   <div class="flex-1 flex overflow-hidden">
 
-    <!-- LEFT PANE: Engineering Chat & Execution Log -->
-    <section class="flex-1 flex flex-col h-full border-r border-slate-200/80 dark:border-slate-800 min-w-[340px]">
-      <div id="chat-container" class="flex-1 overflow-y-auto p-5 space-y-4">
-        <div class="p-4 rounded-xl surface border space-y-2 max-w-2xl">
-          <div class="flex items-center justify-between">
-            <h2 class="text-sm font-bold text-slate-900 dark:text-white">WOLF On-Demand DevSecOps Engine</h2>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 font-semibold">Strict On-Demand</span>
+    <!-- LEFT STAGE: Conversational Engineering Stream -->
+    <section class="flex-1 flex flex-col h-full bg-transparent border-r border-slate-200/80 dark:border-slate-800 min-w-[360px]">
+      <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4">
+
+        <!-- Executive Welcome Hero Card -->
+        <div class="p-5 rounded-2xl glass-card space-y-3.5 max-w-2xl">
+          <div class="flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-indigo-800 p-1 flex items-center justify-center shadow-md shadow-indigo-500/25 text-white shrink-0">
+              <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow">
+                <polygon points="50,4 92,25 92,75 50,96 8,75 8,25" fill="#0f172a" stroke="#ffffff" stroke-width="2.5"/>
+                <polygon points="28,26 18,5 42,22" fill="#1e293b" stroke="#38bdf8"/>
+                <polygon points="72,26 82,5 58,22" fill="#1e293b" stroke="#38bdf8"/>
+                <polygon points="50,22 36,36 50,48 64,36" fill="#0f172a"/>
+                <polygon points="50,48 40,64 50,82 60,64" fill="#1e293b" stroke="#38bdf8"/>
+                <polygon points="35,46 45,47 38,51" fill="#38bdf8"/>
+                <polygon points="65,46 55,47 62,51" fill="#38bdf8"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span class="font-black bg-gradient-to-r from-indigo-600 to-sky-500 bg-clip-text text-transparent">WOLF</span>
+                <span>Autonomous DevSecOps Engineering System</span>
+              </h2>
+              <p class="text-xs text-slate-500">Enterprise On-Demand Code Remediation &amp; Cybersecurity Verification</p>
+            </div>
           </div>
+
           <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-            Paste any <strong>GitHub repository URL</strong> or <strong>local folder path</strong> in the panel on the right (or right here in chat) to execute the 2-stage pipeline:
-            <strong>Stage 1</strong> detects and fixes bugs automatically; <strong>Stage 2</strong> scans the fixed code against OWASP Top 10 / CWE security rules and displays a clear <strong>SECURE / INSECURE</strong> verdict.
+            Modern engineering teams ship code faster than manual reviews can catch regressions and security flaws.
+            <strong>WOLF</strong> operates strictly on demand on any repository you submit — executing a verified <strong>2-Stage DevSecOps Pipeline</strong>:
           </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+            <div class="p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/35 border border-indigo-200/70 dark:border-indigo-900/60 space-y-0.5">
+              <div class="font-bold text-indigo-800 dark:text-indigo-300 flex items-center gap-1.5">
+                <i data-lucide="wrench" class="w-3.5 h-3.5"></i> Stage 1 — Autonomous Bug Fixing
+              </div>
+              <p class="text-[11px] text-slate-600 dark:text-slate-300">Parses Python AST, runs discovered test suites, diagnoses root causes, and applies verified patches automatically.</p>
+            </div>
+            <div class="p-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/35 border border-emerald-200/70 dark:border-emerald-900/60 space-y-0.5">
+              <div class="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Stage 2 — OWASP / CWE Security Audit
+              </div>
+              <p class="text-[11px] text-slate-600 dark:text-slate-300">Audits the fixed codebase for code injection, leaked secrets, SQLi, unsafe deserialization, and crypto flaws before deployment.</p>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 flex-wrap gap-2">
+            <span>Status: <code id="hero-target-label" class="font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md">Ready — Paste any GitHub URL or local path</code></span>
+            <span class="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> 6 OWASP/CWE Controls • 4 MCP Services
+            </span>
+          </div>
         </div>
+
       </div>
 
-      <footer class="p-3.5 surface border-t">
+      <!-- Floating Input Bar -->
+      <footer class="p-4 glass-card border-t border-slate-200/80 dark:border-slate-800">
         <form id="chat-form" onsubmit="handleSend(event)" class="relative flex items-center max-w-3xl mx-auto">
           <input
             type="text"
             id="user-input"
-            placeholder="Paste a GitHub repo link to execute, or ask a security / engineering question..."
+            placeholder="Paste a GitHub repo link to execute, or ask Wolf (e.g. 'Check PC specs', 'Search OWASP fixes', 'Weather in Kolkata')..."
             autocomplete="off"
-            class="w-full pl-4 pr-24 py-2.5 rounded-xl surface border text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            class="w-full pl-4 pr-24 py-3 rounded-2xl glass-card text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition shadow-inner"
           />
           <button
             type="submit"
             id="send-btn"
-            class="absolute right-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1 transition disabled:opacity-50"
+            class="absolute right-2 px-4 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm disabled:opacity-50"
           >
-            <span>Send</span>
+            <span>Execute</span>
             <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
           </button>
         </form>
       </footer>
     </section>
 
-    <!-- RIGHT PANE: On-Demand Repo Runner, Live Code Viewer & Security Audit -->
-    <aside class="w-[500px] surface flex flex-col justify-between hidden lg:flex z-10 shrink-0">
+    <!-- RIGHT STAGE: Interactive DevSecOps Studio -->
+    <aside class="w-[500px] glass-card flex flex-col justify-between hidden lg:flex z-10 shrink-0 border-l border-slate-200/80 dark:border-slate-800">
 
-      <!-- 3 Clean Studio Tabs -->
+      <!-- 4 Clean Studio Tabs -->
       <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-        <div class="flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs">
-          <button id="tab-hub-btn" onclick="switchRightTab('hub')" class="px-3 py-1 rounded-md font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm flex items-center gap-1.5 transition">
+        <div class="flex items-center gap-1 p-1 rounded-xl bg-slate-200/60 dark:bg-slate-800 text-[11px]">
+          <button id="tab-hub-btn" onclick="switchRightTab('hub')" class="px-2.5 py-1 rounded-lg font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm flex items-center gap-1 transition">
             <i data-lucide="play-circle" class="w-3.5 h-3.5 text-indigo-500"></i> Execute Repo
           </button>
-          <button id="tab-code-btn" onclick="switchRightTab('code')" class="px-3 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 transition">
+          <button id="tab-code-btn" onclick="switchRightTab('code')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 transition">
             <i data-lucide="code-2" class="w-3.5 h-3.5 text-sky-500"></i> Code
           </button>
-          <button id="tab-sec-btn" onclick="switchRightTab('sec')" class="px-3 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 transition">
+          <button id="tab-sec-btn" onclick="switchRightTab('sec')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 transition">
             <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> Security
+          </button>
+          <button id="tab-arch-btn" onclick="switchRightTab('arch')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 transition">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-purple-500"></i> Arch
           </button>
         </div>
 
-        <span id="studio-status-pill" class="px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
+        <span id="studio-status-pill" class="px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
           IDLE
         </span>
       </div>
 
-      <!-- TAB 1: Execute Repo (Primary Workflow) -->
-      <div id="panel-hub-tab" class="flex-1 overflow-y-auto p-4 space-y-3">
-        <!-- Input Box -->
-        <div class="p-3.5 rounded-xl surface border space-y-2.5">
+      <!-- TAB 1: On-Demand Execute Repo -->
+      <div id="panel-hub-tab" class="flex-1 overflow-y-auto p-4 space-y-3.5">
+
+        <!-- Target Repo Submission Card -->
+        <div class="p-4 rounded-2xl glass-card border border-indigo-200/70 dark:border-indigo-900/60 space-y-2.5">
           <div class="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
-            <span class="flex items-center gap-1.5"><i data-lucide="git-branch" class="w-3.5 h-3.5 text-indigo-500"></i> Repository URL or Local Path</span>
-            <span class="text-[10px] font-mono text-slate-400">On-Demand Only</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="git-branch" class="w-4 h-4 text-indigo-500"></i> On-Demand Repository Executor</span>
+            <span class="text-[10px] font-mono text-indigo-500 font-semibold">Strict On-Demand</span>
           </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">
+            Paste any GitHub repository URL or local folder path. Wolf will <strong>(1) fix bugs</strong> and <strong>(2) certify security</strong> against OWASP/CWE rules.
+          </p>
           <input
             id="repo-link-input"
             type="text"
             placeholder="https://github.com/owner/repo  or  C:\path\to\project"
-            class="w-full px-3 py-2 rounded-lg bg-slate-100/90 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            class="w-full px-3 py-2.5 rounded-xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
             onkeydown="if(event.key==='Enter'){ runOnDemandRepo(); }"
           />
           <button
             id="execute-repo-btn"
             onclick="runOnDemandRepo()"
-            class="w-full py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-bold transition flex items-center justify-center gap-2 disabled:opacity-50"
+            class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-bold transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
             <span id="execute-repo-btn-label">Fix &amp; Certify (Bug Fix + Security Scan)</span>
           </button>
         </div>
 
-        <!-- SECURITY VERDICT BANNER -->
-        <div id="verdict-banner" class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 space-y-1">
+        <!-- BIG SECURITY VERDICT INDICATOR BANNER -->
+        <div id="verdict-banner" class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 space-y-1">
           <div class="flex items-center justify-between">
             <span id="verdict-title" class="text-xs font-extrabold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
               <i data-lucide="shield" class="w-4 h-4 text-slate-400"></i> Waiting for Repository Input
             </span>
-            <span id="verdict-grade-pill" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+            <span id="verdict-grade-pill" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
               IDLE
             </span>
           </div>
           <p id="verdict-desc" class="text-[11px] text-slate-500 dark:text-slate-400">
-            No background scans are running. Paste a repository link above and click <strong>Fix &amp; Certify</strong>.
+            Zero background scanning active. Submit a repository link above to run Stage 1 (Bug Remediation) followed by Stage 2 (Cybersecurity Verification).
           </p>
         </div>
 
-        <!-- STAGE 1: Bug Detection & Fixing -->
-        <div id="stage1-card" class="p-3.5 rounded-xl surface border space-y-2 hidden">
+        <!-- STAGE 1 RESULT CARD -->
+        <div id="stage1-card" class="p-4 rounded-2xl glass-card space-y-2.5 hidden">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <span class="w-5 h-5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] flex items-center justify-center font-black">1</span>
+            <span class="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <span class="w-5 h-5 rounded-md bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] flex items-center justify-center font-black">1</span>
               Stage 1 — Bug Detection &amp; Auto-Fix
             </span>
             <span id="stage1-pill" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 font-bold">0 Fixed</span>
           </div>
           <div class="grid grid-cols-3 gap-2 text-center font-mono text-[10px]">
-            <div class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900">
-              <div id="s1-files" class="font-black text-slate-800 dark:text-white">0</div>
+            <div class="p-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/70">
+              <div id="s1-files" class="text-sm font-black text-slate-800 dark:text-white">0</div>
               <div class="text-[9px] text-slate-400">PY FILES</div>
             </div>
-            <div class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900">
-              <div id="s1-fixed" class="font-black text-emerald-600">0</div>
+            <div class="p-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/70">
+              <div id="s1-fixed" class="text-sm font-black text-emerald-600">0</div>
               <div class="text-[9px] text-slate-400">AUTO-FIXED</div>
             </div>
-            <div class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900">
-              <div id="s1-remaining" class="font-black text-amber-500">0</div>
+            <div class="p-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/70">
+              <div id="s1-remaining" class="text-sm font-black text-amber-500">0</div>
               <div class="text-[9px] text-slate-400">REVIEW</div>
             </div>
           </div>
           <div id="stage1-details" class="space-y-1.5 text-[11px]"></div>
         </div>
 
-        <!-- STAGE 2: Post-Fix Security Scan -->
-        <div id="stage2-card" class="p-3.5 rounded-xl surface border space-y-2 hidden">
+        <!-- STAGE 2 RESULT CARD -->
+        <div id="stage2-card" class="p-4 rounded-2xl glass-card space-y-2.5 hidden">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <span class="w-5 h-5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] flex items-center justify-center font-black">2</span>
+            <span class="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <span class="w-5 h-5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] flex items-center justify-center font-black">2</span>
               Stage 2 — Post-Fix Security Scan
             </span>
             <span id="stage2-pill" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 font-bold">Grade A+</span>
@@ -343,9 +473,14 @@
       <!-- TAB 2: Live Code Viewer -->
       <div id="panel-code-tab" class="flex-1 overflow-y-auto p-4 space-y-3 hidden">
         <div class="ide-window">
-          <div class="px-3.5 py-2 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
-            <span id="ide-filename-label" class="text-[11px] font-mono text-slate-300 truncate">No repository executed yet</span>
-            <span id="ide-status-pill" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Idle</span>
+          <div class="ide-header">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="ide-dot bg-rose-500 shrink-0"></span>
+              <span class="ide-dot bg-amber-500 shrink-0"></span>
+              <span class="ide-dot bg-emerald-500 shrink-0"></span>
+              <span id="ide-filename-label" class="text-[11px] font-mono text-slate-300 ml-2 truncate">No repository executed yet</span>
+            </div>
+            <span id="ide-status-pill" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 shrink-0">Idle</span>
           </div>
           <div id="ide-code-view" class="p-2 max-h-[520px] overflow-y-auto overflow-x-auto">
             <div class="p-4 text-xs font-mono text-slate-400">Execute a repository link in the first tab to inspect fixed &amp; flagged lines here.</div>
@@ -353,97 +488,180 @@
         </div>
       </div>
 
-      <!-- TAB 3: Full OWASP/CWE Security Report + Snippet Sandbox -->
+      <!-- TAB 3: Full OWASP/CWE Security Audit & Sandbox -->
       <div id="panel-sec-tab" class="flex-1 overflow-y-auto p-4 space-y-3 hidden">
-        <!-- Grade & Severity Breakdown -->
-        <div id="sec-summary-banner" class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 space-y-2.5">
+        <div id="sec-summary-banner" class="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 space-y-2.5">
           <div class="flex items-center gap-2.5">
-            <span id="sec-banner-grade" class="w-9 h-9 rounded-lg bg-slate-600 text-white font-black text-sm font-mono flex items-center justify-center">—</span>
+            <span id="sec-banner-grade" class="w-10 h-10 rounded-xl bg-slate-600 text-white font-black text-sm font-mono flex items-center justify-center shadow-sm">—</span>
             <div>
-              <div class="text-xs font-bold text-slate-900 dark:text-white">OWASP Top 10 / CWE SAST Report</div>
-              <div id="sec-banner-meta" class="text-[11px] text-slate-500">Execute a repo or audit a snippet below</div>
+              <div class="text-xs font-extrabold text-slate-900 dark:text-white">OWASP Top 10 / CWE SAST Audit</div>
+              <div id="sec-banner-meta" class="text-[11px] text-slate-500">Execute a repository or audit a code snippet below</div>
             </div>
           </div>
           <div class="grid grid-cols-4 gap-1.5 text-center font-mono text-[10px]">
-            <div class="p-1.5 rounded-lg bg-white/80 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
+            <div class="p-1.5 rounded-xl bg-white/80 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
               <div class="text-rose-600 font-black" id="sev-critical">0</div>
               <div class="text-slate-400 text-[9px]">CRIT</div>
             </div>
-            <div class="p-1.5 rounded-lg bg-white/80 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
+            <div class="p-1.5 rounded-xl bg-white/80 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
               <div class="text-orange-500 font-black" id="sev-high">0</div>
               <div class="text-slate-400 text-[9px]">HIGH</div>
             </div>
-            <div class="p-1.5 rounded-lg bg-white/80 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
+            <div class="p-1.5 rounded-xl bg-white/80 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
               <div class="text-amber-500 font-black" id="sev-medium">0</div>
               <div class="text-slate-400 text-[9px]">MED</div>
             </div>
-            <div class="p-1.5 rounded-lg bg-white/80 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
+            <div class="p-1.5 rounded-xl bg-white/80 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
               <div class="text-sky-500 font-black" id="sev-low">0</div>
               <div class="text-slate-400 text-[9px]">LOW</div>
             </div>
           </div>
         </div>
 
-        <!-- Flagged Findings -->
         <div id="sec-findings-section" class="space-y-2 hidden">
-          <div class="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Flagged Vulnerabilities</div>
+          <div class="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Flagged Security Vulnerabilities</div>
           <div id="sec-findings-list" class="space-y-2 text-xs"></div>
         </div>
 
-        <!-- 6 OWASP/CWE Controls -->
         <div class="space-y-1.5">
           <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">6 OWASP / CWE Security Controls</div>
           <div id="sec-checklist-container" class="space-y-1.5 text-xs">
-            <div class="p-2.5 rounded-lg surface border text-[11px] text-slate-500 font-mono">Run a repository or snippet audit to populate rule results.</div>
+            <div class="p-3 rounded-xl glass-card text-[11px] text-slate-500 font-mono">Run a repository or snippet audit to populate all 6 OWASP/CWE controls.</div>
           </div>
         </div>
 
         <!-- Live Code Snippet Sandbox -->
-        <div class="p-3.5 rounded-xl surface border space-y-2">
+        <div class="p-3.5 rounded-2xl glass-card border border-indigo-200/60 dark:border-indigo-900/60 space-y-2">
           <div class="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
             <span class="flex items-center gap-1.5"><i data-lucide="terminal" class="w-3.5 h-3.5 text-indigo-500"></i> Security Sandbox (Paste Python Code)</span>
+            <span class="text-[10px] font-mono text-slate-400">Live AST + Regex</span>
           </div>
           <textarea
             id="sast-snippet-input"
             rows="4"
-            placeholder="Paste any Python snippet to test detection of eval(), os.system(), shell=True, SQLi, hardcoded secrets, pickle, MD5..."
-            class="w-full p-2.5 rounded-lg bg-slate-950 text-slate-100 font-mono text-[11px] border border-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            placeholder="Paste any Python snippet to test detection of eval(), os.system(), shell=True, SQLi, hardcoded API keys, pickle, MD5..."
+            class="w-full p-2.5 rounded-xl bg-slate-950 text-slate-100 font-mono text-[11px] border border-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           ></textarea>
           <div class="flex items-center justify-end gap-2">
             <button onclick="document.getElementById('sast-snippet-input').value='';" class="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white">
               Clear
             </button>
-            <button onclick="scanInlineCodeSnippet()" class="px-3.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 transition">
+            <button onclick="scanInlineCodeSnippet()" class="px-3.5 py-1 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 transition">
               <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Audit Snippet
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Minimal Footer -->
-      <div class="px-4 py-2.5 border-t border-slate-200/80 dark:border-slate-800 text-[11px] text-slate-500 flex items-center justify-between font-mono">
-        <span>WOLF DevSecOps Engine</span>
-        <span>Stage 1: Bug Fix &rarr; Stage 2: SAST</span>
+      <!-- TAB 4: Interactive System Architecture Blueprint -->
+      <div id="panel-arch-tab" class="flex-1 overflow-y-auto p-4 space-y-3 hidden">
+        <div class="p-3.5 rounded-2xl glass-card space-y-2 border border-indigo-200/60 dark:border-indigo-900/60">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <i data-lucide="git-fork" class="w-4 h-4 text-indigo-500"></i> Live System Data-Flow Topology
+            </span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800">
+              Interactive
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-500">Click any node to inspect its protocol &amp; engineering responsibility:</p>
+
+          <div class="relative bg-slate-950 rounded-xl p-2.5 border border-slate-800 overflow-x-auto select-none">
+            <svg viewBox="0 0 380 135" class="w-full min-w-[350px] h-32">
+              <defs>
+                <linearGradient id="topo-pulse" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#6366f1" />
+                  <stop offset="50%" stop-color="#38bdf8" />
+                  <stop offset="100%" stop-color="#34d399" />
+                </linearGradient>
+              </defs>
+              <path d="M 68 35 L 126 35" stroke="url(#topo-pulse)" stroke-width="2" class="flow-line"/>
+              <path d="M 186 35 L 244 35" stroke="url(#topo-pulse)" stroke-width="2" class="flow-line"/>
+              <path d="M 156 55 L 156 82 L 186 100" stroke="url(#topo-pulse)" stroke-width="2" class="flow-line"/>
+              <path d="M 248 102 L 275 102" stroke="url(#topo-pulse)" stroke-width="2" class="flow-line"/>
+
+              <g onclick="selectTopologyNode('client')" class="cursor-pointer">
+                <rect x="6" y="15" width="62" height="40" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="1.5"/>
+                <text x="37" y="32" fill="#94a3b8" font-size="8" font-family="monospace" text-anchor="middle">STUDIO</text>
+                <text x="37" y="45" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">ASGI UI</text>
+              </g>
+              <g onclick="selectTopologyNode('langgraph')" class="cursor-pointer">
+                <rect x="126" y="15" width="60" height="40" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.5"/>
+                <text x="156" y="32" fill="#a5b4fc" font-size="8" font-family="monospace" text-anchor="middle">LANGGRAPH</text>
+                <text x="156" y="45" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">Router</text>
+              </g>
+              <g onclick="selectTopologyNode('mcp')" class="cursor-pointer">
+                <rect x="244" y="15" width="68" height="40" rx="8" fill="#082f49" stroke="#38bdf8" stroke-width="1.5"/>
+                <text x="278" y="32" fill="#7dd3fc" font-size="8" font-family="monospace" text-anchor="middle">FASTMCP</text>
+                <text x="278" y="45" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">4 Services</text>
+              </g>
+              <g onclick="selectTopologyNode('stage1')" class="cursor-pointer">
+                <rect x="186" y="82" width="62" height="40" rx="8" fill="#064e3b" stroke="#34d399" stroke-width="1.5"/>
+                <text x="217" y="99" fill="#6ee7b7" font-size="8" font-family="monospace" text-anchor="middle">STAGE 1</text>
+                <text x="217" y="112" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">Bug Fixer</text>
+              </g>
+              <g onclick="selectTopologyNode('stage2')" class="cursor-pointer">
+                <rect x="275" y="82" width="68" height="40" rx="8" fill="#31102b" stroke="#f43f5e" stroke-width="1.5"/>
+                <text x="309" y="99" fill="#fca5a5" font-size="8" font-family="monospace" text-anchor="middle">STAGE 2</text>
+                <text x="309" y="112" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">SAST Guard</text>
+              </g>
+            </svg>
+            <div class="mt-2 p-2 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-mono flex items-center justify-between gap-2">
+              <span id="topo-name" class="font-bold text-indigo-400">Node: LangGraph Router</span>
+              <span id="topo-desc" class="text-slate-400 text-[10px]">Cyclic agent loop • Multi-LLM Factory</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl glass-card space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-900 dark:text-white">1. On-Demand 2-Stage DevSecOps Pipeline</span>
+            <span class="text-[10px] font-mono text-emerald-500">Zero Background Loop</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-300">Executes strictly when a GitHub URL or local path is submitted: isolates clone, fixes AST/test bugs, then verifies security against 6 OWASP/CWE rules.</p>
+        </div>
+
+        <div class="p-3 rounded-xl glass-card space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-900 dark:text-white">2. Dual-Engine AI (Gemini + Groq LPU)</span>
+            <span class="text-[10px] font-mono text-indigo-500">Model-Agnostic</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-300">LangGraph orchestrates Google Gemini for reasoning &amp; tool routing, while Groq (`qwen/qwen3.8-27b`) accelerates live technical &amp; CVE search synthesis.</p>
+        </div>
+
+        <div class="p-3 rounded-xl glass-card space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-900 dark:text-white">3. FastMCP Microservices (4 Servers)</span>
+            <span class="text-[10px] font-mono text-sky-500">JSON-RPC 2.0</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-300">Isolated stdio microservices for System Diagnostics (PC Specs), Read-Only GitHub, Groq Web Search, and Advanced Math/Statistics.</p>
+        </div>
+      </div>
+
+      <!-- Studio Footer -->
+      <div class="p-3.5 border-t border-slate-200/80 dark:border-slate-800 text-xs text-slate-500 flex items-center justify-between">
+        <span class="font-mono">debdeepsikha13-hub</span>
+        <span class="text-indigo-600 dark:text-indigo-400 font-semibold">WOLF Autonomous Engineering System</span>
       </div>
     </aside>
   </div>
 
-  <!-- COMMAND PALETTE (Ctrl+K) -->
-  <div id="command-palette-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-start justify-center pt-24 px-4" onclick="closeCommandPalette()">
-    <div class="w-full max-w-lg surface border rounded-xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
-      <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center gap-2">
+  <!-- OMNI COMMAND PALETTE (Ctrl + K) -->
+  <div id="command-palette-modal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md hidden flex items-start justify-center pt-24 px-4" onclick="closeCommandPalette()">
+    <div class="w-full max-w-xl glass-card rounded-2xl shadow-2xl border border-indigo-500/30 overflow-hidden" onclick="event.stopPropagation()">
+      <div class="p-3.5 border-b border-slate-200/80 dark:border-slate-800 flex items-center gap-2.5">
         <i data-lucide="search" class="w-4 h-4 text-indigo-500"></i>
         <input
           id="palette-search-input"
           type="text"
-          placeholder="Type a command (fix, repo, security, search, theme)..."
+          placeholder="Type an action or tool (fix, repo, security, pc, calc, weather, dark)..."
           class="w-full bg-transparent text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
           oninput="filterPaletteItems(this.value)"
           onkeydown="handlePaletteKeydown(event)"
         />
-        <kbd class="px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-200 dark:bg-slate-800 text-slate-500">ESC</kbd>
+        <kbd class="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-200 dark:bg-slate-800 text-slate-500">ESC</kbd>
       </div>
-      <div id="palette-items-list" class="max-h-72 overflow-y-auto p-1.5 space-y-1 text-xs"></div>
+      <div id="palette-items-list" class="max-h-80 overflow-y-auto p-2 space-y-1 text-xs select-none"></div>
     </div>
   </div>
 
@@ -452,42 +670,43 @@
     const userInput = document.getElementById("user-input");
     const sendBtn = document.getElementById("send-btn");
     const studioStatusPill = document.getElementById("studio-status-pill");
-
     const threadId = "wolf-" + Math.random().toString(36).substring(2, 9);
 
     window.addEventListener("DOMContentLoaded", () => {
-      if (localStorage.getItem("wolf_theme") === "dark") {
-        document.body.classList.add("mode-dark");
-        updateThemeLabel(true);
+      if (localStorage.getItem("wolf_atmosphere") === "twilight") {
+        document.body.classList.add("mode-twilight");
+        updateAtmosphereBtn(true);
       }
       lucide.createIcons();
     });
 
-    function toggleTheme() {
-      const isDark = document.body.classList.toggle("mode-dark");
-      localStorage.setItem("wolf_theme", isDark ? "dark" : "light");
-      updateThemeLabel(isDark);
+    function toggleAtmosphere() {
+      const isTwilight = document.body.classList.toggle("mode-twilight");
+      localStorage.setItem("wolf_atmosphere", isTwilight ? "twilight" : "pearl");
+      updateAtmosphereBtn(isTwilight);
     }
 
-    function updateThemeLabel(isDark) {
-      const el = document.getElementById("theme-label");
-      if (el) el.innerText = isDark ? "Dark" : "Light";
+    function updateAtmosphereBtn(isTwilight) {
+      const label = document.getElementById("atmosphere-label");
+      if (label) label.innerText = isTwilight ? "Twilight Dark" : "Pearl Light";
     }
 
     function switchRightTab(tab) {
       const panels = {
         hub: document.getElementById("panel-hub-tab"),
         code: document.getElementById("panel-code-tab"),
-        sec: document.getElementById("panel-sec-tab")
+        sec: document.getElementById("panel-sec-tab"),
+        arch: document.getElementById("panel-arch-tab")
       };
       const btns = {
         hub: document.getElementById("tab-hub-btn"),
         code: document.getElementById("tab-code-btn"),
-        sec: document.getElementById("tab-sec-btn")
+        sec: document.getElementById("tab-sec-btn"),
+        arch: document.getElementById("tab-arch-btn")
       };
 
-      const inactive = "px-3 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 transition";
-      const active = "px-3 py-1 rounded-md font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm flex items-center gap-1.5 transition";
+      const inactive = "px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 transition";
+      const active = "px-2.5 py-1 rounded-lg font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm flex items-center gap-1 transition";
 
       Object.keys(panels).forEach(k => {
         if (panels[k]) panels[k].classList.add("hidden");
@@ -498,6 +717,19 @@
       if (panels[key]) panels[key].classList.remove("hidden");
       if (btns[key]) btns[key].className = active;
       lucide.createIcons();
+    }
+
+    function selectTopologyNode(key) {
+      const info = {
+        client: { name: "Node: Prismatic Studio UI", desc: "Starlette ASGI gateway • On-Demand REST & Chat" },
+        langgraph: { name: "Node: LangGraph Router", desc: "Cyclic StateGraph engine • Persistent memory" },
+        mcp: { name: "Node: FastMCP Suite", desc: "4 stdio microservices (PC Specs, GitHub, Groq Search, Math)" },
+        stage1: { name: "Node: Stage 1 Bug Fixer", desc: "Clones submitted repo • AST scan, tests & auto-patch" },
+        stage2: { name: "Node: Stage 2 SAST Guard", desc: "6 OWASP/CWE security rules • SECURE/INSECURE verdict" }
+      };
+      const sel = info[key] || info.langgraph;
+      document.getElementById("topo-name").innerText = sel.name;
+      document.getElementById("topo-desc").innerText = sel.desc;
     }
 
     function focusRepoInput() {
@@ -512,7 +744,7 @@
       if (input && input.value.trim()) {
         runOnDemandRepo();
       } else {
-        appendSystemMessage("Paste a GitHub repository URL or local folder path first, then click Fix & Certify.");
+        appendSystemMessage("📌 Paste a GitHub repository URL or local folder path into Execute Repo first, then click Fix & Certify.");
         if (input) input.focus();
       }
     }
@@ -524,14 +756,14 @@
       const target = input ? input.value.trim() : "";
 
       if (!target) {
-        appendSystemMessage("Paste a GitHub repository URL or local folder path first.");
+        appendSystemMessage("📌 Paste a GitHub repository URL or local folder path first.");
         if (input) input.focus();
         return;
       }
 
       if (btn) btn.disabled = true;
       if (btnLabel) btnLabel.innerText = "Running Stage 1 (Bug Fix) & Stage 2 (Security)...";
-      appendSystemMessage(`Executing on '${target}': Stage 1 (Bug Fix) -> Stage 2 (Security Scan)...`);
+      appendSystemMessage(`⚡ Executing 2-Stage Pipeline on '${target}': Stage 1 (Bug Fix) -> Stage 2 (Security Scan)...`);
 
       try {
         const res = await fetch("/api/execute_repo", {
@@ -562,10 +794,10 @@
       const title = document.getElementById("verdict-title");
       const pill = document.getElementById("verdict-grade-pill");
       const desc = document.getElementById("verdict-desc");
-      banner.className = "p-4 rounded-xl border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/50 space-y-1";
+      banner.className = "p-4 rounded-2xl border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/50 space-y-1";
       title.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-rose-500"></i> Execution Failed`;
       pill.innerText = "ERROR";
-      pill.className = "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-600 text-white";
+      pill.className = "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-600 text-white";
       desc.innerText = errorMsg;
       lucide.createIcons();
     }
@@ -576,40 +808,40 @@
       const s2 = data.stage2_security;
       const isSecure = s2.verdict === "SECURE";
 
+      const heroLbl = document.getElementById("hero-target-label");
+      if (heroLbl) heroLbl.innerText = repoLabel;
+
       renderLiveSourceCode(data.source, s2);
       renderSecurityAudit(s2);
 
-      // Update status pills
       studioStatusPill.innerText = isSecure ? `SECURE (${s2.overall_grade})` : `INSECURE (${s2.vulnerabilities_count})`;
       studioStatusPill.className = isSecure
-        ? "px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
-        : "px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-rose-600 text-white animate-pulse";
+        ? "px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 shrink-0"
+        : "px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-rose-600 text-white animate-pulse shrink-0";
 
-      // Verdict Banner
       const banner = document.getElementById("verdict-banner");
       const title = document.getElementById("verdict-title");
       const pill = document.getElementById("verdict-grade-pill");
       const desc = document.getElementById("verdict-desc");
 
       if (isSecure) {
-        banner.className = "p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50/90 dark:bg-emerald-950/50 space-y-1";
+        banner.className = "p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50/90 dark:bg-emerald-950/50 space-y-1 shadow-md shadow-emerald-500/10";
         title.className = "text-xs font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5";
-        title.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i> CODE IS SECURE`;
+        title.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i> 🟢 CODE IS SECURE ✅`;
         pill.className = "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-emerald-600 text-white";
         pill.innerText = `GRADE ${s2.overall_grade} • 0 VULNS`;
         desc.className = "text-[11px] text-emerald-700 dark:text-emerald-300";
-        desc.innerHTML = `<strong>${escapeHtml(repoLabel)}</strong> passed Stage 1 bug checks and all 6 OWASP/CWE security rules (${data.duration_ms}ms).`;
+        desc.innerHTML = `<strong>${escapeHtml(repoLabel)}</strong> passed Stage 1 bug verification and all 6 OWASP/CWE cybersecurity controls (${data.duration_ms}ms).`;
       } else {
-        banner.className = "p-4 rounded-xl border-2 border-rose-500 bg-rose-50/95 dark:bg-rose-950/60 space-y-1";
+        banner.className = "p-4 rounded-2xl border-2 border-rose-500 bg-rose-50/95 dark:bg-rose-950/60 space-y-1 shadow-md shadow-rose-500/20";
         title.className = "text-xs font-extrabold text-rose-800 dark:text-rose-200 flex items-center gap-1.5";
-        title.innerHTML = `<i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i> INSECURE — SECURITY RISK DETECTED`;
+        title.innerHTML = `<i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i> 🔴 SECURITY RISK DETECTED 🚨`;
         pill.className = "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-rose-600 text-white animate-pulse";
         pill.innerText = `GRADE ${s2.overall_grade} • ${s2.vulnerabilities_count} VULN(S)`;
         desc.className = "text-[11px] text-rose-700 dark:text-rose-300";
-        desc.innerHTML = `<strong>WARNING:</strong> <strong>${escapeHtml(repoLabel)}</strong> has <strong>${s2.vulnerabilities_count}</strong> vulnerability(s) (CRIT: ${s2.severity_counts.CRITICAL}, HIGH: ${s2.severity_counts.HIGH}). Remediate before deployment.`;
+        desc.innerHTML = `<strong>WARNING:</strong> <strong>${escapeHtml(repoLabel)}</strong> has <strong>${s2.vulnerabilities_count}</strong> vulnerability(s) (CRIT: ${s2.severity_counts.CRITICAL}, HIGH: ${s2.severity_counts.HIGH}). Remediate before deployment!`;
       }
 
-      // Stage 1
       document.getElementById("stage1-card").classList.remove("hidden");
       document.getElementById("s1-files").innerText = s1.files_analyzed;
       document.getElementById("s1-fixed").innerText = s1.bugs_fixed_count;
@@ -618,25 +850,24 @@
 
       const s1Details = document.getElementById("stage1-details");
       if (s1.bugs_found_count === 0) {
-        s1Details.innerHTML = `<div class="p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300">No syntax or static bugs found across ${s1.files_analyzed} Python file(s).</div>`;
+        s1Details.innerHTML = `<div class="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300">✅ No syntax or static bugs found across ${s1.files_analyzed} Python file(s).</div>`;
       } else {
         let html = "";
         (s1.fixes_applied || []).forEach(fx => {
-          html += `<div class="p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900">
-            <div class="font-bold text-emerald-800 dark:text-emerald-300">FIXED: ${escapeHtml(fx.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(fx.file)}:${fx.line})</span></div>
+          html += `<div class="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900">
+            <div class="font-bold text-emerald-800 dark:text-emerald-300">🛠️ FIXED: ${escapeHtml(fx.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(fx.file)}:${fx.line})</span></div>
             <div class="text-slate-600 dark:text-slate-300">${escapeHtml(fx.fix || fx.description)}</div>
           </div>`;
         });
         (s1.remaining_bugs || []).forEach(rb => {
-          html += `<div class="p-2 rounded-lg bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
-            <div class="font-bold text-amber-800 dark:text-amber-300">FLAGGED: ${escapeHtml(rb.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(rb.file)}:${rb.line})</span></div>
+          html += `<div class="p-2.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
+            <div class="font-bold text-amber-800 dark:text-amber-300">⚠️ FLAGGED: ${escapeHtml(rb.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(rb.file)}:${rb.line})</span></div>
             <div class="text-slate-600 dark:text-slate-300">${escapeHtml(rb.description)}</div>
           </div>`;
         });
         s1Details.innerHTML = html;
       }
 
-      // Stage 2
       document.getElementById("stage2-card").classList.remove("hidden");
       const s2Pill = document.getElementById("stage2-pill");
       s2Pill.innerText = isSecure ? `SECURE • ${s2.overall_grade}` : `INSECURE • ${s2.vulnerabilities_count} Flagged`;
@@ -646,10 +877,10 @@
 
       const s2List = document.getElementById("stage2-findings");
       if (isSecure) {
-        s2List.innerHTML = `<div class="p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300">All 6 OWASP Top 10 / CWE controls passed cleanly.</div>`;
+        s2List.innerHTML = `<div class="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300">✅ All 6 OWASP Top 10 / CWE controls passed cleanly.</div>`;
       } else {
         s2List.innerHTML = (s2.findings || []).slice(0, 8).map(f => `
-          <div class="p-2 rounded-lg bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 space-y-0.5">
+          <div class="p-2.5 rounded-xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 space-y-0.5">
             <div class="flex items-center justify-between gap-1">
               <span class="font-bold text-rose-800 dark:text-rose-300">${escapeHtml(f.title)}</span>
               <span class="px-1.5 py-0.5 rounded bg-rose-600 text-white font-mono text-[9px] font-bold shrink-0">${escapeHtml(f.severity)}</span>
@@ -660,19 +891,18 @@
         `).join("");
       }
 
-      // Chat summary
-      let msg = `**Execution Complete — \`${repoLabel}\`** (${data.duration_ms}ms)\n\n`;
+      let msg = `🚀 **On-Demand Execution Complete — \`${repoLabel}\`** (${data.duration_ms}ms)\n\n`;
       msg += isSecure
-        ? `### 🟢 VERDICT: CODE IS SECURE (Grade ${s2.overall_grade} — 0 Vulnerabilities)\n\n`
-        : `### 🔴 VERDICT: INSECURE CODE DETECTED (Grade ${s2.overall_grade} — ${s2.vulnerabilities_count} Vulnerability(s))\n\n`;
-      msg += `**Stage 1 (Bug Fixing)**: \`${s1.files_analyzed}\` file(s) • Found: **${s1.bugs_found_count}** • Auto-Fixed: **${s1.bugs_fixed_count}** • Review: **${s1.remaining_bugs_count}**\n`;
+        ? `### 🟢 VERDICT: CODE IS SECURE ✅ (Grade ${s2.overall_grade} — 0 Vulnerabilities)\n\n`
+        : `### 🔴 VERDICT: INSECURE CODE DETECTED 🚨 (Grade ${s2.overall_grade} — ${s2.vulnerabilities_count} Vulnerability(s))\n\n`;
+      msg += `**Stage 1 — Bug Remediation**: Analyzed \`${s1.files_analyzed}\` file(s) • Found: **${s1.bugs_found_count}** • Auto-Fixed: **${s1.bugs_fixed_count}** • Review: **${s1.remaining_bugs_count}**\n`;
       if (s1.fixes_applied && s1.fixes_applied.length > 0) {
-        msg += s1.fixes_applied.slice(0, 5).map(fx => `- Fixed \`${fx.file}:${fx.line}\` (${fx.bug_type}): ${fx.fix || fx.description}`).join("\n") + "\n";
+        msg += s1.fixes_applied.slice(0, 5).map(fx => `- 🛠️ Fixed \`${fx.file}:${fx.line}\` (${fx.bug_type}): ${fx.fix || fx.description}`).join("\n") + "\n";
       }
-      msg += `\n**Stage 2 (Security Scan)**: Grade **${s2.overall_grade}** (${s2.score}/100) • CRIT: ${s2.severity_counts.CRITICAL} | HIGH: ${s2.severity_counts.HIGH} | MED: ${s2.severity_counts.MEDIUM} | LOW: ${s2.severity_counts.LOW}`;
+      msg += `\n**Stage 2 — Post-Fix Security Scan**: Grade **${s2.overall_grade}** (${s2.score}/100) • CRIT: ${s2.severity_counts.CRITICAL} | HIGH: ${s2.severity_counts.HIGH} | MED: ${s2.severity_counts.MEDIUM} | LOW: ${s2.severity_counts.LOW}`;
       if (!isSecure && s2.findings) {
         msg += "\n" + s2.findings.slice(0, 5).map(f =>
-          `- **[${f.severity}] ${f.cwe}** \`${f.file}:${f.line}\` — ${f.title}`
+          `- 🚨 **[${f.severity}] ${f.cwe}** \`${f.file}:${f.line}\` — ${f.title}`
         ).join("\n");
       }
       appendAgentMessage(msg, []);
@@ -686,7 +916,7 @@
       if (!codeView) return;
 
       if (!source || !source.exists || !source.lines || source.lines.length === 0) {
-        codeView.innerHTML = `<div class="p-3 font-mono text-xs text-amber-400">No Python source file preview available.</div>`;
+        codeView.innerHTML = `<div class="p-3 font-mono text-xs text-amber-400">No Python source preview available.</div>`;
         return;
       }
 
@@ -699,10 +929,10 @@
       }
 
       if (statusEl) {
-        statusEl.innerText = flaggedLines.size > 0 ? `${flaggedLines.size} Flagged Line(s)` : "Clean";
+        statusEl.innerText = flaggedLines.size > 0 ? `${flaggedLines.size} Flagged Line(s)` : "Certified Clean";
         statusEl.className = flaggedLines.size > 0
-          ? "text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold"
-          : "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold";
+          ? "text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30"
+          : "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30";
       }
 
       const maxLines = Math.min(source.lines.length, 150);
@@ -724,17 +954,15 @@
       const isSecure = Boolean(security.is_secure);
       const sev = security.severity_counts || { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
 
-      // Header Pill
       const hPill = document.getElementById("header-security-pill");
       const hText = document.getElementById("header-security-text");
       if (hPill && hText) {
         hText.innerText = isSecure ? `SECURE: ${grade} (0 Vulns)` : `INSECURE: ${grade} (${vulns} Vulns)`;
         hPill.className = isSecure
-          ? "hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-bold transition"
-          : "hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-600 text-white text-xs font-bold animate-pulse transition";
+          ? "hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-bold shadow-sm transition"
+          : "hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600 text-white text-xs font-bold animate-pulse shadow-sm transition";
       }
 
-      // Security Tab Banner
       const banner = document.getElementById("sec-summary-banner");
       const bGrade = document.getElementById("sec-banner-grade");
       const bMeta = document.getElementById("sec-banner-meta");
@@ -742,11 +970,11 @@
         bGrade.innerText = grade;
         bMeta.innerText = `${filesScanned} file(s) scanned • Score ${score}/100`;
         banner.className = isSecure
-          ? "p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 space-y-2.5"
-          : "p-3.5 rounded-xl border border-rose-300 dark:border-rose-900 bg-rose-50/80 dark:bg-rose-950/40 space-y-2.5";
+          ? "p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 space-y-2.5"
+          : "p-3.5 rounded-2xl border border-rose-300 dark:border-rose-900 bg-rose-50/80 dark:bg-rose-950/40 space-y-2.5";
         bGrade.className = isSecure
-          ? "w-9 h-9 rounded-lg bg-emerald-600 text-white font-black text-sm font-mono flex items-center justify-center"
-          : "w-9 h-9 rounded-lg bg-rose-600 text-white font-black text-sm font-mono flex items-center justify-center";
+          ? "w-10 h-10 rounded-xl bg-emerald-600 text-white font-black text-sm font-mono flex items-center justify-center shadow-sm"
+          : "w-10 h-10 rounded-xl bg-rose-600 text-white font-black text-sm font-mono flex items-center justify-center shadow-sm";
       }
 
       document.getElementById("sev-critical").innerText = sev.CRITICAL || 0;
@@ -754,7 +982,6 @@
       document.getElementById("sev-medium").innerText = sev.MEDIUM || 0;
       document.getElementById("sev-low").innerText = sev.LOW || 0;
 
-      // Findings
       const fSec = document.getElementById("sec-findings-section");
       const fList = document.getElementById("sec-findings-list");
       const findings = security.findings || [];
@@ -776,13 +1003,12 @@
         fList.innerHTML = "";
       }
 
-      // Checklist
       const cEl = document.getElementById("sec-checklist-container");
       if (cEl && Array.isArray(security.checklist)) {
         cEl.innerHTML = security.checklist.map(r => `
-          <div class="p-2.5 rounded-lg border flex items-center justify-between gap-2 ${r.passed ? 'surface' : 'bg-rose-50/70 border-rose-200 dark:bg-rose-950/30 dark:border-rose-900'}">
+          <div class="p-2.5 rounded-xl border flex items-center justify-between gap-2 ${r.passed ? 'glass-card' : 'bg-rose-50/70 border-rose-200 dark:bg-rose-950/30 dark:border-rose-900'}">
             <div class="min-w-0">
-              <div class="font-bold text-slate-800 dark:text-white text-[11px] truncate">${escapeHtml(r.rule_id)}: ${escapeHtml(r.title)}</div>
+              <div class="font-bold text-slate-800 dark:text-white text-[11px] truncate">${r.passed ? '🛡️' : '🚨'} ${escapeHtml(r.rule_id)}: ${escapeHtml(r.title)}</div>
               <div class="text-[10px] font-mono text-slate-500">${escapeHtml(r.cwe)} • ${escapeHtml(r.owasp)}</div>
             </div>
             <span class="px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${r.passed ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-rose-600 text-white'}">
@@ -798,11 +1024,11 @@
       const ta = document.getElementById("sast-snippet-input");
       const code = ta ? ta.value : "";
       if (!code.trim()) {
-        appendSystemMessage("Paste a Python snippet into the Security Sandbox first.");
+        appendSystemMessage("📌 Paste a Python snippet into the Security Sandbox first.");
         return;
       }
 
-      appendSystemMessage("Auditing submitted Python snippet against OWASP/CWE rules...");
+      appendSystemMessage("🛡️ Auditing submitted Python snippet against OWASP/CWE rules...");
       try {
         const res = await fetch("/api/security_audit", {
           method: "POST",
@@ -812,13 +1038,13 @@
         const report = await res.json();
         renderSecurityAudit(report);
 
-        let msg = `**Snippet Security Audit — ${report.is_secure ? '🟢 SECURE' : '🔴 INSECURE'} (Grade ${report.overall_grade} • ${report.score}/100)**`;
+        let msg = `🛡️ **Snippet Security Audit — ${report.is_secure ? '🟢 SECURE ✅' : '🔴 INSECURE 🚨'} (Grade ${report.overall_grade} • ${report.score}/100)**`;
         if (report.findings && report.findings.length > 0) {
           msg += "\n\n" + report.findings.map(f =>
-            `- **[${f.severity}] ${f.cwe}** Line ${f.line}: ${f.title}\n  - *Fix*: ${f.remediation}`
+            `- 🚨 **[${f.severity}] ${f.cwe}** Line ${f.line}: ${f.title}\n  - *Fix*: ${f.remediation}`
           ).join("\n");
         } else {
-          msg += "\n- Zero vulnerabilities detected across all 6 OWASP/CWE rules.";
+          msg += "\n- ✅ Zero vulnerabilities detected across all 6 OWASP/CWE rules.";
         }
         appendAgentMessage(msg, []);
       } catch (err) {
@@ -869,50 +1095,72 @@
 
     function appendUserMessage(text) {
       const div = document.createElement("div");
-      div.className = "flex justify-end max-w-xl ml-auto";
-      div.innerHTML = `<div class="px-3.5 py-2 rounded-xl rounded-tr-none bg-indigo-600 text-white text-xs leading-relaxed">${escapeHtml(text)}</div>`;
+      div.className = "flex items-start justify-end gap-3 max-w-xl ml-auto";
+      div.innerHTML = `<div class="px-4 py-2.5 rounded-2xl rounded-tr-none bg-gradient-to-r from-indigo-600 to-sky-600 text-white text-xs leading-relaxed shadow-sm">${escapeHtml(text)}</div>`;
       chatContainer.appendChild(div);
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     function appendSystemMessage(text) {
       const div = document.createElement("div");
-      div.className = "flex justify-center";
-      div.innerHTML = `<div class="px-3 py-1 rounded-full surface border text-[11px] font-mono text-slate-600 dark:text-slate-300">${escapeHtml(text)}</div>`;
+      div.className = "flex justify-center max-w-xl mx-auto my-1";
+      div.innerHTML = `<div class="px-3.5 py-1.5 rounded-full glass-card text-xs font-mono flex items-center gap-1.5 text-slate-700 dark:text-slate-300"><i data-lucide="info" class="w-3.5 h-3.5 text-indigo-500"></i> ${escapeHtml(text)}</div>`;
       chatContainer.appendChild(div);
+      lucide.createIcons();
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     function appendAgentMessage(text, toolCalls) {
       const div = document.createElement("div");
-      div.className = "flex items-start gap-2.5 max-w-2xl";
+      div.className = "flex items-start gap-3 max-w-2xl";
 
       let toolsHtml = "";
       if (toolCalls && toolCalls.length > 0) {
         toolsHtml = `<div class="mb-2 space-y-1">` + toolCalls.map(tc => {
           const name = tc.name || tc.tool || "Tool";
           const args = JSON.stringify(tc.args || {}, null, 2);
-          const result = tc.result !== undefined ? (typeof tc.result === "string" ? tc.result : JSON.stringify(tc.result, null, 2)) : "Done";
+          const result = tc.result !== undefined ? (typeof tc.result === "string" ? tc.result : JSON.stringify(tc.result, null, 2)) : "Executed successfully";
           return `
-            <details class="text-[11px] border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
-              <summary class="cursor-pointer px-2.5 py-1.5 bg-slate-100/80 dark:bg-slate-800/80 font-mono text-slate-700 dark:text-slate-200">
-                Tool: <strong>${escapeHtml(name)}</strong>
+            <details class="text-xs border border-indigo-200/80 dark:border-indigo-900 rounded-xl overflow-hidden glass-card transition mb-1.5 group">
+              <summary class="cursor-pointer px-3 py-2 bg-indigo-50/70 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 font-mono flex items-center justify-between select-none">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                  <strong>Executed:</strong> ${escapeHtml(name)}
+                </span>
+                <span class="text-[10px] text-slate-400">▼</span>
               </summary>
-              <div class="p-2.5 space-y-1.5 font-mono text-[10px] bg-slate-950 text-slate-200">
-                <pre class="overflow-x-auto">${escapeHtml(args)}</pre>
-                <pre class="text-emerald-300 overflow-x-auto">${escapeHtml(result)}</pre>
+              <div class="p-3 space-y-2 border-t border-indigo-200/60 dark:border-indigo-900 font-mono text-[11px] bg-white/60 dark:bg-slate-900/60">
+                <div><span class="text-slate-400 text-[10px] uppercase font-bold">Parameters:</span><pre class="bg-slate-900 text-slate-100 p-2 rounded text-[10px] overflow-x-auto mt-0.5">${escapeHtml(args)}</pre></div>
+                <div><span class="text-slate-400 text-[10px] uppercase font-bold">Output:</span><pre class="bg-slate-900 text-emerald-300 p-2 rounded text-[10px] overflow-x-auto mt-0.5">${escapeHtml(result)}</pre></div>
               </div>
             </details>`;
         }).join("") + `</div>`;
       }
 
       div.innerHTML = `
-        <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-600 to-sky-500 text-white font-black text-[11px] flex items-center justify-center shrink-0">W</div>
-        <div class="w-full p-3.5 rounded-xl rounded-tl-none surface border text-xs leading-relaxed">
-          ${toolsHtml}
-          <div class="prose prose-slate dark:prose-invert max-w-none">${marked.parse(text || "")}</div>
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-indigo-800 text-white p-1 shrink-0 flex items-center justify-center shadow-md shadow-indigo-500/20">
+          <svg viewBox="0 0 100 100" class="w-full h-full">
+            <polygon points="50,4 92,25 92,75 50,96 8,75 8,25" fill="#0f172a" stroke="#ffffff" stroke-width="2.5"/>
+            <polygon points="28,26 18,5 42,22" fill="#1e293b" stroke="#38bdf8"/>
+            <polygon points="72,26 82,5 58,22" fill="#1e293b" stroke="#38bdf8"/>
+            <polygon points="50,22 36,36 50,48 64,36" fill="#0f172a"/>
+            <polygon points="50,48 40,64 50,82 60,64" fill="#1e293b" stroke="#38bdf8"/>
+            <polygon points="35,46 45,47 38,51" fill="#38bdf8"/>
+            <polygon points="65,46 55,47 62,51" fill="#38bdf8"/>
+          </svg>
+        </div>
+        <div class="space-y-1 w-full">
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-xs text-slate-900 dark:text-white">WOLF</span>
+            <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono font-semibold">Autonomous DevSecOps Engineer</span>
+          </div>
+          <div class="p-4 rounded-2xl rounded-tl-none glass-card text-slate-800 dark:text-slate-200 text-xs leading-relaxed space-y-2">
+            ${toolsHtml}
+            <div class="prose prose-slate dark:prose-invert max-w-none">${marked.parse(text || "")}</div>
+          </div>
         </div>`;
       chatContainer.appendChild(div);
+      lucide.createIcons();
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
@@ -920,8 +1168,15 @@
       const id = "loading-" + Date.now();
       const div = document.createElement("div");
       div.id = id;
-      div.className = "flex items-center gap-2 text-xs text-slate-500 font-mono";
-      div.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-indigo-500"></i><span>Processing...</span>`;
+      div.className = "flex items-start gap-3 max-w-xs";
+      div.innerHTML = `
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-500 text-white p-1 shrink-0 flex items-center justify-center animate-pulse">
+          <i data-lucide="loader-2" class="w-4 h-4 text-white animate-spin"></i>
+        </div>
+        <div class="p-3 rounded-2xl rounded-tl-none glass-card text-slate-600 dark:text-slate-300 text-xs flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
+          <span>Wolf is analyzing...</span>
+        </div>`;
       chatContainer.appendChild(div);
       lucide.createIcons();
       chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -938,17 +1193,19 @@
       return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
 
-    // Command Palette (Ctrl+K)
+    // Omni Command Palette (Ctrl+K)
     const paletteActions = [
-      { id: "fix", title: "Fix & Certify Repository", desc: "Run Stage 1 Bug Fix + Stage 2 Security Scan", icon: "sparkles", action: () => runFixAndCertify() },
-      { id: "repo", title: "Execute Repo Link", desc: "Focus repository URL / folder path input", icon: "git-branch", action: () => focusRepoInput() },
-      { id: "sec", title: "Open Security Sandbox", desc: "Inspect OWASP/CWE report & audit inline code", icon: "shield-alert", action: () => switchRightTab("sec") },
-      { id: "code", title: "Open Code Viewer", desc: "Inspect fixed & flagged lines from last run", icon: "code-2", action: () => switchRightTab("code") },
-      { id: "pc", title: "Check PC Specs & Storage", desc: "Query CPU, RAM, OS, and disk via MCP", icon: "cpu", action: () => sendQuickPrompt("Check my system specs, CPU, RAM, and disk storage using MCP.") },
-      { id: "calc", title: "Calculator & Math Stats", desc: "Evaluate expressions or statistics via MCP", icon: "calculator", action: () => sendQuickPrompt("Calculate (144 * 12) / (3.14159 * 2)") },
-      { id: "weather", title: "Check Live Weather", desc: "Get current weather conditions", icon: "cloud-sun", action: () => sendQuickPrompt("What is the weather today in Kolkata?") },
-      { id: "cve", title: "Groq Tech / CVE Search", desc: "Search security fixes & docs via Groq", icon: "globe", action: () => sendQuickPrompt("Search for OWASP Top 10 Python vulnerability fixes") },
-      { id: "theme", title: "Toggle Light / Dark Theme", desc: "Switch studio color mode", icon: "sun-moon", action: () => toggleTheme() }
+      { id: "fix", title: "DevSecOps: Fix & Certify Repository", desc: "Run Stage 1 Bug Fix + Stage 2 Security Scan", icon: "sparkles", action: () => runFixAndCertify() },
+      { id: "repo", title: "DevSecOps: Execute Repo Link", desc: "Focus repository URL / folder path input", icon: "git-branch", action: () => focusRepoInput() },
+      { id: "sec", title: "Security: Open OWASP/CWE Sandbox", desc: "Inspect security report & audit inline Python code", icon: "shield-alert", action: () => switchRightTab("sec") },
+      { id: "code", title: "Code: Open Live Source Viewer", desc: "Inspect fixed & flagged lines from last run", icon: "code-2", action: () => switchRightTab("code") },
+      { id: "arch", title: "System: Open Architecture Topology", desc: "Inspect live SVG data-flow diagram", icon: "layers", action: () => switchRightTab("arch") },
+      { id: "pc", title: "FastMCP: Check PC Specs & Storage", desc: "Query CPU, RAM, OS, and disk via MCP", icon: "cpu", action: () => sendQuickPrompt("Check my system specs, CPU, RAM, and disk storage using MCP.") },
+      { id: "calc", title: "FastMCP: Calculator & Math Stats", desc: "Evaluate expressions or statistics via MCP", icon: "calculator", action: () => sendQuickPrompt("Calculate (144 * 12) / (3.14159 * 2)") },
+      { id: "weather", title: "Utility: Check Live Weather", desc: "Get live weather conditions", icon: "cloud-sun", action: () => sendQuickPrompt("What is the weather today in Kolkata?") },
+      { id: "cve", title: "FastMCP: Groq Tech / CVE Search", desc: "Search security fixes & docs synthesized via Groq", icon: "globe", action: () => sendQuickPrompt("Search technical documentation for OWASP Top 10 Python security fixes") },
+      { id: "git", title: "FastMCP: List GitHub Repositories", desc: "Query connected read-only GitHub MCP server", icon: "github", action: () => sendQuickPrompt("List my GitHub repositories using your GitHub MCP tool.") },
+      { id: "theme", title: "Appearance: Toggle Pearl / Twilight", desc: "Switch between Prismatic Pearl Light and Twilight Dark", icon: "sun-moon", action: () => toggleAtmosphere() }
     ];
 
     function openCommandPalette() {
@@ -969,13 +1226,18 @@
       const q = (query || "").toLowerCase().trim();
       const items = paletteActions.filter(a => a.title.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q));
       list.innerHTML = items.length ? items.map(a => `
-        <div onclick="executePaletteAction('${a.id}')" class="p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-800 cursor-pointer flex items-center gap-2.5">
-          <i data-lucide="${a.icon}" class="w-4 h-4 text-indigo-500 shrink-0"></i>
-          <div>
-            <div class="font-semibold text-slate-900 dark:text-white">${a.title}</div>
-            <div class="text-[11px] text-slate-500">${a.desc}</div>
+        <div onclick="executePaletteAction('${a.id}')" class="p-2.5 rounded-xl hover:bg-indigo-50 dark:hover:bg-slate-800/80 cursor-pointer flex items-center justify-between transition group border border-transparent hover:border-indigo-200 dark:hover:border-indigo-800/60">
+          <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+              <i data-lucide="${a.icon}" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <div class="font-semibold text-slate-900 dark:text-white text-xs">${a.title}</div>
+              <div class="text-[11px] text-slate-500">${a.desc}</div>
+            </div>
           </div>
-        </div>`).join("") : `<div class="p-3 text-center text-slate-500 font-mono">No matching commands.</div>`;
+          <span class="text-[10px] font-mono text-slate-400 group-hover:text-indigo-500">Run ↵</span>
+        </div>`).join("") : `<div class="p-4 text-center text-slate-500 font-mono">No matching commands.</div>`;
       lucide.createIcons();
     }
 
