@@ -249,8 +249,7 @@ async def api_bug_action(request):
 
 
 async def api_security_audit(request):
-    """Run OWASP Top 10 / CWE SAST cybersecurity scan on a repository path, file, or inline code."""
-    from core.bug_fixer_agent import TARGET_FILE_PATH
+    """Run OWASP Top 10 / CWE SAST cybersecurity scan on a user-provided path or inline code."""
     from core.security_scanner import SecurityVulnerabilityScanner
 
     scanner = SecurityVulnerabilityScanner()
@@ -261,18 +260,26 @@ async def api_security_audit(request):
         except Exception:
             body = {}
         inline_code = body.get("code")
-        target_path = str(body.get("target_path", "")).strip() or None
+        target_path = str(body.get("target_path", "")).strip()
         filename = str(body.get("filename", "<submitted_snippet.py>")).strip() or "<submitted_snippet.py>"
 
         if inline_code is not None and str(inline_code).strip():
             report = await asyncio.to_thread(scanner.scan_code, str(inline_code), filename)
             return JSONResponse(report)
 
-        effective_target = target_path or TARGET_FILE_PATH
-        report = await asyncio.to_thread(scanner.scan_directory, effective_target)
+        if not target_path:
+            return JSONResponse(
+                {"status": "error", "error": "Please provide target_path or code to audit."},
+                status_code=400
+            )
+        report = await asyncio.to_thread(scanner.scan_directory, target_path)
         return JSONResponse(report)
 
-    target_path = request.query_params.get("target", "").strip() or TARGET_FILE_PATH
+    target_path = request.query_params.get("target", "").strip()
+    if not target_path:
+        return JSONResponse(
+            {"status": "idle", "message": "Provide ?target=<path> or POST code/target_path to run SAST."}
+        )
     report = await asyncio.to_thread(scanner.scan_directory, target_path)
     return JSONResponse(report)
 

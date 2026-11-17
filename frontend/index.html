@@ -396,10 +396,10 @@
           </p>
 
           <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 flex-wrap gap-2">
-            <span>Target: <code id="hero-target-label" class="font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md">codebase/data_processor.py</code></span>
+            <span>Target: <code id="hero-target-label" class="font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md">Waiting for your repo link</code></span>
             <div class="flex items-center gap-3">
               <span class="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 6 QA Rules
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> On-Demand Bug Fixer
               </span>
               <span class="text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1">
                 <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> 6 OWASP/CWE Controls
@@ -558,7 +558,7 @@
             <input
               id="target-repo-input"
               type="text"
-              placeholder="codebase/data_processor.py or C:\path\to\repo"
+              placeholder="Paste GitHub repo URL or local folder path..."
               class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 text-[11px] font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
               onkeydown="if(event.key==='Enter'){ applyTargetRepo(); }"
             />
@@ -576,7 +576,7 @@
               <span class="ide-dot bg-rose-500 shrink-0"></span>
               <span class="ide-dot bg-amber-500 shrink-0"></span>
               <span class="ide-dot bg-emerald-500 shrink-0"></span>
-              <span id="ide-filename-label" class="text-[11px] text-slate-300 font-mono ml-2 truncate">codebase/data_processor.py</span>
+              <span id="ide-filename-label" class="text-[11px] text-slate-300 font-mono ml-2 truncate">No file loaded yet</span>
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
@@ -1017,8 +1017,8 @@
       if (input && input.value.trim()) {
         runOnDemandRepo();
       } else {
-        if (input) input.value = "codebase/data_processor.py";
-        runOnDemandRepo();
+        appendSystemMessage("📌 Paste a GitHub repository URL or local folder path into Execute Repo first, then click Fix & Certify.");
+        if (input) input.focus();
       }
     }
 
@@ -1205,13 +1205,15 @@
 
     function applyTargetRepo() {
       const input = document.getElementById("target-repo-input");
-      activeTargetPath = input ? input.value.trim() : "";
-      appendSystemMessage(
-        activeTargetPath
-          ? `📂 Target switched to: ${activeTargetPath}. Running AST, Test & OWASP/CWE SAST audit...`
-          : "📂 Target reset to default workspace (codebase/data_processor.py)."
-      );
-      refreshCodebaseStatus();
+      const val = input ? input.value.trim() : "";
+      if (!val) {
+        appendSystemMessage("📌 Paste a GitHub repo URL or local folder path first.");
+        return;
+      }
+      const mainInput = document.getElementById("repo-link-input");
+      if (mainInput) mainInput.value = val;
+      switchRightTab("hub");
+      runOnDemandRepo();
     }
 
     function resetTargetPath() {
@@ -2261,8 +2263,8 @@
 
     function launchDemoFromPitch() {
       closePitchDeck();
-      switchRightTab('ide');
-      appendSystemMessage("🚀 Executive Pitch complete. Live demonstration active on target codebase: codebase/data_processor.py");
+      focusRepoInput();
+      appendSystemMessage("🚀 Ready! Paste any GitHub repository URL or local path and click Fix & Certify.");
     }
   </script>
 </body>

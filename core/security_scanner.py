@@ -553,3 +553,4 @@ class SecurityVulnerabilityScanner:
             "checklist": checklist,
             "findings": findings
         }
+

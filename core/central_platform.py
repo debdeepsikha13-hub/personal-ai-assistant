@@ -47,7 +47,6 @@ class CentralSecurityPlatform:
         self.github_owner = github_owner or DEFAULT_GITHUB_OWNER
         self.scanner = SecurityVulnerabilityScanner()
         self._init_db()
-        self._ensure_default_local_repo()
 
     @contextmanager
     def _connect(self):

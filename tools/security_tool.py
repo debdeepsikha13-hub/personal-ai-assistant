@@ -2,17 +2,17 @@
 Enterprise Cybersecurity SAST Audit Native Tool.
 ================================================
 Exposes Wolf's OWASP Top 10 / CWE Static Application Security Testing scanner
-directly to the LangGraph agent for on-demand repository and code audits.
+directly to the LangGraph agent for on-demand repository and file audits.
 """
 
 from langchain_core.tools import tool
 
 
 @tool
-def run_security_audit(target_path: str = "") -> str:
+def run_security_audit(target_path: str) -> str:
     """
     Executes an OWASP Top 10 / CWE Static Application Security Testing (SAST) scan
-    on a local Python file or repository directory.
+    on a user-provided local Python file or repository directory.
 
     Detects:
       - SEC-01 [CWE-94/78]: Code & OS Command Injection (eval, exec, os.system, shell=True)
@@ -23,24 +23,27 @@ def run_security_audit(target_path: str = "") -> str:
       - SEC-06 [CWE-22/400]: Path Traversal, insecure temp files, and missing HTTP timeouts
 
     Args:
-        target_path: Optional local file or repository directory path to audit.
-                     Defaults to the active codebase (`codebase/data_processor.py`).
+        target_path: Local file or repository directory path to audit (required).
 
     Returns:
         str: Formatted cybersecurity grade, CWE checklist, and remediation report.
     """
-    from core.bug_fixer_agent import TARGET_FILE_PATH
     from core.security_scanner import SecurityVulnerabilityScanner
 
+    effective_target = (target_path or "").strip()
+    if not effective_target:
+        return "⚠️ Please provide a repository folder path or Python file path to audit."
+
     scanner = SecurityVulnerabilityScanner()
-    effective_target = target_path.strip() or TARGET_FILE_PATH
     report = scanner.scan_directory(effective_target)
 
     if report.get("status") == "error":
         return f"❌ **Security Audit Failed**: {report.get('error')}"
 
+    verdict = "🟢 CODE IS SECURE ✅" if report["is_secure"] else "🔴 INSECURE — VULNERABILITIES DETECTED 🚨"
     lines = [
-        f"🛡️ **Cybersecurity SAST Audit Report — Grade {report['overall_grade']} ({report['score']}/100)**",
+        f"🛡️ **Cybersecurity SAST Audit — {verdict}**",
+        f"- **Grade**: **{report['overall_grade']}** ({report['score']}/100)",
         f"- **Target**: `{report['target']}`",
         f"- **Files Scanned**: `{report['files_scanned']}` | **Vulnerabilities Found**: `{report['vulnerabilities_count']}`",
         f"- **Severity Breakdown**: CRITICAL: {report['severity_counts']['CRITICAL']} | HIGH: {report['severity_counts']['HIGH']} | MEDIUM: {report['severity_counts']['MEDIUM']} | LOW: {report['severity_counts']['LOW']}\n",
@@ -60,6 +63,6 @@ def run_security_audit(target_path: str = "") -> str:
                 f"   - Remediation: {f['remediation']}"
             )
     else:
-        lines.append("\n✅ **Zero security vulnerabilities detected.** Target codebase meets enterprise DevSecOps standards.")
+        lines.append("\n✅ **Zero security vulnerabilities detected.**")
 
     return "\n".join(lines)

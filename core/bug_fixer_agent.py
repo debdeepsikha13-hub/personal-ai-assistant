@@ -1,22 +1,22 @@
 """
 Autonomous DevSecOps Code Bug Fixer & Security Verification Agent.
 ==================================================================
-Enterprise engineering agent responsible for a 2-stage autonomous workflow:
+Pure input-driven engineering agent — executes ONLY on the real repository
+or Python file path provided by the developer:
   STAGE 1 - Bug Detection & Remediation:
-    1. Scans target Python files or repositories (AST syntax, static bugs, & automated test suites).
+    1. Scans target Python files or repositories (AST syntax, static bugs, & discovered unit tests).
     2. Diagnoses root causes from tracebacks and AST inspection.
     3. Autonomously applies verified code patches to resolve functional bugs.
-    4. Re-runs automated unit tests to certify 100% QA compliance.
+    4. Re-runs discovered automated unit tests.
   STAGE 2 - Cybersecurity SAST Vulnerability Scanning:
     5. Runs Static Application Security Testing (OWASP Top 10 / CWE) via SecurityVulnerabilityScanner
-       on every scanned or patched codebase to verify the code is secure against exploits.
+       on the target codebase after fixing.
 """
 
 import ast
 import io
 import os
 import re
-import sys
 import unittest
 from pathlib import Path
 from typing import Dict, Any, List, Optional
@@ -27,50 +27,35 @@ from utils.logger import setup_logger
 logger = setup_logger("bug_fixer_agent")
 
 PROJECT_ROOT = Path(__file__).parent.parent.resolve()
-TARGET_FILE_PATH = str(PROJECT_ROOT / "codebase" / "data_processor.py")
 
 
 class GeneralCodeBugFixerAgent:
     """
-    Autonomous DevSecOps agent for finding, diagnosing, patching, and security-auditing
-    Python repositories and source files.
+    Input-driven DevSecOps agent for finding, diagnosing, patching, and security-auditing
+    any user-provided Python repository or source file.
     """
 
-    CHECKLIST_DESCRIPTIONS = {
-        "test_checklist_1_average_calculation": "Arithmetic mean calculation accuracy",
-        "test_checklist_2_empty_list_zero_division_guard": "ZeroDivisionError protection on empty lists",
-        "test_checklist_3_safe_divide_zero_guard": "Safe division zero-denominator fallback",
-        "test_checklist_4_record_filter_missing_key_safety": "Dictionary key safety (prevents KeyError on missing fields)",
-        "test_checklist_5_percentage_growth_zero_baseline": "Zero-baseline percentage calculation safety",
-        "test_checklist_6_user_payload_validation": "Input string sanitization and email format validation"
-    }
-
     def __init__(self, target_path: Optional[str] = None):
-        self.target_path = str(Path(target_path).resolve()) if target_path else TARGET_FILE_PATH
+        cleaned = (target_path or "").strip()
+        self.target_path: Optional[str] = str(Path(cleaned).resolve()) if cleaned else None
         self.security_scanner = SecurityVulnerabilityScanner()
         self.last_diagnosis: Optional[Dict[str, Any]] = None
         self.last_fix: Optional[Dict[str, Any]] = None
 
-    def _is_default_codebase(self, path: Optional[str] = None) -> bool:
-        """Return True if operating on the built-in codebase/data_processor.py module."""
-        check = Path(path or self.target_path).resolve()
-        default_file = Path(TARGET_FILE_PATH).resolve()
-        default_dir = default_file.parent
-        return check == default_file or check == default_dir
-
-    def reload_codebase_modules(self):
-        """Force reload built-in codebase modules in memory after file modifications."""
-        import importlib
-        if "codebase.data_processor" in sys.modules:
-            importlib.reload(sys.modules["codebase.data_processor"])
-        if "codebase.test_data_processor" in sys.modules:
-            importlib.reload(sys.modules["codebase.test_data_processor"])
+    def _resolve_target(self, target_path: Optional[str] = None) -> Optional[str]:
+        raw = (target_path or "").strip()
+        if raw:
+            return str(Path(raw).resolve())
+        return self.target_path
 
     def get_source_snapshot(self, target_path: Optional[str] = None) -> Dict[str, Any]:
         """Return live file contents from disk for the IDE inspector panel."""
-        p = Path(target_path or self.target_path)
+        effective = self._resolve_target(target_path)
+        if not effective:
+            return {"file": "No target selected", "lines": [], "exists": False}
+
+        p = Path(effective)
         if p.is_dir():
-            # Pick first non-test .py file if directory is given
             py_files = [
                 f for f in sorted(p.rglob("*.py"))
                 if not any(part in SKIP_DIRS for part in f.parts)
@@ -99,10 +84,22 @@ class GeneralCodeBugFixerAgent:
         }
 
     def run_security_audit(self, target_path: Optional[str] = None) -> Dict[str, Any]:
-        """
-        STAGE 2: Execute OWASP/CWE SAST cybersecurity scan on the target file or repository.
-        """
-        scan_target = target_path or self.target_path
+        """STAGE 2: Execute OWASP/CWE SAST cybersecurity scan on the provided target."""
+        scan_target = self._resolve_target(target_path)
+        if not scan_target:
+            return {
+                "status": "error",
+                "error": "No target repository or file path provided.",
+                "target": "",
+                "files_scanned": 0,
+                "vulnerabilities_count": 0,
+                "score": 0,
+                "overall_grade": "N/A",
+                "is_secure": False,
+                "severity_counts": {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0},
+                "checklist": [],
+                "findings": []
+            }
         logger.info(f"Running SAST cybersecurity audit on: {scan_target}")
         return self.security_scanner.scan_directory(scan_target)
 
@@ -123,12 +120,13 @@ class GeneralCodeBugFixerAgent:
 
     def run_static_ast_bug_scan(self, target_path: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        Inspect real Python files via AST for syntax errors and common production bug patterns
-        (bare excepts, mutable default arguments, unguarded sum/len division).
+        Inspect real Python files via AST for syntax errors and common production bug patterns.
         """
-        scan_target = target_path or self.target_path
-        issues: List[Dict[str, Any]] = []
+        scan_target = self._resolve_target(target_path)
+        if not scan_target:
+            return []
 
+        issues: List[Dict[str, Any]] = []
         for py_file in self._collect_python_files(scan_target):
             try:
                 source = py_file.read_text(encoding="utf-8", errors="ignore")
@@ -161,7 +159,6 @@ class GeneralCodeBugFixerAgent:
                 continue
 
             for node in ast.walk(tree):
-                # Detect bare `except:` blocks that swallow SystemExit/KeyboardInterrupt
                 if isinstance(node, ast.ExceptHandler) and node.type is None:
                     issues.append({
                         "file": str(py_file),
@@ -171,10 +168,9 @@ class GeneralCodeBugFixerAgent:
                         "function": "<handler>",
                         "impact": "Swallows SystemExit/KeyboardInterrupt and hides unexpected bugs.",
                         "root_cause": "Using `except:` without specifying `Exception`.",
-                        "recommended_fix": "Replace bare `except:` with `except Exception as e:`."
+                        "recommended_fix": "Replace bare `except:` with `except Exception:`."
                     })
 
-                # Detect mutable default arguments (list/dict/set)
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                     for default in node.args.defaults + [d for d in node.args.kw_defaults if d is not None]:
                         if isinstance(default, (ast.List, ast.Dict, ast.Set)):
@@ -192,76 +188,39 @@ class GeneralCodeBugFixerAgent:
         return issues
 
     def run_tests(self, target_path: Optional[str] = None) -> Dict[str, Any]:
-        """
-        Runs the test suite for the built-in codebase or discovers tests in an external repo.
-        """
-        effective_path = target_path or self.target_path
+        """Discover and run unittest suites in the user-provided target repository."""
+        effective_path = self._resolve_target(target_path)
+        if not effective_path:
+            return {
+                "all_passed": True,
+                "total_tests": 0,
+                "passed_count": 0,
+                "failed_count": 0,
+                "pass_rate": "N/A",
+                "checklist": [],
+                "failures": [],
+                "raw_output": "No target path specified."
+            }
 
-        if not self._is_default_codebase(effective_path):
-            return self._run_external_repo_tests(effective_path)
-
-        self.reload_codebase_modules()
-        from codebase.test_data_processor import TestCodebaseQuality
-
-        loader = unittest.TestLoader()
-        suite = loader.loadTestsFromTestCase(TestCodebaseQuality)
-
-        # Pre-cache test names before runner.run() mutates suite
-        ordered_test_names = [getattr(t, "_testMethodName", str(t)) for t in suite]
-
-        stream = io.StringIO()
-        runner = unittest.TextTestRunner(stream=stream, verbosity=2)
-        result = runner.run(suite)
-
-        failed_names = {getattr(f[0], "_testMethodName", str(f[0])) for f in result.failures}
-        errored_names = {getattr(e[0], "_testMethodName", str(e[0])) for e in result.errors}
-        broken_names = failed_names.union(errored_names)
-
-        checklist_status = []
-        for test_name in ordered_test_names:
-            desc = self.CHECKLIST_DESCRIPTIONS.get(test_name, test_name)
-            if test_name in broken_names:
-                checklist_status.append({
-                    "test_id": test_name,
-                    "description": desc,
-                    "status": "FAIL ❌",
-                    "passed": False
-                })
-            else:
-                checklist_status.append({
-                    "test_id": test_name,
-                    "description": desc,
-                    "status": "PASS ✅",
-                    "passed": True
-                })
-
-        all_passed = result.wasSuccessful()
-        total_tests = result.testsRun
-        passed_tests = total_tests - (len(result.failures) + len(result.errors))
-
-        failures_detail = []
-        for test, tb in result.failures + result.errors:
-            failures_detail.append({
-                "test": str(test),
-                "traceback": tb
-            })
-
-        return {
-            "all_passed": all_passed,
-            "total_tests": total_tests,
-            "passed_count": passed_tests,
-            "failed_count": len(result.failures) + len(result.errors),
-            "pass_rate": f"{(passed_tests / total_tests * 100):.1f}%" if total_tests > 0 else "0%",
-            "checklist": checklist_status,
-            "failures": failures_detail,
-            "raw_output": stream.getvalue()
-        }
-
-    def _run_external_repo_tests(self, target_path: str) -> Dict[str, Any]:
-        """Discover and run unittest suites in a user-provided local repository."""
-        p = Path(target_path)
+        p = Path(effective_path)
         start_dir = str(p if p.is_dir() else p.parent)
         pattern = p.name if (p.is_file() and p.name.startswith("test_")) else "test_*.py"
+
+        test_files = [
+            f for f in (Path(start_dir).rglob(pattern) if Path(start_dir).is_dir() else [])
+            if not any(part in SKIP_DIRS for part in f.parts)
+        ]
+        if not test_files:
+            return {
+                "all_passed": True,
+                "total_tests": 0,
+                "passed_count": 0,
+                "failed_count": 0,
+                "pass_rate": "100.0%",
+                "checklist": [],
+                "failures": [],
+                "raw_output": "No unittest files discovered in target."
+            }
 
         loader = unittest.TestLoader()
         try:
@@ -321,12 +280,18 @@ class GeneralCodeBugFixerAgent:
         }
 
     def scan_for_bugs(self, target_path: Optional[str] = None) -> Dict[str, Any]:
-        """
-        Scans the target codebase for runtime exceptions, test failures, and AST bugs.
-        """
-        effective_path = target_path or self.target_path
-        logger.info(f"Scanning codebase for bugs: {effective_path}")
+        """Scan the user-provided target codebase for AST bugs and failing unit tests."""
+        effective_path = self._resolve_target(target_path)
+        if not effective_path:
+            return {
+                "bug_found": False,
+                "error": "No target repository or file path provided.",
+                "target": "",
+                "ast_issues": [],
+                "test_results": self.run_tests(None)
+            }
 
+        logger.info(f"Scanning codebase for bugs: {effective_path}")
         ast_issues = self.run_static_ast_bug_scan(effective_path)
         test_results = self.run_tests(effective_path)
 
@@ -334,14 +299,14 @@ class GeneralCodeBugFixerAgent:
             return {
                 "bug_found": False,
                 "target": effective_path,
-                "message": "All codebase tests and static AST checks are PASSING! Code is healthy.",
+                "message": "All discovered tests and static AST checks are PASSING! Code is healthy.",
                 "ast_issues": [],
                 "test_results": test_results
             }
 
         if not test_results["all_passed"] and test_results["failures"]:
             first_failure = test_results["failures"][0]
-            diagnosis = self.diagnose(first_failure["test"], first_failure["traceback"])
+            diagnosis = self.diagnose(first_failure["test"], first_failure["traceback"], effective_path)
         else:
             diagnosis = ast_issues[0]
 
@@ -356,60 +321,31 @@ class GeneralCodeBugFixerAgent:
             "test_results": test_results
         }
 
-    def diagnose(self, failing_test: str, traceback_str: str) -> Dict[str, Any]:
-        """
-        Diagnoses root cause from failing test and traceback.
-        """
-        if "test_checklist_2" in failing_test or "ZeroDivisionError" in traceback_str:
-            return {
-                "bug_title": "ZeroDivisionError: division by zero on empty input",
-                "file": "codebase/data_processor.py",
-                "function": "calculate_average()",
-                "severity": "CRITICAL",
-                "impact": "Application crashes with ZeroDivisionError when receiving an empty list of numbers.",
-                "root_cause": "Line attempts `sum(numbers) / len(numbers)` without checking `if not numbers: return 0.0`.",
-                "recommended_fix": "Add guard clause: `if not numbers: return 0.0` at beginning of calculate_average()."
-            }
-        elif "test_checklist_3" in failing_test:
-            return {
-                "bug_title": "ZeroDivisionError in safe_divide()",
-                "file": "codebase/data_processor.py",
-                "function": "safe_divide()",
-                "severity": "HIGH",
-                "impact": "Division by zero is unhandled when denominator is 0.",
-                "root_cause": "Missing `if denominator == 0: return fallback` validation.",
-                "recommended_fix": "Verify denominator before performing division."
-            }
-        elif "test_checklist_4" in failing_test or "KeyError" in traceback_str:
-            return {
-                "bug_title": "KeyError on missing record fields",
-                "file": "codebase/data_processor.py",
-                "function": "filter_active_records()",
-                "severity": "MEDIUM",
-                "impact": "Direct dictionary indexing `r['status']` crashes if key is omitted.",
-                "root_cause": "Using direct key lookup instead of `.get('status')` safe accessor.",
-                "recommended_fix": "Replace `r['status']` with `r.get('status')`."
-            }
-        else:
-            lines = [ln.strip() for ln in traceback_str.strip().splitlines() if ln.strip()]
-            return {
-                "bug_title": "Assertion / Runtime Failure in Code Logic",
-                "file": self.target_path,
-                "function": failing_test,
-                "severity": "MEDIUM",
-                "impact": "Code execution output does not match expected test assertion.",
-                "root_cause": lines[-1] if lines else "Unknown runtime error",
-                "recommended_fix": "Review traceback and patch the failing branch."
-            }
+    def diagnose(self, failing_test: str, traceback_str: str, target_path: str = "") -> Dict[str, Any]:
+        """Diagnose root cause from a failing test and traceback."""
+        lines = [ln.strip() for ln in traceback_str.strip().splitlines() if ln.strip()]
+        return {
+            "bug_title": "Runtime / Assertion Failure in Target Repository",
+            "file": target_path or (self.target_path or ""),
+            "function": failing_test,
+            "severity": "HIGH",
+            "impact": "Code execution failed automated test verification.",
+            "root_cause": lines[-1] if lines else "Unknown runtime error",
+            "recommended_fix": "Review traceback and patch the failing branch."
+        }
 
     def apply_fix(self, target_path: Optional[str] = None) -> Dict[str, Any]:
         """
-        Applies verified autonomous patches to real Python files:
-          1. Adds empty-list ZeroDivisionError guard before `sum(x) / len(x)` when missing.
+        Apply verified autonomous patches to real Python files in the provided target:
+          1. Adds empty-list ZeroDivisionError guard before `sum(numbers) / len(numbers)`.
           2. Replaces bare `except:` clauses with `except Exception:`.
           3. Replaces unsafe `yaml.unsafe_load(` with `yaml.safe_load(`.
+          4. Normalizes `== None` / `!= None` to `is None` / `is not None`.
         """
-        effective_path = target_path or self.target_path
+        effective_path = self._resolve_target(target_path)
+        if not effective_path:
+            return {"status": "error", "message": "No target repository or file path provided."}
+
         py_files = self._collect_python_files(effective_path)
         patches_applied: List[str] = []
         modified_files: List[str] = []
@@ -453,17 +389,25 @@ class GeneralCodeBugFixerAgent:
                     f"{py_file.name}: Replaced insecure `yaml.unsafe_load()` with `yaml.safe_load()` (CWE-502)."
                 )
 
+            # Patch 4: == None / != None -> is None / is not None
+            none_eq_re = re.compile(r"(?<![=!<>])==\s*None\b")
+            none_neq_re = re.compile(r"!=\s*None\b")
+            if none_eq_re.search(updated) or none_neq_re.search(updated):
+                updated = none_eq_re.sub("is None", updated)
+                updated = none_neq_re.sub("is not None", updated)
+                patches_applied.append(
+                    f"{py_file.name}: Normalized `== None` / `!= None` to `is None` / `is not None`."
+                )
+
             if updated != original:
                 py_file.write_text(updated, encoding="utf-8")
                 modified_files.append(str(py_file))
 
-        if self._is_default_codebase(effective_path):
-            self.reload_codebase_modules()
-
-        if patches_applied:
-            summary = " | ".join(patches_applied)
-        else:
-            summary = "Verified target source files — all functional guards and safety patterns are compliant."
+        summary = (
+            " | ".join(patches_applied)
+            if patches_applied
+            else "Verified target source files — no automated patches required."
+        )
 
         self.last_fix = {
             "status": "success",
@@ -475,16 +419,17 @@ class GeneralCodeBugFixerAgent:
 
     def run_full_pipeline(self, target_path: Optional[str] = None) -> Dict[str, Any]:
         """
-        End-to-end 2-Stage DevSecOps Pipeline:
-          STAGE 1 (Functional Healing):
-            1. Scan AST & Unit Tests
-            2. Diagnose Root Cause
-            3. Apply Autonomous Code Fix (if bugs detected)
-            4. Re-run Test Suite & QA Checklist
-          STAGE 2 (Cybersecurity Verification):
-            5. Run OWASP/CWE SAST Security Scanner on the target codebase
+        End-to-end 2-Stage DevSecOps Pipeline on the user-provided target:
+          STAGE 1: Scan AST & Tests -> Diagnose -> Apply Fix -> Verify Tests
+          STAGE 2: OWASP/CWE SAST Security Audit
         """
-        effective_path = target_path or self.target_path
+        effective_path = self._resolve_target(target_path)
+        if not effective_path:
+            return {
+                "pipeline_status": "ERROR",
+                "error": "No target repository or file path provided."
+            }
+
         scan_result = self.scan_for_bugs(effective_path)
         initial_had_bug = scan_result["bug_found"]
         diagnosis = scan_result.get("diagnosis", None)

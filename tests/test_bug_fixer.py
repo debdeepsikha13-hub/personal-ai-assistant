@@ -1,35 +1,30 @@
 """
-Unit Tests for Autonomous DevSecOps Bug Fixer & Security Pipeline.
-==================================================================
-Verifies real-world bug detection, autonomous patching, QA verification,
-and Stage 2 OWASP/CWE SAST cybersecurity scanning (with zero toy simulations).
+Unit Tests for Input-Driven DevSecOps Bug Fixer & Security Pipeline.
+====================================================================
+Verifies pure on-demand execution on user-provided Python files/repos
+with zero dummy codebase defaults or toy simulations.
 """
 
 import tempfile
 import unittest
 from pathlib import Path
 from core.bug_fixer_agent import GeneralCodeBugFixerAgent
-from tools.bug_fixer_tool import run_bug_fixer_agent, run_code_quality_checklist
+from tools.bug_fixer_tool import run_bug_fixer_agent, execute_repository_link
 
 
 class TestGeneralCodeBugFixer(unittest.TestCase):
-    """Verifies 2-stage autonomous DevSecOps pipeline."""
+    """Verifies pure input-driven 2-stage DevSecOps pipeline."""
 
-    def setUp(self):
-        self.agent = GeneralCodeBugFixerAgent()
+    def test_01_requires_explicit_target_path(self):
+        """Agent must NOT default to any hardcoded dummy file when target_path is omitted."""
+        agent = GeneralCodeBugFixerAgent()
+        self.assertIsNone(agent.target_path)
+        self.assertFalse(hasattr(agent, "inject_demo_bug"))
+        res = agent.run_full_pipeline()
+        self.assertEqual(res["pipeline_status"], "ERROR")
 
-    def test_01_baseline_tests_pass(self):
-        """Baseline workspace tests must pass 100% with zero security issues."""
-        res = self.agent.run_tests()
-        self.assertTrue(res["all_passed"], f"Baseline failed: {res.get('failures')}")
-        self.assertEqual(res["total_tests"], 6)
-
-    def test_02_no_toy_simulation_method(self):
-        """Toy simulation helpers must not exist on production agent."""
-        self.assertFalse(hasattr(self.agent, "inject_demo_bug"))
-
-    def test_03_real_external_file_bug_detection_and_patch(self):
-        """Agent must detect & autonomously patch real bugs in external Python files."""
+    def test_02_real_external_file_bug_detection_and_patch(self):
+        """Agent must detect & autonomously patch real bugs in user-provided Python files."""
         with tempfile.TemporaryDirectory() as tmpdir:
             buggy_file = Path(tmpdir) / "service.py"
             buggy_file.write_text(
@@ -57,27 +52,17 @@ class TestGeneralCodeBugFixer(unittest.TestCase):
             self.assertIn("yaml.safe_load(", patched)
             self.assertTrue(pipeline_res["security_audit"]["is_secure"])
 
-    def test_04_full_pipeline_includes_stage2_security_audit(self):
-        """Full pipeline must execute both Stage 1 QA and Stage 2 SAST Security Audit."""
-        pipeline_res = self.agent.run_full_pipeline()
-        v = pipeline_res["verification_results"]
-        sec = pipeline_res["security_audit"]
+    def test_03_langchain_tools_require_input_and_execute_on_real_target(self):
+        """Native LangChain tools must prompt when empty and execute cleanly on real target."""
+        empty_msg = run_bug_fixer_agent.invoke({"action": "full_pipeline", "target_path": ""})
+        self.assertIn("Please provide", empty_msg)
 
-        self.assertTrue(v["all_passed"])
-        self.assertEqual(v["passed_count"], 6)
-        self.assertEqual(v["failed_count"], 0)
-        self.assertEqual(sec["overall_grade"], "A+")
-        self.assertEqual(sec["vulnerabilities_count"], 0)
-
-    def test_05_langchain_tools_callable(self):
-        """Native LangChain tools must execute cleanly and include SAST audit."""
-        report = run_code_quality_checklist.invoke({})
-        self.assertIn("Code Quality Production Checklist", report)
-        self.assertIn("6/6 Passed", report)
-
-        full_report = run_bug_fixer_agent.invoke({"action": "full_pipeline"})
-        self.assertIn("Cybersecurity SAST Audit", full_report)
-        self.assertIn("Grade A+", full_report)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            sample = Path(tmpdir) / "clean.py"
+            sample.write_text("def add(a: int, b: int) -> int:\n    return a + b\n", encoding="utf-8")
+            report = execute_repository_link.invoke({"repo_url_or_path": str(tmpdir)})
+            self.assertIn("CODE IS SECURE", report)
+            self.assertIn("Grade", report)
 
 
 if __name__ == "__main__":

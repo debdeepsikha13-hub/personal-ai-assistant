@@ -57,6 +57,8 @@ def run_bug_fixer_agent(action: str = "full_pipeline", target_path: str = "") ->
         str: Formatted DevSecOps QA & Security Certification report.
     """
     resolved_target = target_path.strip() or None
+    if not resolved_target:
+        return "⚠️ Please provide a GitHub repository URL or local folder/file path (`target_path`) to execute."
     agent = _get_bug_fixer_agent(target_path=resolved_target)
     action = action.lower().strip()
 
@@ -161,7 +163,10 @@ def run_code_quality_checklist(target_path: str = "") -> str:
     Returns:
         str: Checklist execution report.
     """
-    agent = _get_bug_fixer_agent(target_path=target_path.strip() or None)
+    resolved = target_path.strip() or None
+    if not resolved:
+        return "⚠️ Please provide a repository folder or Python file path (`target_path`) to run tests."
+    agent = _get_bug_fixer_agent(target_path=resolved)
     tests = agent.run_tests()
 
     lines = [
