@@ -3,1007 +3,461 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WOLF // Autonomous Software Engineering System</title>
-  <!-- Tailwind CSS & Lucide Icons -->
+  <title>WOLF — DevSecOps Bug Remediation &amp; Security Scanner</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Marked.js for Markdown rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    /* Custom sleek scrollbars */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.6); }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.55); }
 
-    /* Luminous Prismatic Aurora Theme (Innovative Luxury Glass) */
     :root {
-      --canvas-bg: #f1f5f9;
-      --card-bg: rgba(255, 255, 255, 0.85);
-      --card-border: rgba(226, 232, 240, 0.9);
-      --card-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+      --canvas-bg: #f8fafc;
+      --surface-bg: rgba(255, 255, 255, 0.92);
+      --border-col: rgba(226, 232, 240, 0.95);
       --text-main: #0f172a;
       --text-muted: #64748b;
-      --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
     }
 
-    body.mode-twilight {
+    body.mode-dark {
       --canvas-bg: #090d16;
-      --card-bg: rgba(15, 23, 42, 0.85);
-      --card-border: rgba(56, 189, 248, 0.2);
-      --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      --surface-bg: rgba(15, 23, 42, 0.9);
+      --border-col: rgba(51, 65, 85, 0.7);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%);
     }
 
     body {
       background-color: var(--canvas-bg);
-      background-image: 
-        radial-gradient(circle at 10% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 45%),
-        radial-gradient(circle at 90% 10%, rgba(6, 182, 212, 0.16) 0%, transparent 45%),
-        radial-gradient(circle at 50% 90%, rgba(236, 72, 153, 0.12) 0%, transparent 50%),
-        radial-gradient(circle at 80% 85%, rgba(16, 185, 129, 0.12) 0%, transparent 40%),
-        linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px;
-      background-attachment: fixed;
       color: var(--text-main);
-      transition: background-color 0.4s ease, color 0.4s ease;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
-    .glass-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid var(--card-border);
-      box-shadow: var(--card-shadow);
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    .surface {
+      background: var(--surface-bg);
+      border-color: var(--border-col);
+      backdrop-filter: blur(18px);
     }
 
-    .glass-dock-item {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      backdrop-filter: blur(16px);
-      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .glass-dock-item:hover {
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.25);
-      border-color: rgba(99, 102, 241, 0.4);
-    }
-
-    /* Virtual IDE Code Editor Styling */
     .ide-window {
       background: #0f172a;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
-      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 12px;
       overflow: hidden;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
-    .ide-header {
-      background: #1e293b;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 8px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .ide-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
-    /* Code Line Highlights */
-    .code-line { display: flex; padding: 2px 10px; font-size: 11.5px; line-height: 1.6; }
-    .code-ln { width: 28px; color: #475569; user-select: none; text-align: right; margin-right: 12px; }
-    .code-content { color: #e2e8f0; flex: 1; }
-    .code-kw { color: #f43f5e; font-weight: 600; }
-    .code-fn { color: #38bdf8; font-weight: 600; }
-    .code-str { color: #a3e635; }
-    .code-cm { color: #64748b; font-style: italic; }
+    .code-line { display: flex; padding: 2px 10px; font-size: 11.5px; line-height: 1.55; }
+    .code-ln { width: 32px; color: #64748b; user-select: none; text-align: right; margin-right: 12px; flex-shrink: 0; }
+    .code-content { color: #e2e8f0; flex: 1; white-space: pre; }
     .code-highlight-bug {
       background: rgba(244, 63, 94, 0.22);
       border-left: 3px solid #f43f5e;
-      color: #fda4af;
-    }
-    .code-highlight-fixed {
-      background: rgba(16, 185, 129, 0.2);
-      border-left: 3px solid #10b981;
-      color: #86efac;
     }
 
-    /* Neural Pulse SVG Waveform */
-    @keyframes neuralWave {
-      0%, 100% { height: 6px; }
-      50% { height: 18px; }
+    .prose code {
+      background: rgba(99, 102, 241, 0.1);
+      color: #4f46e5;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
-    .wave-bar {
-      width: 3px;
-      background: linear-gradient(to top, #4f46e5, #06b6d4);
-      border-radius: 3px;
-      animation: neuralWave 1.2s ease-in-out infinite;
+    body.mode-dark .prose code {
+      background: rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
     }
-
-    /* Clean typography */
-    .prose code { 
-      background: rgba(99, 102, 241, 0.08); 
-      color: #4f46e5; 
-      padding: 2px 5px; 
-      border-radius: 4px; 
-      font-size: 0.88em; 
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
-      border: 1px solid rgba(99, 102, 241, 0.15);
+    .prose pre {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 8px 0;
+      font-size: 11.5px;
     }
-    .prose pre { 
-      background: #0f172a; 
-      color: #f8fafc; 
-      padding: 12px 14px; 
-      border-radius: 10px; 
-      overflow-x: auto; 
-      margin: 8px 0; 
-      font-size: 12px;
-    }
-
-    /* Live Diff Styling */
-    .diff-line-del {
-      background: rgba(244, 63, 94, 0.18) !important;
-      border-left: 3px solid #f43f5e;
-      color: #fda4af !important;
-    }
-    .diff-line-add {
-      background: rgba(16, 185, 129, 0.18) !important;
-      border-left: 3px solid #10b981;
-      color: #86efac !important;
-    }
-
-    /* SVG Flow Pulses */
-    @keyframes flowDash {
-      to { stroke-dashoffset: -24; }
-    }
-    .flow-line {
-      stroke-dasharray: 6 6;
-      animation: flowDash 1.2s linear infinite;
-    }
-
-    /* Stepper Styling */
-    .step-active {
-      border-color: #6366f1 !important;
-      background: rgba(99, 102, 241, 0.25) !important;
-      color: #c7d2fe !important;
-      box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
-    }
-    .step-done {
-      border-color: #10b981 !important;
-      background: rgba(16, 185, 129, 0.2) !important;
-      color: #a7f3d0 !important;
-    }
+    .prose h3 { font-weight: 700; margin-top: 8px; margin-bottom: 4px; }
+    .prose ul { list-style-type: disc; padding-left: 18px; margin: 4px 0; }
   </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden font-sans antialiased text-sm">
 
-  <!-- ========================================================== -->
-  <!-- TOP STUDIO HEADER: Minimalist, Refined, Uncluttered        -->
-  <!-- ========================================================== -->
-  <header class="h-16 glass-card border-b flex items-center justify-between px-6 z-20 shrink-0">
-    
-    <!-- Wolf Brand & Neural Pulse -->
-    <div class="flex items-center space-x-3.5">
-      <!-- Modern Prismatic Wolf Icon -->
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-indigo-800 p-1 flex items-center justify-center shadow-md shadow-indigo-500/20 text-white relative">
-        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow">
-          <polygon points="50,4 92,25 92,75 50,96 8,75 8,25" fill="#0f172a" stroke="#ffffff" stroke-width="2.5"/>
-          <polygon points="28,26 18,5 42,22" fill="#1e293b" stroke="#38bdf8"/>
-          <polygon points="72,26 82,5 58,22" fill="#1e293b" stroke="#38bdf8"/>
-          <polygon points="50,22 36,36 50,48 64,36" fill="#0f172a"/>
-          <polygon points="50,48 40,64 50,82 60,64" fill="#1e293b" stroke="#38bdf8"/>
-          <polygon points="35,46 45,47 38,51" fill="#38bdf8"/>
-          <polygon points="65,46 55,47 62,51" fill="#38bdf8"/>
-        </svg>
+  <!-- TOP HEADER -->
+  <header class="h-14 surface border-b flex items-center justify-between px-5 z-20 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-sky-500 flex items-center justify-center text-white font-black text-xs shadow-sm">
+        W
       </div>
-
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="font-extrabold text-base tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
-            <span class="tracking-wide bg-gradient-to-r from-indigo-600 to-sky-500 bg-clip-text text-transparent font-black">WOLF</span>
-            <span class="text-slate-300 dark:text-slate-700 font-light">|</span>
-            <span class="text-xs uppercase font-mono tracking-wider text-slate-700 dark:text-slate-200 font-bold">Autonomous Engineering System</span>
-          </h1>
-          <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold border border-indigo-200/80 dark:border-indigo-800">
-            v3.0 Central Security Platform
-          </span>
+          <span class="font-black tracking-wide text-slate-900 dark:text-white">WOLF</span>
+          <span class="text-slate-300 dark:text-slate-700">|</span>
+          <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Automated Bug Remediation &amp; Security Scanner</span>
         </div>
-        <p class="text-[11px] text-slate-500">Central Security Scanning Platform &amp; Autonomous Bug Remediation</p>
-      </div>
-
-      <!-- Zero-Touch Engine Indicator -->
-      <div class="hidden sm:flex items-center gap-1.5 pl-4 h-6 border-l border-slate-200/80 dark:border-slate-800">
-        <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-        <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400 font-semibold">On-Demand Mode</span>
       </div>
     </div>
 
-    <!-- Right Controls: Command Palette, Pitch Deck, Atmosphere Switcher, Status & Repo -->
-    <div class="flex items-center space-x-2.5">
-      <!-- Omni Command Palette Button (Ctrl + K) -->
-      <button 
-        onclick="openCommandPalette()" 
-        title="Open Omni Command Palette (Ctrl+K)"
-        class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl glass-dock-item text-xs font-medium text-slate-700 dark:text-slate-200 transition shadow-sm hover:border-indigo-400"
-      >
-        <i data-lucide="command" class="w-3.5 h-3.5 text-indigo-500"></i>
-        <span>Command</span>
-        <kbd class="px-1.5 py-0.5 text-[9px] font-mono rounded bg-slate-200/80 dark:bg-slate-800 text-slate-500 font-bold">Ctrl+K</kbd>
-      </button>
-
-      <!-- Client Pitch Deck Button -->
-      <button 
-        onclick="openPitchDeck()" 
-        title="Open Executive Pitch Presentation Mode"
-        class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-md shadow-indigo-500/20"
-      >
-        <i data-lucide="presentation" class="w-3.5 h-3.5 text-amber-300"></i>
-        <span class="hidden sm:inline">Pitch Deck</span>
-      </button>
-
-      <!-- Prismatic Atmosphere Toggle (Pearl Light vs Twilight Dark) -->
-      <button 
-        onclick="toggleAtmosphere()" 
-        id="atmosphere-btn" 
-        title="Toggle Light / Twilight Atmosphere"
-        class="px-3 py-1.5 rounded-xl glass-dock-item text-xs font-medium flex items-center gap-1.5 transition text-slate-700 dark:text-slate-200"
-      >
-        <i data-lucide="sun-moon" class="w-3.5 h-3.5 text-indigo-500"></i>
-        <span id="atmosphere-label" class="hidden sm:inline">Pearl Light</span>
-      </button>
-
-      <!-- Cybersecurity Health Pill -->
+    <div class="flex items-center gap-2">
+      <!-- Live Security Verdict Pill -->
       <button
         onclick="switchRightTab('hub')"
         id="header-security-pill"
-        title="Security Status of Last Executed Repository"
-        class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold shadow-sm hover:opacity-90 transition"
+        class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold transition"
       >
-        <i data-lucide="shield" class="w-3.5 h-3.5 text-slate-500"></i>
+        <i data-lucide="shield" class="w-3.5 h-3.5"></i>
         <span id="header-security-text">Security: Ready</span>
       </button>
 
-      <!-- System Health Pill -->
-      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-medium shadow-sm">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <!-- Command Palette -->
+      <button
+        onclick="openCommandPalette()"
+        class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg surface border text-xs font-medium text-slate-600 dark:text-slate-300 hover:border-indigo-400 transition"
+      >
+        <i data-lucide="command" class="w-3.5 h-3.5 text-indigo-500"></i>
+        <kbd class="text-[10px] font-mono text-slate-400">Ctrl+K</kbd>
+      </button>
+
+      <!-- Theme Switcher -->
+      <button
+        onclick="toggleTheme()"
+        class="px-2.5 py-1 rounded-lg surface border text-xs font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1.5 hover:border-indigo-400 transition"
+      >
+        <i data-lucide="sun-moon" class="w-3.5 h-3.5 text-indigo-500"></i>
+        <span id="theme-label" class="hidden sm:inline">Light</span>
+      </button>
+
+      <!-- Operational Indicator -->
+      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-medium">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
         <span>Operational</span>
       </div>
-
-      <a 
-        href="https://github.com/debdeepsikha13-hub/personal-ai-assistant" 
-        target="_blank" 
-        class="px-3 py-1.5 rounded-xl glass-dock-item text-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition shadow-sm"
-      >
-        <i data-lucide="github" class="w-3.5 h-3.5"></i>
-        <span class="hidden sm:inline">Repository</span>
-      </a>
     </div>
-
   </header>
 
-  <!-- ========================================================== -->
-  <!-- FLOATING COMMAND DOCK (Raycast / Modern Studio Style)      -->
-  <!-- ========================================================== -->
-  <div class="px-6 py-2.5 glass-card border-b flex items-center gap-2 overflow-x-auto text-xs whitespace-nowrap z-10 shrink-0 select-none">
-    
-    <!-- Group 1: On-Demand Repo Execution Tools -->
-    <div class="flex items-center gap-1.5 shrink-0 pr-2 border-r border-slate-200 dark:border-slate-800">
-      <span class="text-[10px] uppercase font-mono text-slate-400 font-bold px-1">Repo Runner:</span>
-      
-      <!-- Fix & Certify (runs on pasted repo link, or default codebase if empty) -->
-      <button onclick="runFixAndCertify()" class="glass-dock-item shrink-0 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/20">
-        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
-        <span>Fix &amp; Certify</span>
-      </button>
+  <!-- FOCUSED ACTION BAR -->
+  <div class="px-5 py-2 surface border-b flex items-center gap-2 overflow-x-auto text-xs whitespace-nowrap z-10 shrink-0">
+    <button onclick="runFixAndCertify()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white font-semibold flex items-center gap-1.5 shadow-sm transition">
+      <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+      <span>Fix &amp; Certify</span>
+    </button>
 
-      <!-- Focus Repo URL Executor -->
-      <button onclick="focusRepoInput()" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-semibold flex items-center gap-1.5">
-        <i data-lucide="git-branch" class="w-3.5 h-3.5 text-indigo-500"></i>
-        <span>Execute Repo Link</span>
-      </button>
+    <button onclick="focusRepoInput()" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-indigo-400 flex items-center gap-1.5 transition">
+      <i data-lucide="git-branch" class="w-3.5 h-3.5 text-indigo-500"></i>
+      <span>Execute Repo Link</span>
+    </button>
 
-      <!-- Snippet Security Sandbox -->
-      <button onclick="switchRightTab('sec')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-semibold flex items-center gap-1.5">
-        <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-emerald-500"></i>
-        <span>Code Security Sandbox</span>
-      </button>
-    </div>
+    <button onclick="switchRightTab('sec')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-emerald-400 flex items-center gap-1.5 transition">
+      <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-emerald-500"></i>
+      <span>Security Sandbox</span>
+    </button>
 
-    <!-- Group 2: Connected MCP Microservices -->
-    <div class="flex items-center gap-1.5 shrink-0 pl-1">
-      <span class="text-[10px] uppercase font-mono text-slate-400 font-bold px-1">MCP Suite:</span>
-
-      <!-- PC Specs -->
-      <button onclick="sendQuickPrompt('Check my system specs, CPU, RAM, and disk storage using MCP.')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
-        <i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-500"></i>
-        <span>PC Specs</span>
-      </button>
-
-      <!-- GitHub Repos -->
-      <button onclick="sendQuickPrompt('List my repositories using your GitHub MCP tool.')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
-        <i data-lucide="git-branch" class="w-3.5 h-3.5 text-teal-500"></i>
-        <span>GitHub Repos</span>
-      </button>
-
-      <!-- Tech Web Search -->
-      <button onclick="sendQuickPrompt('Search technical documentation for Python ZeroDivisionError handling and safe division patterns')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
-        <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-500"></i>
-        <span>Tech Search</span>
-      </button>
-
-      <!-- Math Stats -->
-      <button onclick="sendQuickPrompt('Calculate statistics for [12, 45, 67, 89, 23, 56, 78] using MCP tool.')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
-        <i data-lucide="calculator" class="w-3.5 h-3.5 text-purple-500"></i>
-        <span>Math Stats</span>
-      </button>
-
-      <!-- Weather -->
-      <button onclick="sendQuickPrompt('What is the weather today in Kolkata?')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
-        <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-amber-500"></i>
-        <span>Weather</span>
-      </button>
-
-      <!-- Memory -->
-      <button onclick="sendQuickPrompt('Remember that my project is Wolf and my active repository is personal-ai-assistant.')" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 mr-6 text-slate-700 dark:text-slate-200">
-        <i data-lucide="bookmark" class="w-3.5 h-3.5 text-pink-500"></i>
-        <span>Save Memory</span>
-      </button>
-    </div>
-
+    <button onclick="sendQuickPrompt('Search for OWASP Top 10 Python vulnerability remediation best practices')" class="px-3 py-1.5 rounded-lg surface border font-medium text-slate-700 dark:text-slate-200 hover:border-sky-400 flex items-center gap-1.5 transition">
+      <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-500"></i>
+      <span>Tech / CVE Search (Groq)</span>
+    </button>
   </div>
 
-  <!-- ========================================================== -->
-  <!-- MAIN WORKSPACE: Studio Split View                          -->
-  <!-- ========================================================== -->
+  <!-- MAIN 2-PANE STUDIO -->
   <div class="flex-1 flex overflow-hidden">
 
-    <!-- LEFT STAGE: Conversational Engineering Stream (60%) -->
-    <section class="flex-1 flex flex-col h-full bg-transparent border-r border-slate-200/80 dark:border-slate-800 min-w-[360px]">
-      
-      <!-- Messages & Log Stream -->
-      <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4">
-        
-        <!-- Welcome Hero Card -->
-        <div class="p-5 rounded-2xl glass-card space-y-3 max-w-2xl">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-indigo-800 p-1 flex items-center justify-center shadow-md shadow-indigo-500/20 text-white relative shrink-0">
-              <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow">
-                <polygon points="50,4 92,25 92,75 50,96 8,75 8,25" fill="#0f172a" stroke="#ffffff" stroke-width="2.5"/>
-                <polygon points="28,26 18,5 42,22" fill="#1e293b" stroke="#38bdf8"/>
-                <polygon points="72,26 82,5 58,22" fill="#1e293b" stroke="#38bdf8"/>
-                <polygon points="50,22 36,36 50,48 64,36" fill="#0f172a"/>
-                <polygon points="50,48 40,64 50,82 60,64" fill="#1e293b" stroke="#38bdf8"/>
-                <polygon points="35,46 45,47 38,51" fill="#38bdf8"/>
-                <polygon points="65,46 55,47 62,51" fill="#38bdf8"/>
-              </svg>
-            </div>
-            <div>
-              <h2 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                <span class="font-black text-indigo-600 dark:text-indigo-400">WOLF</span>
-                <span>Autonomous Engineering System</span>
-              </h2>
-              <p class="text-xs text-slate-500">Operating autonomously on behalf of developers</p>
-            </div>
+    <!-- LEFT PANE: Engineering Chat & Execution Log -->
+    <section class="flex-1 flex flex-col h-full border-r border-slate-200/80 dark:border-slate-800 min-w-[340px]">
+      <div id="chat-container" class="flex-1 overflow-y-auto p-5 space-y-4">
+        <div class="p-4 rounded-xl surface border space-y-2 max-w-2xl">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold text-slate-900 dark:text-white">WOLF On-Demand DevSecOps Engine</h2>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 font-semibold">Strict On-Demand</span>
           </div>
-
           <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-            Point WOLF at any real repository or Python file to execute a <strong>2-Stage Enterprise DevSecOps Pipeline</strong>:
-            (1) autonomously detect, diagnose, and patch functional bugs against automated QA tests, and
-            (2) audit the codebase with our <strong>OWASP Top 10 / CWE SAST Cybersecurity Scanner</strong> to catch injection flaws, hardcoded secrets, SQLi, and unsafe deserialization before deployment.
+            Paste any <strong>GitHub repository URL</strong> or <strong>local folder path</strong> in the panel on the right (or right here in chat) to execute the 2-stage pipeline:
+            <strong>Stage 1</strong> detects and fixes bugs automatically; <strong>Stage 2</strong> scans the fixed code against OWASP Top 10 / CWE security rules and displays a clear <strong>SECURE / INSECURE</strong> verdict.
           </p>
-
-          <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 flex-wrap gap-2">
-            <span>Target: <code id="hero-target-label" class="font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md">Waiting for your repo link</code></span>
-            <div class="flex items-center gap-3">
-              <span class="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> On-Demand Bug Fixer
-              </span>
-              <span class="text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1">
-                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> 6 OWASP/CWE Controls
-              </span>
-            </div>
-          </div>
         </div>
-
       </div>
 
-      <!-- Modern Floating Input Bar -->
-      <footer class="p-4 glass-card border-t border-slate-200/80 dark:border-slate-800">
+      <footer class="p-3.5 surface border-t">
         <form id="chat-form" onsubmit="handleSend(event)" class="relative flex items-center max-w-3xl mx-auto">
-          <input 
-            type="text" 
-            id="user-input" 
-            placeholder="Type a task (e.g. 'Fix the bug and verify tests', 'Check PC specs', 'Search documentation')..." 
+          <input
+            type="text"
+            id="user-input"
+            placeholder="Paste a GitHub repo link to execute, or ask a security / engineering question..."
             autocomplete="off"
-            class="w-full pl-4 pr-24 py-3 rounded-2xl glass-card text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition shadow-inner"
+            class="w-full pl-4 pr-24 py-2.5 rounded-xl surface border text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
           />
-
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             id="send-btn"
-            class="absolute right-2 px-4 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm disabled:opacity-50"
+            class="absolute right-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1 transition disabled:opacity-50"
           >
-            <span>Execute</span>
+            <span>Send</span>
             <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
           </button>
         </form>
       </footer>
-
     </section>
 
-    <!-- RIGHT STAGE: Central Security Scanning Platform, SAST, Code Lab & QA Studio -->
-    <aside class="w-[510px] glass-card flex flex-col justify-between hidden lg:flex z-10 shrink-0 border-l border-slate-200/80 dark:border-slate-800">
-      
-      <!-- Studio Tabs Header -->
+    <!-- RIGHT PANE: On-Demand Repo Runner, Live Code Viewer & Security Audit -->
+    <aside class="w-[500px] surface flex flex-col justify-between hidden lg:flex z-10 shrink-0">
+
+      <!-- 3 Clean Studio Tabs -->
       <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-        <div class="flex items-center gap-1 p-1 rounded-xl bg-slate-200/60 dark:bg-slate-800 text-[11px]">
-          <button id="tab-hub-btn" onclick="switchRightTab('hub')" class="px-2.5 py-1 rounded-lg font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition flex items-center gap-1 shadow-sm">
+        <div class="flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs">
+          <button id="tab-hub-btn" onclick="switchRightTab('hub')" class="px-3 py-1 rounded-md font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm flex items-center gap-1.5 transition">
             <i data-lucide="play-circle" class="w-3.5 h-3.5 text-indigo-500"></i> Execute Repo
           </button>
-          <button id="tab-ide-btn" onclick="switchRightTab('ide')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
+          <button id="tab-code-btn" onclick="switchRightTab('code')" class="px-3 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 transition">
             <i data-lucide="code-2" class="w-3.5 h-3.5 text-sky-500"></i> Code
           </button>
-          <button id="tab-sec-btn" onclick="switchRightTab('sec')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
+          <button id="tab-sec-btn" onclick="switchRightTab('sec')" class="px-3 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 transition">
             <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> Security
-          </button>
-          <button id="tab-arch-btn" onclick="switchRightTab('arch')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
-            <i data-lucide="layers" class="w-3.5 h-3.5 text-purple-500"></i> Arch
           </button>
         </div>
 
-        <span id="matrix-pass-rate" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
-          Idle
+        <span id="studio-status-pill" class="px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
+          IDLE
         </span>
       </div>
 
-      <!-- TAB 0: On-Demand Repository Executor (Paste Link -> Fix Bugs -> Security Verdict) -->
+      <!-- TAB 1: Execute Repo (Primary Workflow) -->
       <div id="panel-hub-tab" class="flex-1 overflow-y-auto p-4 space-y-3">
-
-        <!-- Step 0: Paste GitHub Link or Local Path -->
-        <div class="p-3.5 rounded-xl glass-card border border-indigo-200/80 dark:border-indigo-900/70 space-y-2">
-          <div class="flex items-center justify-between text-[11px] font-bold text-slate-800 dark:text-white">
-            <span class="flex items-center gap-1.5"><i data-lucide="git-branch" class="w-3.5 h-3.5 text-indigo-500"></i> On-Demand Repository Executor</span>
-            <span class="text-[10px] font-mono text-slate-400">Runs ONLY when you click</span>
+        <!-- Input Box -->
+        <div class="p-3.5 rounded-xl surface border space-y-2.5">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
+            <span class="flex items-center gap-1.5"><i data-lucide="git-branch" class="w-3.5 h-3.5 text-indigo-500"></i> Repository URL or Local Path</span>
+            <span class="text-[10px] font-mono text-slate-400">On-Demand Only</span>
           </div>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400">
-            Paste any GitHub repo link (e.g. your friend's repo) or local folder path. Wolf will <strong>(1) fix bugs</strong> and then <strong>(2) scan for security risks</strong>.
-          </p>
-          <div class="space-y-2">
-            <input
-              id="repo-link-input"
-              type="text"
-              placeholder="https://github.com/username/repo-name  or  C:\path\to\folder"
-              class="w-full px-3 py-2 rounded-xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-              onkeydown="if(event.key==='Enter'){ runOnDemandRepo(); }"
-            />
-            <button
-              id="execute-repo-btn"
-              onclick="runOnDemandRepo()"
-              class="w-full py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-bold transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
-              <span id="execute-repo-btn-label">Execute: Fix Bugs &amp; Security Scan</span>
-            </button>
-          </div>
+          <input
+            id="repo-link-input"
+            type="text"
+            placeholder="https://github.com/owner/repo  or  C:\path\to\project"
+            class="w-full px-3 py-2 rounded-lg bg-slate-100/90 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            onkeydown="if(event.key==='Enter'){ runOnDemandRepo(); }"
+          />
+          <button
+            id="execute-repo-btn"
+            onclick="runOnDemandRepo()"
+            class="w-full py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-bold transition flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
+            <span id="execute-repo-btn-label">Fix &amp; Certify (Bug Fix + Security Scan)</span>
+          </button>
         </div>
 
-        <!-- BIG SECURITY VERDICT INDICATOR BANNER -->
-        <div id="verdict-banner" class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 space-y-1">
+        <!-- SECURITY VERDICT BANNER -->
+        <div id="verdict-banner" class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 space-y-1">
           <div class="flex items-center justify-between">
             <span id="verdict-title" class="text-xs font-extrabold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-              <i data-lucide="shield" class="w-4 h-4 text-slate-400"></i> Waiting for Repository Link
+              <i data-lucide="shield" class="w-4 h-4 text-slate-400"></i> Waiting for Repository Input
             </span>
             <span id="verdict-grade-pill" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
               IDLE
             </span>
           </div>
           <p id="verdict-desc" class="text-[11px] text-slate-500 dark:text-slate-400">
-            Nothing is being scanned in the background. Paste a link above and click <strong>Execute</strong> to run Stage 1 (Bug Fix) + Stage 2 (Security Scan).
+            No background scans are running. Paste a repository link above and click <strong>Fix &amp; Certify</strong>.
           </p>
         </div>
 
-        <!-- STAGE 1 RESULT CARD: Bug Detection & Fixing -->
-        <div id="stage1-card" class="p-3.5 rounded-xl glass-card border border-slate-200/80 dark:border-slate-800 space-y-2 hidden">
+        <!-- STAGE 1: Bug Detection & Fixing -->
+        <div id="stage1-card" class="p-3.5 rounded-xl surface border space-y-2 hidden">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <span class="w-5 h-5 rounded-md bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] flex items-center justify-center font-black">1</span>
-              Stage 1: Bug Detection &amp; Auto-Fix
+            <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <span class="w-5 h-5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] flex items-center justify-center font-black">1</span>
+              Stage 1 — Bug Detection &amp; Auto-Fix
             </span>
             <span id="stage1-pill" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 font-bold">0 Fixed</span>
           </div>
-          <div class="grid grid-cols-3 gap-1.5 text-center font-mono text-[10px]">
-            <div class="p-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-900/70">
+          <div class="grid grid-cols-3 gap-2 text-center font-mono text-[10px]">
+            <div class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900">
               <div id="s1-files" class="font-black text-slate-800 dark:text-white">0</div>
               <div class="text-[9px] text-slate-400">PY FILES</div>
             </div>
-            <div class="p-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-900/70">
+            <div class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900">
               <div id="s1-fixed" class="font-black text-emerald-600">0</div>
               <div class="text-[9px] text-slate-400">AUTO-FIXED</div>
             </div>
-            <div class="p-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-900/70">
+            <div class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900">
               <div id="s1-remaining" class="font-black text-amber-500">0</div>
               <div class="text-[9px] text-slate-400">REVIEW</div>
             </div>
           </div>
-          <div id="stage1-details" class="space-y-1 text-[11px]"></div>
+          <div id="stage1-details" class="space-y-1.5 text-[11px]"></div>
         </div>
 
-        <!-- STAGE 2 RESULT CARD: Post-Fix Security Scan -->
-        <div id="stage2-card" class="p-3.5 rounded-xl glass-card border border-slate-200/80 dark:border-slate-800 space-y-2 hidden">
+        <!-- STAGE 2: Post-Fix Security Scan -->
+        <div id="stage2-card" class="p-3.5 rounded-xl surface border space-y-2 hidden">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <span class="w-5 h-5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] flex items-center justify-center font-black">2</span>
-              Stage 2: Post-Fix Security Scan
+            <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <span class="w-5 h-5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] flex items-center justify-center font-black">2</span>
+              Stage 2 — Post-Fix Security Scan
             </span>
             <span id="stage2-pill" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 font-bold">Grade A+</span>
           </div>
           <div id="stage2-findings" class="space-y-1.5 text-[11px]"></div>
         </div>
-
       </div>
 
-      <!-- TAB 1: Live Code Lab & Target Repo Inspector -->
-      <div id="panel-ide-tab" class="flex-1 overflow-y-auto p-4 space-y-3 hidden">
-
-        <!-- Target Repository / File Path Selector -->
-        <div class="p-2.5 rounded-xl glass-card border border-slate-200/80 dark:border-slate-800 space-y-1.5">
-          <div class="flex items-center justify-between text-[10px] font-mono uppercase text-slate-400 font-bold">
-            <span class="flex items-center gap-1"><i data-lucide="folder-git-2" class="w-3 h-3 text-indigo-500"></i> Active Target Repo / File</span>
-            <button onclick="resetTargetPath()" class="text-indigo-500 hover:underline normal-case font-semibold">Reset Default</button>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <input
-              id="target-repo-input"
-              type="text"
-              placeholder="Paste GitHub repo URL or local folder path..."
-              class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 text-[11px] font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-              onkeydown="if(event.key==='Enter'){ applyTargetRepo(); }"
-            />
-            <button onclick="applyTargetRepo()" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold transition shrink-0">
-              Load &amp; Scan
-            </button>
-          </div>
-        </div>
-        
-        <!-- Live Code Inspector Window -->
+      <!-- TAB 2: Live Code Viewer -->
+      <div id="panel-code-tab" class="flex-1 overflow-y-auto p-4 space-y-3 hidden">
         <div class="ide-window">
-          <!-- IDE Header -->
-          <div class="ide-header">
-            <div class="flex items-center gap-1.5 min-w-0">
-              <span class="ide-dot bg-rose-500 shrink-0"></span>
-              <span class="ide-dot bg-amber-500 shrink-0"></span>
-              <span class="ide-dot bg-emerald-500 shrink-0"></span>
-              <span id="ide-filename-label" class="text-[11px] text-slate-300 font-mono ml-2 truncate">No file loaded yet</span>
-            </div>
-
-            <div class="flex items-center gap-2 shrink-0">
-              <span id="ide-status-pill" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                Certified Master
-              </span>
-            </div>
+          <div class="px-3.5 py-2 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+            <span id="ide-filename-label" class="text-[11px] font-mono text-slate-300 truncate">No repository executed yet</span>
+            <span id="ide-status-pill" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Idle</span>
           </div>
-
-          <!-- 2-Stage DevSecOps Pipeline Stepper -->
-          <div id="healing-stepper" class="px-3 py-1.5 bg-slate-950 border-b border-slate-800 text-[10px] font-mono grid grid-cols-4 gap-1.5">
-            <div id="step-node-1" class="p-1 rounded border border-slate-800 bg-slate-900/60 text-slate-400 text-center flex items-center justify-center gap-1 transition">
-              <span class="step-num text-[9px] w-3.5 h-3.5 rounded-full bg-slate-800 flex items-center justify-center">1</span>
-              <span>AST/Test</span>
-            </div>
-            <div id="step-node-2" class="p-1 rounded border border-slate-800 bg-slate-900/60 text-slate-400 text-center flex items-center justify-center gap-1 transition">
-              <span class="step-num text-[9px] w-3.5 h-3.5 rounded-full bg-slate-800 flex items-center justify-center">2</span>
-              <span>Diagnose</span>
-            </div>
-            <div id="step-node-3" class="p-1 rounded border border-slate-800 bg-slate-900/60 text-slate-400 text-center flex items-center justify-center gap-1 transition">
-              <span class="step-num text-[9px] w-3.5 h-3.5 rounded-full bg-slate-800 flex items-center justify-center">3</span>
-              <span>Patch/QA</span>
-            </div>
-            <div id="step-node-4" class="p-1 rounded border border-emerald-800/80 bg-emerald-950/40 text-emerald-300 text-center flex items-center justify-center gap-1 transition font-bold">
-              <span class="step-num text-[9px] w-3.5 h-3.5 rounded-full bg-emerald-800 text-emerald-100 flex items-center justify-center">✓</span>
-              <span>SAST Sec</span>
-            </div>
-          </div>
-
-          <!-- Live Source Code View (Populated from Disk via /api/bug_status) -->
-          <div id="ide-code-view" class="p-2 max-h-60 overflow-y-auto overflow-x-auto text-[11px]">
-            <div class="text-slate-400 p-2 font-mono text-[11px]">Loading live target source...</div>
+          <div id="ide-code-view" class="p-2 max-h-[520px] overflow-y-auto overflow-x-auto">
+            <div class="p-4 text-xs font-mono text-slate-400">Execute a repository link in the first tab to inspect fixed &amp; flagged lines here.</div>
           </div>
         </div>
-
-        <!-- Live Diagnostics Callout Box -->
-        <div id="ide-diagnostics-box" class="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 space-y-1">
-          <div class="flex items-center justify-between text-xs font-bold text-emerald-800 dark:text-emerald-300">
-            <span class="flex items-center gap-1.5"><i data-lucide="shield-check" class="w-4 h-4"></i> Code Health Certified</span>
-            <span class="text-[10px] font-mono uppercase">100% Pass</span>
-          </div>
-          <p class="text-xs text-emerald-700 dark:text-emerald-400">
-            All production quality rules and OWASP/CWE security checks are certified green.
-          </p>
-        </div>
-
-        <!-- Dual Health Gauges: QA Score & Cybersecurity Grade -->
-        <div class="grid grid-cols-2 gap-2.5">
-          <!-- QA Quality Dial -->
-          <div class="p-3 rounded-xl glass-card flex items-center justify-between">
-            <div class="space-y-0.5">
-              <div class="text-[11px] font-bold text-slate-800 dark:text-white">QA Quality</div>
-              <p class="text-[10px] text-slate-500">Test Coverage</p>
-            </div>
-            <div class="relative w-12 h-12 flex items-center justify-center shrink-0">
-              <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                <path class="text-slate-200 dark:text-slate-800" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                <path id="radial-progress-circle" class="text-emerald-500 transition-all duration-700 ease-out" stroke-dasharray="100, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-              </svg>
-              <span id="radial-score-text" class="absolute text-[10px] font-extrabold text-slate-800 dark:text-white font-mono">100%</span>
-            </div>
-          </div>
-
-          <!-- Cybersecurity SAST Dial -->
-          <div onclick="switchRightTab('sec')" class="p-3 rounded-xl glass-card flex items-center justify-between cursor-pointer hover:border-indigo-400 transition">
-            <div class="space-y-0.5">
-              <div class="text-[11px] font-bold text-slate-800 dark:text-white">SAST Security</div>
-              <p id="sec-gauge-sub" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">0 Vulns Found</p>
-            </div>
-            <div class="relative w-12 h-12 flex items-center justify-center shrink-0">
-              <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                <path class="text-slate-200 dark:text-slate-800" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                <path id="sec-radial-circle" class="text-emerald-500 transition-all duration-700 ease-out" stroke-dasharray="100, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-              </svg>
-              <span id="sec-grade-text" class="absolute text-xs font-black text-emerald-600 dark:text-emerald-400 font-mono">A+</span>
-            </div>
-          </div>
-        </div>
-
       </div>
 
-      <!-- TAB 2: Enterprise Cybersecurity SAST Panel -->
+      <!-- TAB 3: Full OWASP/CWE Security Report + Snippet Sandbox -->
       <div id="panel-sec-tab" class="flex-1 overflow-y-auto p-4 space-y-3 hidden">
-        <!-- Grade & Severity Summary Card -->
-        <div id="sec-summary-banner" class="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 space-y-2">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span id="sec-banner-grade" class="w-9 h-9 rounded-xl bg-emerald-600 text-white font-black text-sm font-mono flex items-center justify-center shadow-sm">A+</span>
-              <div>
-                <div class="text-xs font-extrabold text-slate-900 dark:text-white">Central Security Scanning Platform</div>
-                <div id="sec-banner-meta" class="text-[11px] text-slate-500 dark:text-slate-400">1 file scanned • Score 100/100</div>
-              </div>
+        <!-- Grade & Severity Breakdown -->
+        <div id="sec-summary-banner" class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 space-y-2.5">
+          <div class="flex items-center gap-2.5">
+            <span id="sec-banner-grade" class="w-9 h-9 rounded-lg bg-slate-600 text-white font-black text-sm font-mono flex items-center justify-center">—</span>
+            <div>
+              <div class="text-xs font-bold text-slate-900 dark:text-white">OWASP Top 10 / CWE SAST Report</div>
+              <div id="sec-banner-meta" class="text-[11px] text-slate-500">Execute a repo or audit a snippet below</div>
             </div>
-            <button onclick="triggerBugAction('security_audit', '🛡️ Re-running SAST cybersecurity audit on active target...')" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-semibold transition">
-              Re-Scan
-            </button>
           </div>
-          <!-- Severity Pills -->
           <div class="grid grid-cols-4 gap-1.5 text-center font-mono text-[10px]">
-            <div class="p-1.5 rounded-lg bg-white/70 dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-800">
+            <div class="p-1.5 rounded-lg bg-white/80 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
               <div class="text-rose-600 font-black" id="sev-critical">0</div>
               <div class="text-slate-400 text-[9px]">CRIT</div>
             </div>
-            <div class="p-1.5 rounded-lg bg-white/70 dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-800">
+            <div class="p-1.5 rounded-lg bg-white/80 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
               <div class="text-orange-500 font-black" id="sev-high">0</div>
               <div class="text-slate-400 text-[9px]">HIGH</div>
             </div>
-            <div class="p-1.5 rounded-lg bg-white/70 dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-800">
+            <div class="p-1.5 rounded-lg bg-white/80 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
               <div class="text-amber-500 font-black" id="sev-medium">0</div>
               <div class="text-slate-400 text-[9px]">MED</div>
             </div>
-            <div class="p-1.5 rounded-lg bg-white/70 dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-800">
+            <div class="p-1.5 rounded-lg bg-white/80 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
               <div class="text-sky-500 font-black" id="sev-low">0</div>
               <div class="text-slate-400 text-[9px]">LOW</div>
             </div>
           </div>
         </div>
 
-        <!-- Flagged Vulnerabilities Container (only visible if findings > 0) -->
+        <!-- Flagged Findings -->
         <div id="sec-findings-section" class="space-y-2 hidden">
-          <div class="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
-            <i data-lucide="alert-octagon" class="w-3.5 h-3.5"></i> Flagged Vulnerabilities
-          </div>
+          <div class="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Flagged Vulnerabilities</div>
           <div id="sec-findings-list" class="space-y-2 text-xs"></div>
         </div>
 
-        <!-- 6-Rule OWASP / CWE Controls Checklist -->
-        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">6-Rule OWASP / CWE Security Controls</div>
-        <div id="sec-checklist-container" class="space-y-1.5 text-xs">
-          <!-- Populated dynamically -->
+        <!-- 6 OWASP/CWE Controls -->
+        <div class="space-y-1.5">
+          <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">6 OWASP / CWE Security Controls</div>
+          <div id="sec-checklist-container" class="space-y-1.5 text-xs">
+            <div class="p-2.5 rounded-lg surface border text-[11px] text-slate-500 font-mono">Run a repository or snippet audit to populate rule results.</div>
+          </div>
         </div>
 
-        <!-- Live Code Snippet Security Auditor -->
-        <div class="p-3 rounded-xl glass-card border border-indigo-200/60 dark:border-indigo-900/60 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
-              <i data-lucide="terminal" class="w-3.5 h-3.5 text-indigo-500"></i> Live Snippet SAST Scanner
-            </span>
-            <span class="text-[9px] font-mono text-slate-400">Paste any Python code</span>
+        <!-- Live Code Snippet Sandbox -->
+        <div class="p-3.5 rounded-xl surface border space-y-2">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
+            <span class="flex items-center gap-1.5"><i data-lucide="terminal" class="w-3.5 h-3.5 text-indigo-500"></i> Security Sandbox (Paste Python Code)</span>
           </div>
           <textarea
             id="sast-snippet-input"
             rows="4"
-            placeholder="Paste any Python code to audit for eval(), shell=True, SQLi, hardcoded API keys, pickle, MD5..."
-            class="w-full p-2 rounded-lg bg-slate-950 text-slate-100 font-mono text-[11px] border border-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            placeholder="Paste any Python snippet to test detection of eval(), os.system(), shell=True, SQLi, hardcoded secrets, pickle, MD5..."
+            class="w-full p-2.5 rounded-lg bg-slate-950 text-slate-100 font-mono text-[11px] border border-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           ></textarea>
           <div class="flex items-center justify-end gap-2">
-            <button onclick="document.getElementById('sast-snippet-input').value=''; refreshCodebaseStatus();" class="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-[11px] text-slate-500 hover:text-slate-800 dark:hover:text-white transition">
+            <button onclick="document.getElementById('sast-snippet-input').value='';" class="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white">
               Clear
             </button>
-            <button onclick="scanInlineCodeSnippet()" class="px-3 py-1 rounded-lg bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-[11px] font-semibold transition flex items-center gap-1">
-              <i data-lucide="shield-alert" class="w-3 h-3"></i> Audit Snippet
+            <button onclick="scanInlineCodeSnippet()" class="px-3.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 transition">
+              <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Audit Snippet
             </button>
           </div>
         </div>
       </div>
 
-      <!-- TAB 3: QA Matrix Cards -->
-      <div id="panel-qa-tab" class="flex-1 overflow-y-auto p-4 space-y-3 hidden">
-        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Production QA Test Checklist</div>
-        <div id="checklist-cards-container" class="space-y-2 text-xs">
-          <!-- Dynamically populated by JavaScript -->
-        </div>
+      <!-- Minimal Footer -->
+      <div class="px-4 py-2.5 border-t border-slate-200/80 dark:border-slate-800 text-[11px] text-slate-500 flex items-center justify-between font-mono">
+        <span>WOLF DevSecOps Engine</span>
+        <span>Stage 1: Bug Fix &rarr; Stage 2: SAST</span>
       </div>
-
-      <!-- TAB 3: System Architecture Blueprint -->
-      <div id="panel-arch-tab" class="flex-1 overflow-y-auto p-4 space-y-3 hidden">
-        
-        <!-- Interactive SVG Data-Flow Topology -->
-        <div class="p-3.5 rounded-xl glass-card space-y-2 border border-indigo-200/60 dark:border-indigo-900/60 shadow-sm">
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <i data-lucide="git-fork" class="w-4 h-4 text-indigo-500"></i> Live Data-Flow Topology
-            </span>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800">
-              Interactive
-            </span>
-          </div>
-          <p class="text-[11px] text-slate-500">Click any system node to inspect routing protocol & latency:</p>
-          
-          <div class="relative bg-slate-950 rounded-xl p-2.5 border border-slate-800 overflow-x-auto select-none">
-            <!-- SVG Node Graph with Animated Pulses -->
-            <svg viewBox="0 0 380 135" class="w-full min-w-[360px] h-32">
-              <defs>
-                <linearGradient id="topo-pulse" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#6366f1" />
-                  <stop offset="50%" stop-color="#38bdf8" />
-                  <stop offset="100%" stop-color="#34d399" />
-                </linearGradient>
-              </defs>
-
-              <!-- Flow Connection Lines -->
-              <path d="M 68 35 L 126 35" stroke="url(#topo-pulse)" stroke-width="2" class="flow-line"/>
-              <path d="M 186 35 L 244 35" stroke="url(#topo-pulse)" stroke-width="2" class="flow-line"/>
-              <path d="M 156 55 L 156 82 L 186 100" stroke="url(#topo-pulse)" stroke-width="2" class="flow-line"/>
-              <path d="M 275 55 L 275 80 L 275 100" stroke="url(#topo-pulse)" stroke-width="2" class="flow-line"/>
-
-              <!-- Node 1: Client UI -->
-              <g onclick="selectTopologyNode('client')" class="cursor-pointer">
-                <rect x="6" y="15" width="62" height="40" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="1.5"/>
-                <text x="37" y="32" fill="#94a3b8" font-size="8" font-family="monospace" text-anchor="middle">CLIENT</text>
-                <text x="37" y="45" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">HTTP/UI</text>
-              </g>
-
-              <!-- Node 2: LangGraph Orchestrator -->
-              <g onclick="selectTopologyNode('langgraph')" class="cursor-pointer">
-                <rect x="126" y="15" width="60" height="40" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.5"/>
-                <text x="156" y="32" fill="#a5b4fc" font-size="8" font-family="monospace" text-anchor="middle">LANGGRAPH</text>
-                <text x="156" y="45" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">Router</text>
-              </g>
-
-              <!-- Node 3: FastMCP Gateway -->
-              <g onclick="selectTopologyNode('mcp')" class="cursor-pointer">
-                <rect x="244" y="15" width="62" height="40" rx="8" fill="#082f49" stroke="#38bdf8" stroke-width="1.5"/>
-                <text x="275" y="32" fill="#7dd3fc" font-size="8" font-family="monospace" text-anchor="middle">FASTMCP</text>
-                <text x="275" y="45" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">4 Microserv</text>
-              </g>
-
-              <!-- Node 4: Autonomous Code Doctor -->
-              <g onclick="selectTopologyNode('doctor')" class="cursor-pointer">
-                <rect x="186" y="82" width="62" height="40" rx="8" fill="#064e3b" stroke="#34d399" stroke-width="1.5"/>
-                <text x="217" y="99" fill="#6ee7b7" font-size="8" font-family="monospace" text-anchor="middle">AUTONOMOUS</text>
-                <text x="217" y="112" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">Code Doctor</text>
-              </g>
-
-              <!-- Node 5: OWASP/CWE SAST Security Engine -->
-              <g onclick="selectTopologyNode('codebase')" class="cursor-pointer">
-                <rect x="275" y="82" width="62" height="40" rx="8" fill="#31102b" stroke="#f43f5e" stroke-width="1.5"/>
-                <text x="306" y="99" fill="#fca5a5" font-size="8" font-family="monospace" text-anchor="middle">DEVSECOPS</text>
-                <text x="306" y="112" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">SAST Audit</text>
-              </g>
-            </svg>
-
-            <!-- Node Inspector Banner -->
-            <div id="topo-inspector" class="mt-2 p-2 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-mono flex items-center justify-between">
-              <span id="topo-name" class="font-bold text-indigo-400">Node: LangGraph Router</span>
-              <span id="topo-desc" class="text-slate-400 text-[10px]">Cyclic Decision Engine • 12ms latency</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 pt-1">6-Pillar Architecture Blueprint</div>
-
-        <!-- Pillar 1 -->
-        <div class="p-3 rounded-xl glass-card space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-sky-500"></span> 1. ASGI Web Server Layer
-            </span>
-            <span class="text-[10px] font-mono text-slate-500">Starlette + Uvicorn</span>
-          </div>
-          <p class="text-xs text-slate-600 dark:text-slate-300">Non-blocking async HTTP/REST gateway. Dispatches heavy agent reasoning onto background worker thread pools.</p>
-        </div>
-
-        <!-- Pillar 2 -->
-        <div class="p-3 rounded-xl glass-card space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 2. LangGraph StateGraph Loop
-            </span>
-            <span class="text-[10px] font-mono text-slate-500">LangGraph v0.2</span>
-          </div>
-          <p class="text-xs text-slate-600 dark:text-slate-300">Cyclic decision flow: <code class="text-indigo-600 dark:text-indigo-400 font-mono">START ➔ agent ➔ tools ➔ agent ➔ END</code> with loop synthesizer protection.</p>
-        </div>
-
-        <!-- Pillar 3 -->
-        <div class="p-3 rounded-xl glass-card space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-amber-500"></span> 3. Model-Agnostic LLM Factory
-            </span>
-            <span class="text-[10px] font-mono text-slate-500">BaseChatModel</span>
-          </div>
-          <p class="text-xs text-slate-600 dark:text-slate-300">Instantiates Google Gemini, Groq (LLaMA 3.3), OpenAI, Claude, and local Ollama without touching core agent code.</p>
-        </div>
-
-        <!-- Pillar 4 -->
-        <div class="p-3 rounded-xl glass-card space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-purple-500"></span> 4. FastMCP Protocol Bridge
-            </span>
-            <span class="text-[10px] font-mono text-emerald-500">4 Stdio Microservices</span>
-          </div>
-          <p class="text-xs text-slate-600 dark:text-slate-300">4 independent microservices communicating over JSON-RPC 2.0: System Diagnostics, GitHub Read-Only, Web Search, and Statistics.</p>
-        </div>
-
-        <!-- Pillar 5 -->
-        <div class="p-3 rounded-xl glass-card space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-pink-500"></span> 5. Context & Memory Layer
-            </span>
-            <span class="text-[10px] font-mono text-slate-500">Multi-Session</span>
-          </div>
-          <p class="text-xs text-slate-600 dark:text-slate-300">trim_messages guards context limits, MemorySaver isolates threads by thread_id, and user_profile.json stores persistent facts.</p>
-        </div>
-
-        <!-- Pillar 6 -->
-        <div class="p-3 rounded-xl glass-card space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 6. DevSecOps Auto-Healer &amp; SAST
-            </span>
-            <span class="text-[10px] font-mono text-emerald-500">QA + OWASP/CWE</span>
-          </div>
-          <p class="text-xs text-slate-600 dark:text-slate-300">2-stage pipeline: AST/test bug patching followed by OWASP Top 10 &amp; CWE static vulnerability auditing on real repositories.</p>
-        </div>
-      </div>
-
-      <!-- Studio Footer -->
-      <div class="p-3.5 border-t border-slate-200/80 dark:border-slate-800 text-xs text-slate-500 flex items-center justify-between">
-        <span class="font-mono">debdeepsikha13-hub</span>
-        <span class="text-indigo-600 dark:text-indigo-400 font-semibold">WOLF Autonomous Engineering System</span>
-      </div>
-
     </aside>
-
   </div>
 
-  <!-- ========================================================== -->
-  <!-- OMNI COMMAND PALETTE MODAL (Ctrl + K / Cmd + K)            -->
-  <!-- ========================================================== -->
-  <div id="command-palette-modal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md hidden flex items-start justify-center pt-24 px-4 transition-all" onclick="handlePaletteBackdropClick(event)">
-    <div class="w-full max-w-xl glass-card rounded-2xl shadow-2xl border border-indigo-500/30 overflow-hidden" onclick="event.stopPropagation()">
-      <!-- Search Input -->
-      <div class="p-3.5 border-b border-slate-200/80 dark:border-slate-800 flex items-center gap-2.5">
+  <!-- COMMAND PALETTE (Ctrl+K) -->
+  <div id="command-palette-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-start justify-center pt-24 px-4" onclick="closeCommandPalette()">
+    <div class="w-full max-w-lg surface border rounded-xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
+      <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center gap-2">
         <i data-lucide="search" class="w-4 h-4 text-indigo-500"></i>
-        <input 
-          id="palette-search-input" 
-          type="text" 
-          placeholder="Type an action, tool, or shortcut (e.g. fix, git, calc, dark)..." 
+        <input
+          id="palette-search-input"
+          type="text"
+          placeholder="Type a command (fix, repo, security, search, theme)..."
           class="w-full bg-transparent text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
           oninput="filterPaletteItems(this.value)"
           onkeydown="handlePaletteKeydown(event)"
         />
-        <kbd class="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-200 dark:bg-slate-800 text-slate-500">ESC</kbd>
+        <kbd class="px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-200 dark:bg-slate-800 text-slate-500">ESC</kbd>
       </div>
-
-      <!-- Action Items List -->
-      <div id="palette-items-list" class="max-h-80 overflow-y-auto p-2 space-y-1 text-xs select-none">
-        <!-- Rendered by JS -->
-      </div>
+      <div id="palette-items-list" class="max-h-72 overflow-y-auto p-1.5 space-y-1 text-xs"></div>
     </div>
   </div>
 
-  <!-- ========================================================== -->
-  <!-- EXECUTIVE CLIENT PITCH DECK MODAL                          -->
-  <!-- ========================================================== -->
-  <div id="pitch-deck-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-lg hidden flex items-center justify-center p-4" onclick="closePitchDeck()">
-    <div class="w-full max-w-2xl glass-card rounded-3xl p-6 shadow-2xl border border-indigo-500/40 relative space-y-5" onclick="event.stopPropagation()">
-      <!-- Header -->
-      <div class="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-sm font-black text-xs">
-            W
-          </div>
-          <div>
-            <h3 class="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
-              <span>WOLF Executive Briefing Deck</span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-500 font-bold border border-indigo-200 dark:border-indigo-800">Client Mode</span>
-            </h3>
-            <p class="text-[11px] text-slate-500">Autonomous Software Engineering & Multi-MCP Intelligence</p>
-          </div>
-        </div>
-        <button onclick="closePitchDeck()" class="w-7 h-7 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white transition">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-      </div>
-
-      <!-- Slide Content Container -->
-      <div id="pitch-slide-content" class="min-h-[250px] flex flex-col justify-center">
-        <!-- Injected dynamically by JS -->
-      </div>
-
-      <!-- Controls -->
-      <div class="flex items-center justify-between pt-3 border-t border-slate-200/80 dark:border-slate-800">
-        <!-- Slide Dots -->
-        <div class="flex items-center gap-2" id="pitch-slide-dots">
-          <!-- Injected dynamically -->
-        </div>
-
-        <div class="flex items-center gap-2">
-          <button onclick="prevPitchSlide()" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-            Previous
-          </button>
-          <button id="pitch-next-btn" onclick="nextPitchSlide()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
-            Next Slide
-          </button>
-          <button onclick="launchDemoFromPitch()" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-            <span>Launch Live Demo</span>
-            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================== -->
-  <!-- JAVASCRIPT LOGIC: Interactive Studio Engine                -->
-  <!-- ========================================================== -->
   <script>
     const chatContainer = document.getElementById("chat-container");
     const userInput = document.getElementById("user-input");
     const sendBtn = document.getElementById("send-btn");
-    const matrixPassRate = document.getElementById("matrix-pass-rate");
-    const checklistCards = document.getElementById("checklist-cards-container");
-    const ideCodeView = document.getElementById("ide-code-view");
-    const ideFilenameLabel = document.getElementById("ide-filename-label");
-    const ideStatusPill = document.getElementById("ide-status-pill");
-    const ideDiagnosticsBox = document.getElementById("ide-diagnostics-box");
-    const radialCircle = document.getElementById("radial-progress-circle");
-    const radialText = document.getElementById("radial-score-text");
+    const studioStatusPill = document.getElementById("studio-status-pill");
 
-    let threadId = "wolf-session-" + Math.random().toString(36).substring(7);
-    let activeTargetPath = "";
+    const threadId = "wolf-" + Math.random().toString(36).substring(2, 9);
 
-    // Initial load: stay clean & idle — NEVER auto-scan user's repos until they click Execute!
     window.addEventListener("DOMContentLoaded", () => {
-      const savedAtmosphere = localStorage.getItem("wolf_atmosphere");
-      if (savedAtmosphere === "twilight") {
-        document.body.classList.add("mode-twilight");
-        updateAtmosphereBtn(true);
+      if (localStorage.getItem("wolf_theme") === "dark") {
+        document.body.classList.add("mode-dark");
+        updateThemeLabel(true);
       }
-
       lucide.createIcons();
     });
+
+    function toggleTheme() {
+      const isDark = document.body.classList.toggle("mode-dark");
+      localStorage.setItem("wolf_theme", isDark ? "dark" : "light");
+      updateThemeLabel(isDark);
+    }
+
+    function updateThemeLabel(isDark) {
+      const el = document.getElementById("theme-label");
+      if (el) el.innerText = isDark ? "Dark" : "Light";
+    }
+
+    function switchRightTab(tab) {
+      const panels = {
+        hub: document.getElementById("panel-hub-tab"),
+        code: document.getElementById("panel-code-tab"),
+        sec: document.getElementById("panel-sec-tab")
+      };
+      const btns = {
+        hub: document.getElementById("tab-hub-btn"),
+        code: document.getElementById("tab-code-btn"),
+        sec: document.getElementById("tab-sec-btn")
+      };
+
+      const inactive = "px-3 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 transition";
+      const active = "px-3 py-1 rounded-md font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm flex items-center gap-1.5 transition";
+
+      Object.keys(panels).forEach(k => {
+        if (panels[k]) panels[k].classList.add("hidden");
+        if (btns[k]) btns[k].className = inactive;
+      });
+
+      const key = panels[tab] ? tab : "hub";
+      if (panels[key]) panels[key].classList.remove("hidden");
+      if (btns[key]) btns[key].className = active;
+      lucide.createIcons();
+    }
 
     function focusRepoInput() {
       switchRightTab("hub");
@@ -1017,12 +471,11 @@
       if (input && input.value.trim()) {
         runOnDemandRepo();
       } else {
-        appendSystemMessage("📌 Paste a GitHub repository URL or local folder path into Execute Repo first, then click Fix & Certify.");
+        appendSystemMessage("Paste a GitHub repository URL or local folder path first, then click Fix & Certify.");
         if (input) input.focus();
       }
     }
 
-    // On-Demand 2-Stage Executor: Paste GitHub URL or Local Path -> Stage 1 (Fix Bugs) -> Stage 2 (Security Scan)
     async function runOnDemandRepo() {
       const input = document.getElementById("repo-link-input");
       const btn = document.getElementById("execute-repo-btn");
@@ -1030,14 +483,14 @@
       const target = input ? input.value.trim() : "";
 
       if (!target) {
-        appendSystemMessage("⚠️ Please paste a GitHub repository URL or local folder path first.");
+        appendSystemMessage("Paste a GitHub repository URL or local folder path first.");
         if (input) input.focus();
         return;
       }
 
       if (btn) btn.disabled = true;
-      if (btnLabel) btnLabel.innerText = "Executing Stage 1 (Bugs) & Stage 2 (Security)...";
-      appendSystemMessage(`🚀 Executing On-Demand Pipeline on '${target}': Stage 1 (Bug Fix) -> Stage 2 (Security Scan)...`);
+      if (btnLabel) btnLabel.innerText = "Running Stage 1 (Bug Fix) & Stage 2 (Security)...";
+      appendSystemMessage(`Executing on '${target}': Stage 1 (Bug Fix) -> Stage 2 (Security Scan)...`);
 
       try {
         const res = await fetch("/api/execute_repo", {
@@ -1055,12 +508,11 @@
 
         renderOnDemandResult(data);
       } catch (err) {
-        console.error("Execute repo error:", err);
-        renderExecutionError("Network error contacting backend.");
-        appendAgentMessage("⚠️ **Network Error**: Could not reach Wolf backend.", []);
+        renderExecutionError("Network error reaching WOLF backend.");
+        appendAgentMessage("⚠️ **Network Error**: Could not reach WOLF backend.", []);
       } finally {
         if (btn) btn.disabled = false;
-        if (btnLabel) btnLabel.innerText = "Execute: Fix Bugs & Security Scan";
+        if (btnLabel) btnLabel.innerText = "Fix & Certify (Bug Fix + Security Scan)";
       }
     }
 
@@ -1069,10 +521,11 @@
       const title = document.getElementById("verdict-title");
       const pill = document.getElementById("verdict-grade-pill");
       const desc = document.getElementById("verdict-desc");
-      if (banner) banner.className = "p-4 rounded-xl border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/50 space-y-1";
-      if (title) title.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-rose-500"></i> Execution Failed`;
-      if (pill) { pill.innerText = "ERROR"; pill.className = "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-600 text-white"; }
-      if (desc) desc.innerText = errorMsg;
+      banner.className = "p-4 rounded-xl border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/50 space-y-1";
+      title.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-rose-500"></i> Execution Failed`;
+      pill.innerText = "ERROR";
+      pill.className = "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-600 text-white";
+      desc.innerText = errorMsg;
       lucide.createIcons();
     }
 
@@ -1082,82 +535,77 @@
       const s2 = data.stage2_security;
       const isSecure = s2.verdict === "SECURE";
 
-      // 1. Update Code Viewer & Security Tab with real results from this executed repo
       renderLiveSourceCode(data.source, s2);
       renderSecurityAudit(s2);
 
-      // Update top studio status pill
-      if (matrixPassRate) {
-        matrixPassRate.innerText = isSecure ? `SECURE (${s2.overall_grade})` : `INSECURE (${s2.vulnerabilities_count} Vulns)`;
-        matrixPassRate.className = isSecure
-          ? "px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0"
-          : "px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-600 text-white border border-rose-700 shrink-0 animate-pulse";
-      }
+      // Update status pills
+      studioStatusPill.innerText = isSecure ? `SECURE (${s2.overall_grade})` : `INSECURE (${s2.vulnerabilities_count})`;
+      studioStatusPill.className = isSecure
+        ? "px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
+        : "px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-rose-600 text-white animate-pulse";
 
-      // 2. BIG SECURITY VERDICT INDICATOR BANNER
+      // Verdict Banner
       const banner = document.getElementById("verdict-banner");
       const title = document.getElementById("verdict-title");
       const pill = document.getElementById("verdict-grade-pill");
       const desc = document.getElementById("verdict-desc");
 
       if (isSecure) {
-        banner.className = "p-4 rounded-xl border-2 border-emerald-400 dark:border-emerald-700 bg-emerald-50/90 dark:bg-emerald-950/50 space-y-1";
+        banner.className = "p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50/90 dark:bg-emerald-950/50 space-y-1";
         title.className = "text-xs font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5";
-        title.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i> 🟢 CODE IS SECURE ✅`;
+        title.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i> CODE IS SECURE`;
         pill.className = "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-emerald-600 text-white";
         pill.innerText = `GRADE ${s2.overall_grade} • 0 VULNS`;
         desc.className = "text-[11px] text-emerald-700 dark:text-emerald-300";
-        desc.innerHTML = `<strong>${escapeHtml(repoLabel)}</strong> passed Stage 1 bug checks and all 6 OWASP/CWE cybersecurity rules (${data.duration_ms}ms).`;
+        desc.innerHTML = `<strong>${escapeHtml(repoLabel)}</strong> passed Stage 1 bug checks and all 6 OWASP/CWE security rules (${data.duration_ms}ms).`;
       } else {
-        banner.className = "p-4 rounded-xl border-2 border-rose-500 dark:border-rose-700 bg-rose-50/95 dark:bg-rose-950/60 space-y-1 shadow-md shadow-rose-500/15";
+        banner.className = "p-4 rounded-xl border-2 border-rose-500 bg-rose-50/95 dark:bg-rose-950/60 space-y-1";
         title.className = "text-xs font-extrabold text-rose-800 dark:text-rose-200 flex items-center gap-1.5";
-        title.innerHTML = `<i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i> 🔴 SECURITY RISK DETECTED 🚨`;
+        title.innerHTML = `<i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i> INSECURE — SECURITY RISK DETECTED`;
         pill.className = "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-rose-600 text-white animate-pulse";
         pill.innerText = `GRADE ${s2.overall_grade} • ${s2.vulnerabilities_count} VULN(S)`;
         desc.className = "text-[11px] text-rose-700 dark:text-rose-300";
-        desc.innerHTML = `<strong>WARNING:</strong> After bug fixing, <strong>${escapeHtml(repoLabel)}</strong> has <strong>${s2.vulnerabilities_count} security vulnerability(s)</strong> (CRIT: ${s2.severity_counts.CRITICAL}, HIGH: ${s2.severity_counts.HIGH}). Do NOT deploy until resolved!`;
+        desc.innerHTML = `<strong>WARNING:</strong> <strong>${escapeHtml(repoLabel)}</strong> has <strong>${s2.vulnerabilities_count}</strong> vulnerability(s) (CRIT: ${s2.severity_counts.CRITICAL}, HIGH: ${s2.severity_counts.HIGH}). Remediate before deployment.`;
       }
 
-      // 3. Stage 1 Card (Bugs Detected & Auto-Fixed)
-      const s1Card = document.getElementById("stage1-card");
-      if (s1Card) s1Card.classList.remove("hidden");
+      // Stage 1
+      document.getElementById("stage1-card").classList.remove("hidden");
       document.getElementById("s1-files").innerText = s1.files_analyzed;
       document.getElementById("s1-fixed").innerText = s1.bugs_fixed_count;
       document.getElementById("s1-remaining").innerText = s1.remaining_bugs_count;
-      document.getElementById("stage1-pill").innerText = `${s1.bugs_fixed_count} Auto-Fixed / ${s1.bugs_found_count} Found`;
+      document.getElementById("stage1-pill").innerText = `${s1.bugs_fixed_count} Fixed / ${s1.bugs_found_count} Found`;
 
       const s1Details = document.getElementById("stage1-details");
       if (s1.bugs_found_count === 0) {
-        s1Details.innerHTML = `<div class="p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 font-medium">✅ No syntax or static bugs found across ${s1.files_analyzed} Python file(s).</div>`;
+        s1Details.innerHTML = `<div class="p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300">No syntax or static bugs found across ${s1.files_analyzed} Python file(s).</div>`;
       } else {
         let html = "";
         (s1.fixes_applied || []).forEach(fx => {
-          html += `<div class="p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-900">
-            <div class="font-bold text-emerald-800 dark:text-emerald-300">🛠️ FIXED: ${escapeHtml(fx.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(fx.file)}:${fx.line})</span></div>
+          html += `<div class="p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900">
+            <div class="font-bold text-emerald-800 dark:text-emerald-300">FIXED: ${escapeHtml(fx.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(fx.file)}:${fx.line})</span></div>
             <div class="text-slate-600 dark:text-slate-300">${escapeHtml(fx.fix || fx.description)}</div>
           </div>`;
         });
         (s1.remaining_bugs || []).forEach(rb => {
-          html += `<div class="p-2 rounded-lg bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900">
-            <div class="font-bold text-amber-800 dark:text-amber-300">⚠️ BUG FLAGGED: ${escapeHtml(rb.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(rb.file)}:${rb.line})</span></div>
+          html += `<div class="p-2 rounded-lg bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
+            <div class="font-bold text-amber-800 dark:text-amber-300">FLAGGED: ${escapeHtml(rb.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(rb.file)}:${rb.line})</span></div>
             <div class="text-slate-600 dark:text-slate-300">${escapeHtml(rb.description)}</div>
           </div>`;
         });
         s1Details.innerHTML = html;
       }
 
-      // 4. Stage 2 Card (Post-Fix Security Scan Findings)
-      const s2Card = document.getElementById("stage2-card");
-      if (s2Card) s2Card.classList.remove("hidden");
+      // Stage 2
+      document.getElementById("stage2-card").classList.remove("hidden");
       const s2Pill = document.getElementById("stage2-pill");
-      s2Pill.innerText = isSecure ? `SECURE • Grade ${s2.overall_grade}` : `INSECURE • ${s2.vulnerabilities_count} Flagged`;
+      s2Pill.innerText = isSecure ? `SECURE • ${s2.overall_grade}` : `INSECURE • ${s2.vulnerabilities_count} Flagged`;
       s2Pill.className = isSecure
         ? "text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold"
         : "text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-600 text-white font-bold";
 
       const s2List = document.getElementById("stage2-findings");
       if (isSecure) {
-        s2List.innerHTML = `<div class="p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 font-medium">✅ All 6 OWASP Top 10 / CWE security rules passed cleanly.</div>`;
+        s2List.innerHTML = `<div class="p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300">All 6 OWASP Top 10 / CWE controls passed cleanly.</div>`;
       } else {
         s2List.innerHTML = (s2.findings || []).slice(0, 8).map(f => `
           <div class="p-2 rounded-lg bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 space-y-0.5">
@@ -1171,410 +619,63 @@
         `).join("");
       }
 
-      // 5. Post complete summary into Chat Stream
-      let chatMsg = `🚀 **On-Demand Execution Complete — \`${repoLabel}\`** (${data.duration_ms}ms)\n\n`;
-      chatMsg += isSecure
-        ? `### 🟢 SECURITY VERDICT: CODE IS SECURE ✅ (Grade ${s2.overall_grade} — 0 Vulnerabilities)\n\n`
-        : `### 🔴 SECURITY VERDICT: INSECURE CODE DETECTED 🚨 (Grade ${s2.overall_grade} — ${s2.vulnerabilities_count} Vulnerability(s))\n\n`;
-      chatMsg += `**Stage 1 — Bug Fixing**: Analyzed \`${s1.files_analyzed}\` Python file(s) • Bugs Found: **${s1.bugs_found_count}** • Auto-Fixed: **${s1.bugs_fixed_count}** • Needs Review: **${s1.remaining_bugs_count}**\n`;
+      // Chat summary
+      let msg = `**Execution Complete — \`${repoLabel}\`** (${data.duration_ms}ms)\n\n`;
+      msg += isSecure
+        ? `### 🟢 VERDICT: CODE IS SECURE (Grade ${s2.overall_grade} — 0 Vulnerabilities)\n\n`
+        : `### 🔴 VERDICT: INSECURE CODE DETECTED (Grade ${s2.overall_grade} — ${s2.vulnerabilities_count} Vulnerability(s))\n\n`;
+      msg += `**Stage 1 (Bug Fixing)**: \`${s1.files_analyzed}\` file(s) • Found: **${s1.bugs_found_count}** • Auto-Fixed: **${s1.bugs_fixed_count}** • Review: **${s1.remaining_bugs_count}**\n`;
       if (s1.fixes_applied && s1.fixes_applied.length > 0) {
-        chatMsg += s1.fixes_applied.slice(0, 5).map(fx => `- 🛠️ Fixed \`${fx.file}:${fx.line}\`: ${fx.fix || fx.description}`).join("\n") + "\n";
+        msg += s1.fixes_applied.slice(0, 5).map(fx => `- Fixed \`${fx.file}:${fx.line}\` (${fx.bug_type}): ${fx.fix || fx.description}`).join("\n") + "\n";
       }
-      chatMsg += `\n**Stage 2 — Post-Fix Security Scan**: Grade **${s2.overall_grade}** (${s2.score}/100) • CRITICAL: ${s2.severity_counts.CRITICAL} | HIGH: ${s2.severity_counts.HIGH} | MEDIUM: ${s2.severity_counts.MEDIUM} | LOW: ${s2.severity_counts.LOW}`;
+      msg += `\n**Stage 2 (Security Scan)**: Grade **${s2.overall_grade}** (${s2.score}/100) • CRIT: ${s2.severity_counts.CRITICAL} | HIGH: ${s2.severity_counts.HIGH} | MED: ${s2.severity_counts.MEDIUM} | LOW: ${s2.severity_counts.LOW}`;
       if (!isSecure && s2.findings) {
-        chatMsg += "\n" + s2.findings.slice(0, 5).map(f =>
-          `- 🚨 **[${f.severity}] ${f.cwe}** \`${f.file}:${f.line}\` — ${f.title}`
+        msg += "\n" + s2.findings.slice(0, 5).map(f =>
+          `- **[${f.severity}] ${f.cwe}** \`${f.file}:${f.line}\` — ${f.title}`
         ).join("\n");
       }
-      appendAgentMessage(chatMsg, []);
+      appendAgentMessage(msg, []);
       lucide.createIcons();
     }
 
-    function toggleAtmosphere() {
-      const isTwilight = document.body.classList.toggle("mode-twilight");
-      localStorage.setItem("wolf_atmosphere", isTwilight ? "twilight" : "pearl");
-      updateAtmosphereBtn(isTwilight);
-    }
-
-    function updateAtmosphereBtn(isTwilight) {
-      const label = document.getElementById("atmosphere-label");
-      if (label) {
-        label.innerText = isTwilight ? "Twilight Dark" : "Pearl Light";
-      }
-    }
-
-    function applyTargetRepo() {
-      const input = document.getElementById("target-repo-input");
-      const val = input ? input.value.trim() : "";
-      if (!val) {
-        appendSystemMessage("📌 Paste a GitHub repo URL or local folder path first.");
-        return;
-      }
-      const mainInput = document.getElementById("repo-link-input");
-      if (mainInput) mainInput.value = val;
-      switchRightTab("hub");
-      runOnDemandRepo();
-    }
-
-    function resetTargetPath() {
-      const input = document.getElementById("target-repo-input");
-      if (input) input.value = "";
-      activeTargetPath = "";
-      refreshCodebaseStatus();
-    }
-
-    function switchRightTab(tab) {
-      const panels = {
-        hub: document.getElementById("panel-hub-tab"),
-        ide: document.getElementById("panel-ide-tab"),
-        sec: document.getElementById("panel-sec-tab"),
-        qa: document.getElementById("panel-qa-tab"),
-        arch: document.getElementById("panel-arch-tab")
-      };
-      const btns = {
-        hub: document.getElementById("tab-hub-btn"),
-        ide: document.getElementById("tab-ide-btn"),
-        sec: document.getElementById("tab-sec-btn"),
-        qa: document.getElementById("tab-qa-btn"),
-        arch: document.getElementById("tab-arch-btn")
-      };
-
-      const inactiveClass = "px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1";
-      const activeClass = "px-2.5 py-1 rounded-lg font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition flex items-center gap-1 shadow-sm";
-
-      Object.keys(panels).forEach(k => {
-        if (panels[k]) panels[k].classList.add("hidden");
-        if (btns[k]) btns[k].className = inactiveClass;
-      });
-
-      const key = panels[tab] ? tab : "hub";
-      if (panels[key]) panels[key].classList.remove("hidden");
-      if (btns[key]) btns[key].className = activeClass;
-      lucide.createIcons();
-    }
-
-    // ==========================================================
-    // Central Security Scanning Platform Hub Logic
-    // ==========================================================
-    async function refreshPlatformOverview() {
-      try {
-        const res = await fetch("/api/platform/overview");
-        if (!res.ok) return;
-        const data = await res.json();
-        renderPlatformOverview(data);
-      } catch (err) {
-        console.error("Failed to fetch platform overview:", err);
-      }
-    }
-
-    function renderPlatformOverview(data) {
-      if (!data) return;
-      const cov = data.coverage || {};
-      const missing = cov.missing_scan_repos || 0;
-      const total = cov.total_repos || 0;
-      const scanned = cov.scanned_repos || 0;
-      const pct = cov.coverage_pct || 0;
-
-      // 1. Missing Scan Visibility Banner
-      const banner = document.getElementById("hub-missing-banner");
-      const covPill = document.getElementById("hub-coverage-pill");
-      const missingDesc = document.getElementById("hub-missing-desc");
-      if (banner && covPill && missingDesc) {
-        covPill.innerText = `${scanned}/${total} Scanned (${pct}%)`;
-        if (missing > 0) {
-          banner.className = "p-3 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/80 dark:bg-rose-950/40 space-y-1";
-          covPill.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-rose-600 text-white font-bold";
-          missingDesc.className = "text-[11px] text-rose-700 dark:text-rose-300";
-          missingDesc.innerHTML = `<strong>🚨 ${missing} repositor${missing === 1 ? 'y is' : 'ies are'} MISSING a security scan!</strong> Click <strong>Scan Now</strong> below to execute a Zero-Touch audit (0 files added).`;
-        } else {
-          banner.className = "p-3 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/80 dark:bg-emerald-950/40 space-y-1";
-          covPill.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-600 text-white font-bold";
-          missingDesc.className = "text-[11px] text-emerald-700 dark:text-emerald-300";
-          missingDesc.innerHTML = `<strong>✅ 100% Fleet Visibility:</strong> Zero missing scans. All ${total} tracked repositories have persisted central SAST reports.`;
-        }
-      }
-
-      const countEl = document.getElementById("hub-repo-count");
-      if (countEl) countEl.innerText = `${total} repo${total === 1 ? '' : 's'} tracked`;
-
-      // 2. Repository Inventory List (Missing Scans Surfaced First)
-      const listEl = document.getElementById("hub-repos-list");
-      if (listEl && Array.isArray(data.repositories)) {
-        listEl.innerHTML = data.repositories.map(r => {
-          let badgeCls = "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300";
-          let badgeText = `SCANNED • ${r.overall_grade}`;
-          let cardCls = "glass-card";
-          if (r.scan_status === "MISSING_SCAN") {
-            badgeCls = "bg-rose-600 text-white";
-            badgeText = "MISSING SCAN 🚨";
-            cardCls = "bg-rose-50/70 border-rose-200 dark:bg-rose-950/30 dark:border-rose-900";
-          } else if (r.scan_status === "VULNERABLE") {
-            badgeCls = "bg-amber-500 text-white";
-            badgeText = `${r.overall_grade} • ${r.vulnerabilities_count} VULN`;
-            cardCls = "bg-amber-50/70 border-amber-200 dark:bg-amber-950/30 dark:border-amber-900";
-          } else if (r.scan_status === "STALE_SCAN") {
-            badgeCls = "bg-orange-500 text-white";
-            badgeText = "STALE SCAN ⚠️";
-          }
-
-          const safeName = escapeHtml(r.repo_name);
-          const safeJsName = r.repo_name.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-          const subMeta = r.last_scanned_at
-            ? `${r.source.toUpperCase()} • ${r.files_scanned} files • Last: ${r.last_scanned_at.substring(0, 16).replace('T', ' ')} UTC`
-            : `${r.source.toUpperCase()} • Never scanned — gap visible`;
-
-          return `
-            <div class="p-2.5 rounded-xl border flex items-center justify-between gap-2 ${cardCls}">
-              <div class="min-w-0">
-                <div class="font-bold text-slate-900 dark:text-white text-[11px] truncate">${safeName}</div>
-                <div class="text-[10px] font-mono text-slate-500 truncate">${escapeHtml(subMeta)}</div>
-              </div>
-              <div class="flex items-center gap-1.5 shrink-0">
-                <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold ${badgeCls}">${badgeText}</span>
-                <button onclick="scanFleetRepository('${safeJsName}')" class="px-2 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-semibold transition">
-                  Scan Now
-                </button>
-              </div>
-            </div>
-          `;
-        }).join("");
-      }
-
-      // 3. Current State Governance Table
-      const stateBody = document.getElementById("hub-current-state-body");
-      if (stateBody && Array.isArray(data.current_state)) {
-        stateBody.innerHTML = data.current_state.map(row => `
-          <tr>
-            <td class="px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-200 whitespace-nowrap">${escapeHtml(row.item)}</td>
-            <td class="px-3 py-1.5 font-mono text-[10px] text-slate-600 dark:text-slate-300">${escapeHtml(row.value)}</td>
-          </tr>
-        `).join("");
-      }
-
-      // 4. Recent Stored Audit Reports
-      const histEl = document.getElementById("hub-reports-history");
-      if (histEl && Array.isArray(data.recent_reports)) {
-        if (data.recent_reports.length === 0) {
-          histEl.innerHTML = `<div class="p-2.5 rounded-xl glass-card text-slate-500 font-mono">No stored scans yet. Click "Scan Now" on any repo above to populate SQLite report storage.</div>`;
-        } else {
-          histEl.innerHTML = data.recent_reports.slice(0, 6).map(rep => `
-            <div class="p-2 rounded-lg glass-card flex items-center justify-between font-mono text-[10px]">
-              <span class="truncate text-slate-700 dark:text-slate-200"><strong>#${rep.id}</strong> ${escapeHtml(rep.repo_name)}</span>
-              <span class="shrink-0 ${rep.vulnerabilities_count > 0 ? 'text-rose-500 font-bold' : 'text-emerald-600 dark:text-emerald-400 font-bold'}">
-                Grade ${escapeHtml(rep.overall_grade)} (${rep.vulnerabilities_count}v • ${rep.duration_ms}ms)
-              </span>
-            </div>
-          `).join("");
-        }
-      }
-      lucide.createIcons();
-    }
-
-    async function syncCentralFleet() {
-      switchRightTab("hub");
-      const input = document.getElementById("hub-org-input");
-      const owner = input ? input.value.trim() : "debdeepsikha13-hub";
-      appendSystemMessage(`🌐 Zero-Touch Fleet Discovery: Syncing GitHub repositories for '${owner}' (0 files added)...`);
-      try {
-        const res = await fetch("/api/platform/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ owner: owner })
-        });
-        const data = await res.json();
-        if (data.overview) renderPlatformOverview(data.overview);
-        if (data.sync && data.sync.status === "synced") {
-          const cov = data.overview.coverage;
-          appendAgentMessage(
-            `🌐 **Central Fleet Discovery Complete (\`${data.sync.owner}\`)**\n` +
-            `- **Repositories Discovered**: ${data.sync.synced_count} (Zero-Touch — 0 files added to any repo)\n` +
-            `- **Missing Scans Surfaced**: **${cov.missing_scan_repos}** unscanned repositories are now visibly flagged in the **Central Hub** panel.\n` +
-            `- Click **Scan Now** on any repo to execute a central SAST audit and persist the report in SQLite.`,
-            []
-          );
-        } else {
-          appendAgentMessage(`⚠️ **Sync Notice**: ${(data.sync && data.sync.error) || 'Could not reach GitHub API.'}`, []);
-        }
-      } catch (err) {
-        console.error("Sync fleet error:", err);
-      }
-    }
-
-    async function scanFleetRepository(repoName) {
-      appendSystemMessage(`🛡️ Running Zero-Touch Central Security Scan on '${repoName}' (0 files modified/added)...`);
-      try {
-        const res = await fetch("/api/platform/scan_repo", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ repo_name: repoName })
-        });
-        const data = await res.json();
-        if (data.overview) renderPlatformOverview(data.overview);
-        const rep = data.report || {};
-        if (rep.status === "error") {
-          appendAgentMessage(`❌ **Central Scan Failed for \`${repoName}\`**: ${rep.error}`, []);
-          return;
-        }
-        renderSecurityAudit(rep);
-        let msg = `🛡️ **Zero-Touch Central Scan Complete — \`${repoName}\`**\n` +
-          `- **Grade**: **${rep.overall_grade}** (${rep.score}/100) | **Files Scanned**: ${rep.files_scanned} | **Vulnerabilities**: ${rep.vulnerabilities_count}\n` +
-          `- **Report Persisted**: SQLite Audit ID \`#${rep.report_id}\` (${rep.duration_ms}ms) • **Per-Repo Files Added**: \`0\``;
-        if (rep.findings && rep.findings.length > 0) {
-          msg += "\n\n" + rep.findings.slice(0, 6).map(f =>
-            `- 🚨 **[${f.severity}] ${f.rule_id} (${f.cwe})** \`${f.file}:${f.line}\`: ${f.title}\n  - *Remediation*: ${f.remediation}`
-          ).join("\n");
-        } else {
-          msg += "\n- ✅ All 6 OWASP/CWE security controls passed.";
-        }
-        appendAgentMessage(msg, []);
-      } catch (err) {
-        console.error("Scan repo error:", err);
-      }
-    }
-
-    // Refresh Codebase QA Status, Source Snapshot & SAST Security Audit
-    async function refreshCodebaseStatus() {
-      try {
-        const qs = activeTargetPath ? `?target=${encodeURIComponent(activeTargetPath)}` : "";
-        const res = await fetch("/api/bug_status" + qs);
-        if (!res.ok) return;
-        const data = await res.json();
-        renderCodeLabAndMatrix(data.tests, data.bug_found, data.diagnosis, data.source, data.security);
-        renderSecurityAudit(data.security);
-      } catch (err) {
-        console.error("Failed to fetch DevSecOps status:", err);
-      }
-    }
-
-    // Render Live Source Code Lines in Code Lab
     function renderLiveSourceCode(source, security) {
-      if (!ideCodeView) return;
+      const codeView = document.getElementById("ide-code-view");
+      const filenameEl = document.getElementById("ide-filename-label");
+      const statusEl = document.getElementById("ide-status-pill");
+      if (!codeView) return;
+
       if (!source || !source.exists || !source.lines || source.lines.length === 0) {
-        ideCodeView.innerHTML = `<div class="p-3 font-mono text-xs text-amber-400">Target path not found or contains no Python source files.</div>`;
+        codeView.innerHTML = `<div class="p-3 font-mono text-xs text-amber-400">No Python source file preview available.</div>`;
         return;
       }
 
-      if (ideFilenameLabel) ideFilenameLabel.innerText = source.file;
-      const heroLabel = document.getElementById("hero-target-label");
-      if (heroLabel) heroLabel.innerText = source.file;
-
+      if (filenameEl) filenameEl.innerText = source.file;
       const flaggedLines = new Set();
       if (security && Array.isArray(security.findings)) {
         security.findings.forEach(f => {
-          if (f.line) flaggedLines.add(Number(f.line));
+          if (f.file === source.file && f.line) flaggedLines.add(Number(f.line));
         });
       }
 
-      const maxLines = Math.min(source.lines.length, 120);
+      if (statusEl) {
+        statusEl.innerText = flaggedLines.size > 0 ? `${flaggedLines.size} Flagged Line(s)` : "Clean";
+        statusEl.className = flaggedLines.size > 0
+          ? "text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold"
+          : "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold";
+      }
+
+      const maxLines = Math.min(source.lines.length, 150);
       let html = "";
       for (let i = 0; i < maxLines; i++) {
         const ln = i + 1;
-        const isFlagged = flaggedLines.has(ln);
-        const cls = isFlagged ? "code-line code-highlight-bug" : "code-line";
-        html += `<div class="${cls}"><span class="code-ln">${ln}</span><span class="code-content whitespace-pre">${escapeHtml(source.lines[i])}</span></div>`;
+        const cls = flaggedLines.has(ln) ? "code-line code-highlight-bug" : "code-line";
+        html += `<div class="${cls}"><span class="code-ln">${ln}</span><span class="code-content">${escapeHtml(source.lines[i])}</span></div>`;
       }
-      if (source.lines.length > maxLines) {
-        html += `<div class="px-3 py-1 text-[10px] font-mono text-slate-500">... (${source.lines.length - maxLines} more lines)</div>`;
-      }
-      ideCodeView.innerHTML = html;
+      codeView.innerHTML = html;
     }
 
-    // Render Virtual IDE Code Lab and QA Checklist Cards
-    function renderCodeLabAndMatrix(tests, bugFound, diagnosis, source, security) {
-      renderLiveSourceCode(source, security);
-      if (!tests) return;
-
-      const total = tests.total_tests || 0;
-      const passed = tests.passed_count || 0;
-      const failed = tests.failed_count || 0;
-      const pct = total > 0 ? Math.round((passed / total) * 100) : (bugFound ? 0 : 100);
-
-      matrixPassRate.innerText = total > 0 ? `${passed}/${total} (${pct}%)` : (bugFound ? "AST Issue" : "Clean");
-      radialCircle.setAttribute("stroke-dasharray", `${pct}, 100`);
-      radialText.innerText = `${pct}%`;
-
-      if (bugFound || failed > 0) {
-        ideStatusPill.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30";
-        ideStatusPill.innerText = "Bug Detected";
-        radialCircle.className = "text-rose-500 transition-all duration-700 ease-out";
-
-        const title = diagnosis ? diagnosis.bug_title : "Functional / AST Bug Detected";
-        const detail = diagnosis ? diagnosis.root_cause : "One or more unit tests or static checks failed.";
-
-        ideDiagnosticsBox.className = "p-3.5 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/80 dark:bg-rose-950/40 space-y-1";
-        ideDiagnosticsBox.innerHTML = `
-          <div class="flex items-center justify-between text-xs font-bold text-rose-800 dark:text-rose-300">
-            <span class="flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-4 h-4 text-rose-500"></i> ${escapeHtml(title)}</span>
-            <span class="text-[10px] font-mono uppercase bg-rose-200/60 dark:bg-rose-900 px-1.5 py-0.2 rounded">Action Needed</span>
-          </div>
-          <p class="text-xs text-rose-700 dark:text-rose-400">
-            ${escapeHtml(detail)} Click <strong>"Fix &amp; Certify"</strong> to auto-patch and audit.
-          </p>
-        `;
-      } else {
-        ideStatusPill.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30";
-        ideStatusPill.innerText = "Certified Master";
-        radialCircle.className = "text-emerald-500 transition-all duration-700 ease-out";
-
-        const secVulns = security ? (security.vulnerabilities_count || 0) : 0;
-        if (secVulns > 0) {
-          ideDiagnosticsBox.className = "p-3.5 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/40 space-y-1";
-          ideDiagnosticsBox.innerHTML = `
-            <div class="flex items-center justify-between text-xs font-bold text-amber-800 dark:text-amber-300">
-              <span class="flex items-center gap-1.5"><i data-lucide="shield-alert" class="w-4 h-4 text-amber-500"></i> QA Passed • Security Flagged</span>
-              <span class="text-[10px] font-mono uppercase">${secVulns} Vuln(s)</span>
-            </div>
-            <p class="text-xs text-amber-700 dark:text-amber-400">
-              Functional tests pass, but SAST detected <strong>${secVulns}</strong> cybersecurity issue(s). Open the <strong>Security</strong> tab for remediation.
-            </p>
-          `;
-        } else {
-          ideDiagnosticsBox.className = "p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 space-y-1";
-          ideDiagnosticsBox.innerHTML = `
-            <div class="flex items-center justify-between text-xs font-bold text-emerald-800 dark:text-emerald-300">
-              <span class="flex items-center gap-1.5"><i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i> QA &amp; Cybersecurity Certified</span>
-              <span class="text-[10px] font-mono uppercase">${pct}% Pass</span>
-            </div>
-            <p class="text-xs text-emerald-700 dark:text-emerald-400">
-              Zero functional bugs and zero OWASP/CWE security vulnerabilities detected across target codebase.
-            </p>
-          `;
-        }
-      }
-
-      // Render cards in QA Matrix Tab
-      checklistCards.innerHTML = "";
-      const list = tests.checklist || [];
-      if (list.length === 0) {
-        checklistCards.innerHTML = `<div class="p-3 rounded-xl glass-card text-slate-500 font-mono text-xs">No unittest files discovered in this target path. Static AST and SAST security checks remain active.</div>`;
-      } else {
-        list.forEach(item => {
-          const isPass = item.passed;
-          const card = document.createElement("div");
-          card.className = `p-3 rounded-xl border flex items-center justify-between transition ${isPass ? 'glass-card' : 'bg-rose-50/70 border-rose-200 dark:bg-rose-950/30 dark:border-rose-900'}`;
-          card.innerHTML = `
-            <div class="flex items-center gap-2.5">
-              <span class="text-base">${isPass ? '✅' : '❌'}</span>
-              <div>
-                <div class="font-bold text-slate-800 dark:text-white">${escapeHtml(formatTestTitle(item.test_id))}</div>
-                <div class="text-[11px] text-slate-500 dark:text-slate-400">${escapeHtml(item.description)}</div>
-              </div>
-            </div>
-            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isPass ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300'}">
-              ${isPass ? 'PASS' : 'FAIL'}
-            </span>
-          `;
-          checklistCards.appendChild(card);
-        });
-      }
-
-      lucide.createIcons();
-    }
-
-    // Render Cybersecurity SAST Audit Panel, Code Lab Gauge & Header Pill
     function renderSecurityAudit(security) {
       if (!security) return;
-
       const grade = security.overall_grade || "N/A";
       const score = security.score !== undefined ? security.score : 0;
       const vulns = security.vulnerabilities_count || 0;
@@ -1582,207 +683,113 @@
       const isSecure = Boolean(security.is_secure);
       const sev = security.severity_counts || { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
 
-      // 1. Header Security Pill
-      const headerPill = document.getElementById("header-security-pill");
-      const headerText = document.getElementById("header-security-text");
-      if (headerPill && headerText) {
-        headerText.innerText = `Security: ${grade} (${vulns} Vuln${vulns === 1 ? '' : 's'})`;
-        if (isSecure) {
-          headerPill.className = "hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-semibold shadow-sm hover:opacity-90 transition";
-        } else {
-          headerPill.className = "hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold shadow-sm hover:opacity-90 transition";
-        }
+      // Header Pill
+      const hPill = document.getElementById("header-security-pill");
+      const hText = document.getElementById("header-security-text");
+      if (hPill && hText) {
+        hText.innerText = isSecure ? `SECURE: ${grade} (0 Vulns)` : `INSECURE: ${grade} (${vulns} Vulns)`;
+        hPill.className = isSecure
+          ? "hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-bold transition"
+          : "hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-600 text-white text-xs font-bold animate-pulse transition";
       }
 
-      // 2. Code Lab Security Radial Gauge
-      const secCircle = document.getElementById("sec-radial-circle");
-      const secGradeText = document.getElementById("sec-grade-text");
-      const secGaugeSub = document.getElementById("sec-gauge-sub");
-      if (secCircle && secGradeText && secGaugeSub) {
-        secCircle.setAttribute("stroke-dasharray", `${score}, 100`);
-        secGradeText.innerText = grade;
-        secGaugeSub.innerText = `${vulns} Vuln${vulns === 1 ? '' : 's'} Found`;
-        if (isSecure) {
-          secCircle.className = "text-emerald-500 transition-all duration-700 ease-out";
-          secGradeText.className = "absolute text-xs font-black text-emerald-600 dark:text-emerald-400 font-mono";
-          secGaugeSub.className = "text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold";
-        } else {
-          secCircle.className = "text-rose-500 transition-all duration-700 ease-out";
-          secGradeText.className = "absolute text-xs font-black text-rose-600 dark:text-rose-400 font-mono";
-          secGaugeSub.className = "text-[10px] text-rose-600 dark:text-rose-400 font-semibold";
-        }
-      }
-
-      // 3. Security Tab Banner & Severity Counts
+      // Security Tab Banner
       const banner = document.getElementById("sec-summary-banner");
-      const bannerGrade = document.getElementById("sec-banner-grade");
-      const bannerMeta = document.getElementById("sec-banner-meta");
-      if (banner && bannerGrade && bannerMeta) {
-        bannerGrade.innerText = grade;
-        bannerMeta.innerText = `${filesScanned} file${filesScanned === 1 ? '' : 's'} scanned • Score ${score}/100`;
-        if (isSecure) {
-          banner.className = "p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 space-y-2";
-          bannerGrade.className = "w-9 h-9 rounded-xl bg-emerald-600 text-white font-black text-sm font-mono flex items-center justify-center shadow-sm";
-        } else {
-          banner.className = "p-3.5 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/70 dark:bg-rose-950/40 space-y-2";
-          bannerGrade.className = "w-9 h-9 rounded-xl bg-rose-600 text-white font-black text-sm font-mono flex items-center justify-center shadow-sm";
-        }
+      const bGrade = document.getElementById("sec-banner-grade");
+      const bMeta = document.getElementById("sec-banner-meta");
+      if (banner && bGrade && bMeta) {
+        bGrade.innerText = grade;
+        bMeta.innerText = `${filesScanned} file(s) scanned • Score ${score}/100`;
+        banner.className = isSecure
+          ? "p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 space-y-2.5"
+          : "p-3.5 rounded-xl border border-rose-300 dark:border-rose-900 bg-rose-50/80 dark:bg-rose-950/40 space-y-2.5";
+        bGrade.className = isSecure
+          ? "w-9 h-9 rounded-lg bg-emerald-600 text-white font-black text-sm font-mono flex items-center justify-center"
+          : "w-9 h-9 rounded-lg bg-rose-600 text-white font-black text-sm font-mono flex items-center justify-center";
       }
 
-      const setText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
-      setText("sev-critical", sev.CRITICAL || 0);
-      setText("sev-high", sev.HIGH || 0);
-      setText("sev-medium", sev.MEDIUM || 0);
-      setText("sev-low", sev.LOW || 0);
+      document.getElementById("sev-critical").innerText = sev.CRITICAL || 0;
+      document.getElementById("sev-high").innerText = sev.HIGH || 0;
+      document.getElementById("sev-medium").innerText = sev.MEDIUM || 0;
+      document.getElementById("sev-low").innerText = sev.LOW || 0;
 
-      // 4. Detailed Vulnerability Findings
-      const findingsSection = document.getElementById("sec-findings-section");
-      const findingsList = document.getElementById("sec-findings-list");
-      if (findingsSection && findingsList) {
-        const findings = security.findings || [];
-        if (findings.length > 0) {
-          findingsSection.classList.remove("hidden");
-          findingsList.innerHTML = findings.map(f => `
-            <div class="p-3 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/70 dark:bg-rose-950/30 space-y-1">
-              <div class="flex items-center justify-between gap-2">
-                <span class="font-bold text-rose-800 dark:text-rose-300 text-[11px]">${escapeHtml(f.title)}</span>
-                <span class="px-1.5 py-0.5 rounded bg-rose-600 text-white font-mono text-[9px] font-bold shrink-0">${escapeHtml(f.severity)}</span>
-              </div>
-              <div class="text-[10px] font-mono text-slate-600 dark:text-slate-400">
-                ${escapeHtml(f.rule_id)} • ${escapeHtml(f.cwe)} • <code>${escapeHtml(f.file)}:${f.line}</code>
-              </div>
-              <pre class="bg-slate-950 text-rose-300 p-1.5 rounded text-[10px] overflow-x-auto">${escapeHtml(f.snippet || '')}</pre>
-              <div class="text-[11px] text-slate-700 dark:text-slate-300"><strong>Fix:</strong> ${escapeHtml(f.remediation)}</div>
+      // Findings
+      const fSec = document.getElementById("sec-findings-section");
+      const fList = document.getElementById("sec-findings-list");
+      const findings = security.findings || [];
+      if (findings.length > 0) {
+        fSec.classList.remove("hidden");
+        fList.innerHTML = findings.map(f => `
+          <div class="p-3 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/70 dark:bg-rose-950/30 space-y-1">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-bold text-rose-800 dark:text-rose-300 text-[11px]">${escapeHtml(f.title)}</span>
+              <span class="px-1.5 py-0.5 rounded bg-rose-600 text-white font-mono text-[9px] font-bold shrink-0">${escapeHtml(f.severity)}</span>
             </div>
-          `).join("");
-        } else {
-          findingsSection.classList.add("hidden");
-          findingsList.innerHTML = "";
-        }
+            <div class="text-[10px] font-mono text-slate-500">${escapeHtml(f.rule_id)} • ${escapeHtml(f.cwe)} • <code>${escapeHtml(f.file)}:${f.line}</code></div>
+            <pre class="bg-slate-950 text-rose-300 p-1.5 rounded text-[10px] overflow-x-auto">${escapeHtml(f.snippet || "")}</pre>
+            <div class="text-[11px] text-slate-700 dark:text-slate-300"><strong>Fix:</strong> ${escapeHtml(f.remediation)}</div>
+          </div>
+        `).join("");
+      } else {
+        fSec.classList.add("hidden");
+        fList.innerHTML = "";
       }
 
-      // 5. 6-Rule OWASP / CWE Checklist
-      const secChecklistEl = document.getElementById("sec-checklist-container");
-      if (secChecklistEl && Array.isArray(security.checklist)) {
-        secChecklistEl.innerHTML = security.checklist.map(rule => {
-          const ok = rule.passed;
-          return `
-            <div class="p-2.5 rounded-xl border flex items-center justify-between gap-2 ${ok ? 'glass-card' : 'bg-rose-50/70 border-rose-200 dark:bg-rose-950/30 dark:border-rose-900'}">
-              <div class="min-w-0">
-                <div class="font-bold text-slate-800 dark:text-white text-[11px] flex items-center gap-1.5">
-                  <span>${ok ? '🛡️' : '🚨'}</span>
-                  <span class="truncate">${escapeHtml(rule.rule_id)}: ${escapeHtml(rule.title)}</span>
-                </div>
-                <div class="text-[10px] font-mono text-slate-500">${escapeHtml(rule.cwe)} • ${escapeHtml(rule.owasp)}</div>
-              </div>
-              <span class="px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${ok ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300'}">
-                ${ok ? 'SECURE' : `${rule.findings_count} FLAGGED`}
-              </span>
+      // Checklist
+      const cEl = document.getElementById("sec-checklist-container");
+      if (cEl && Array.isArray(security.checklist)) {
+        cEl.innerHTML = security.checklist.map(r => `
+          <div class="p-2.5 rounded-lg border flex items-center justify-between gap-2 ${r.passed ? 'surface' : 'bg-rose-50/70 border-rose-200 dark:bg-rose-950/30 dark:border-rose-900'}">
+            <div class="min-w-0">
+              <div class="font-bold text-slate-800 dark:text-white text-[11px] truncate">${escapeHtml(r.rule_id)}: ${escapeHtml(r.title)}</div>
+              <div class="text-[10px] font-mono text-slate-500">${escapeHtml(r.cwe)} • ${escapeHtml(r.owasp)}</div>
             </div>
-          `;
-        }).join("");
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${r.passed ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-rose-600 text-white'}">
+              ${r.passed ? 'SECURE' : `${r.findings_count} FLAGGED`}
+            </span>
+          </div>
+        `).join("");
       }
-
       lucide.createIcons();
     }
 
-    // Live Snippet SAST Security Scanner
     async function scanInlineCodeSnippet() {
-      const textarea = document.getElementById("sast-snippet-input");
-      const code = textarea ? textarea.value : "";
+      const ta = document.getElementById("sast-snippet-input");
+      const code = ta ? ta.value : "";
       if (!code.trim()) {
-        appendSystemMessage("⚠️ Paste a Python code snippet first to run live SAST auditing.");
+        appendSystemMessage("Paste a Python snippet into the Security Sandbox first.");
         return;
       }
 
-      appendSystemMessage("🛡️ Running OWASP/CWE Static Security Audit on submitted Python snippet...");
+      appendSystemMessage("Auditing submitted Python snippet against OWASP/CWE rules...");
       try {
         const res = await fetch("/api/security_audit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: code, filename: "submitted_snippet.py" })
+          body: JSON.stringify({ code: code, filename: "snippet.py" })
         });
         const report = await res.json();
         renderSecurityAudit(report);
 
-        let msg = `🛡️ **Inline SAST Security Audit Complete — Grade ${report.overall_grade} (${report.score}/100)**\n- Vulnerabilities Found: **${report.vulnerabilities_count}**`;
+        let msg = `**Snippet Security Audit — ${report.is_secure ? '🟢 SECURE' : '🔴 INSECURE'} (Grade ${report.overall_grade} • ${report.score}/100)**`;
         if (report.findings && report.findings.length > 0) {
           msg += "\n\n" + report.findings.map(f =>
-            `- 🚨 **[${f.severity}] ${f.rule_id} (${f.cwe})** Line ${f.line}: ${f.title}\n  - *Remediation*: ${f.remediation}`
+            `- **[${f.severity}] ${f.cwe}** Line ${f.line}: ${f.title}\n  - *Fix*: ${f.remediation}`
           ).join("\n");
         } else {
-          msg += "\n- ✅ All 6 OWASP/CWE security checks passed cleanly.";
+          msg += "\n- Zero vulnerabilities detected across all 6 OWASP/CWE rules.";
         }
         appendAgentMessage(msg, []);
       } catch (err) {
-        console.error("Inline SAST scan failed:", err);
+        appendAgentMessage("⚠️ Could not reach security audit API.", []);
       }
     }
 
-    function formatTestTitle(testId) {
-      if (testId.includes("1_average")) return "Arithmetic Average";
-      if (testId.includes("2_empty")) return "ZeroDivisionError Guard";
-      if (testId.includes("3_safe")) return "Safe Divide Fallback";
-      if (testId.includes("4_record")) return "Dictionary Key Safety";
-      if (testId.includes("5_percentage")) return "Zero-Baseline Growth";
-      if (testId.includes("6_user")) return "Input Payload Validation";
-      return testId;
-    }
-
-    // Trigger Enterprise DevSecOps Action Button
-    async function triggerBugAction(action, systemNotice) {
-      appendSystemMessage(systemNotice);
-      try {
-        const res = await fetch("/api/bug_action", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: action, target_path: activeTargetPath })
-        });
-        const data = await res.json();
-        if (action === "full_pipeline") {
-          await animateHealingStepper();
-        }
-        renderCodeLabAndMatrix(data.tests, Boolean(data.result && data.result.bug_found) || (data.tests && data.tests.failed_count > 0), data.result && data.result.diagnosis, data.source, data.security);
-        renderSecurityAudit(data.security);
-
-        const sec = data.security || {};
-        let reportMsg = "";
-
-        if (action === "security_audit") {
-          switchRightTab("sec");
-          reportMsg = `🛡️ **Cybersecurity SAST Audit — Grade ${sec.overall_grade || 'N/A'} (${sec.score ?? 0}/100)**\n- Target: \`${data.target}\`\n- Files Scanned: \`${sec.files_scanned || 0}\` | Vulnerabilities Found: **${sec.vulnerabilities_count || 0}**`;
-          if (sec.findings && sec.findings.length > 0) {
-            reportMsg += "\n\n" + sec.findings.slice(0, 6).map(f =>
-              `- 🚨 **[${f.severity}] ${f.rule_id} (${f.cwe})** \`${f.file}:${f.line}\`: ${f.title}\n  - *Fix*: ${f.remediation}`
-            ).join("\n");
-          } else {
-            reportMsg += "\n- ✅ All 6 OWASP/CWE controls passed (Injection, Hardcoded Secrets, SQLi, Deserialization, Crypto/TLS, Path Safety).";
-          }
-        } else if (action === "scan") {
-          const bugHeader = data.result.bug_found
-            ? `🚨 **Stage 1 — Bug Found**: ${data.result.diagnosis.bug_title}\n- File: \`${data.result.diagnosis.file}\`\n- Severity: **${data.result.diagnosis.severity}**\n- Impact: ${data.result.diagnosis.impact}`
-            : `✅ **Stage 1 — AST & Test Scan Clean**: All ${data.tests.passed_count}/${data.tests.total_tests} QA tests are passing!`;
-          reportMsg = `${bugHeader}\n\n🛡️ **Stage 2 — Cybersecurity SAST**: Grade **${sec.overall_grade || 'A+'}** (${sec.score ?? 100}/100) • **${sec.vulnerabilities_count || 0}** vulnerabilities detected.`;
-        } else if (action === "full_pipeline") {
-          const stage1 = data.result.initial_bug_found
-            ? `1. 🔍 **Stage 1 (Bug Remediation)**: Detected & patched \`${data.result.diagnosis.bug_title}\`.\n2. 🧪 **QA Certification**: ${data.tests.passed_count}/${data.tests.total_tests} tests PASSING (${data.tests.pass_rate}).`
-            : `1. ✅ **Stage 1 (QA Verification)**: Codebase healthy — ${data.tests.passed_count}/${data.tests.total_tests} tests PASSING (${data.tests.pass_rate}).`;
-          const stage2 = `3. 🛡️ **Stage 2 (Cybersecurity SAST)**: Grade **${sec.overall_grade || 'A+'}** (${sec.score ?? 100}/100) — **${sec.vulnerabilities_count || 0}** OWASP/CWE vulnerabilities detected.`;
-          reportMsg = `🤖 **Autonomous DevSecOps Pipeline Complete**\n${stage1}\n${stage2}`;
-        }
-        appendAgentMessage(reportMsg, []);
-      } catch (err) {
-        console.error("Action error:", err);
-      }
-    }
-
-    // Send Quick Prompt into Chat
-    function sendQuickPrompt(promptText) {
-      userInput.value = promptText;
+    function sendQuickPrompt(text) {
+      userInput.value = text;
       handleSend(new Event("submit"));
     }
 
-    // Handle Form Submit
     async function handleSend(e) {
       if (e) e.preventDefault();
       const text = userInput.value.trim();
@@ -1794,28 +801,24 @@
       sendBtn.disabled = true;
 
       const loadingId = appendLoadingIndicator();
-
       try {
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: text, thread_id: threadId })
         });
-
         removeLoadingIndicator(loadingId);
 
         if (!res.ok) {
-          const errData = await res.json();
-          appendAgentMessage("⚠️ Error: " + (errData.error || "Server response failure"), []);
+          const err = await res.json();
+          appendAgentMessage("⚠️ Error: " + (err.error || "Server failure"), []);
           return;
         }
-
         const data = await res.json();
         appendAgentMessage(data.reply || "", data.tool_calls || []);
-
       } catch (err) {
         removeLoadingIndicator(loadingId);
-        appendAgentMessage("⚠️ Network error: Could not reach Wolf Assistant backend.", []);
+        appendAgentMessage("⚠️ Network error: Could not reach WOLF backend.", []);
       } finally {
         userInput.disabled = false;
         sendBtn.disabled = false;
@@ -1823,122 +826,64 @@
       }
     }
 
-    // Append User Bubble
     function appendUserMessage(text) {
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "flex items-start justify-end gap-3 max-w-xl ml-auto";
-      msgDiv.innerHTML = `
-        <div class="px-4 py-2.5 rounded-2xl rounded-tr-none bg-gradient-to-r from-indigo-600 to-sky-600 text-white text-xs leading-relaxed shadow-sm">
-          ${escapeHtml(text)}
-        </div>
-      `;
-      chatContainer.appendChild(msgDiv);
-      scrollToBottom();
+      const div = document.createElement("div");
+      div.className = "flex justify-end max-w-xl ml-auto";
+      div.innerHTML = `<div class="px-3.5 py-2 rounded-xl rounded-tr-none bg-indigo-600 text-white text-xs leading-relaxed">${escapeHtml(text)}</div>`;
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    // Append System Notice Bubble
     function appendSystemMessage(text) {
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "flex justify-center max-w-xl mx-auto my-1";
-      msgDiv.innerHTML = `
-        <div class="px-3.5 py-1.5 rounded-full glass-card text-xs font-mono flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-          <i data-lucide="info" class="w-3.5 h-3.5 text-indigo-500"></i> ${escapeHtml(text)}
-        </div>
-      `;
-      chatContainer.appendChild(msgDiv);
-      lucide.createIcons();
-      scrollToBottom();
+      const div = document.createElement("div");
+      div.className = "flex justify-center";
+      div.innerHTML = `<div class="px-3 py-1 rounded-full surface border text-[11px] font-mono text-slate-600 dark:text-slate-300">${escapeHtml(text)}</div>`;
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    // Append Agent Message with Collapsible Tool Execution
     function appendAgentMessage(text, toolCalls) {
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "flex items-start gap-3 max-w-2xl";
+      const div = document.createElement("div");
+      div.className = "flex items-start gap-2.5 max-w-2xl";
 
-      let toolHtml = "";
+      let toolsHtml = "";
       if (toolCalls && toolCalls.length > 0) {
-        const pills = toolCalls.map(tc => {
-          const toolName = tc.name || tc.tool || "Tool";
-          const toolArgs = JSON.stringify(tc.args || {}, null, 2);
-          const toolResult = tc.result !== undefined ? (typeof tc.result === "string" ? tc.result : JSON.stringify(tc.result, null, 2)) : "Executed successfully";
-
+        toolsHtml = `<div class="mb-2 space-y-1">` + toolCalls.map(tc => {
+          const name = tc.name || tc.tool || "Tool";
+          const args = JSON.stringify(tc.args || {}, null, 2);
+          const result = tc.result !== undefined ? (typeof tc.result === "string" ? tc.result : JSON.stringify(tc.result, null, 2)) : "Done";
           return `
-            <details class="text-xs border border-indigo-200/80 dark:border-indigo-900 rounded-xl overflow-hidden glass-card transition mb-1.5 group">
-              <summary class="cursor-pointer px-3 py-2 bg-indigo-50/70 dark:bg-indigo-950/50 hover:bg-indigo-100/60 text-indigo-950 dark:text-indigo-200 font-mono flex items-center justify-between select-none">
-                <span class="flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                  <strong>Executed:</strong> ${escapeHtml(toolName)}
-                </span>
-                <span class="text-[10px] text-slate-400 group-open:rotate-180 transition transform">▼</span>
+            <details class="text-[11px] border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
+              <summary class="cursor-pointer px-2.5 py-1.5 bg-slate-100/80 dark:bg-slate-800/80 font-mono text-slate-700 dark:text-slate-200">
+                Tool: <strong>${escapeHtml(name)}</strong>
               </summary>
-              <div class="p-3 space-y-2 border-t border-indigo-200/60 dark:border-indigo-900 font-mono text-[11px] text-slate-700 dark:text-slate-300 bg-white/60 dark:bg-slate-900/60">
-                <div>
-                  <span class="text-slate-400 text-[10px] uppercase font-bold">Input Parameters:</span>
-                  <pre class="bg-slate-900 text-slate-100 p-2 rounded text-[10px] overflow-x-auto mt-0.5">${escapeHtml(toolArgs)}</pre>
-                </div>
-                <div>
-                  <span class="text-slate-400 text-[10px] uppercase font-bold">Execution Output:</span>
-                  <pre class="bg-slate-900 text-emerald-300 p-2 rounded text-[10px] overflow-x-auto mt-0.5">${escapeHtml(toolResult)}</pre>
-                </div>
+              <div class="p-2.5 space-y-1.5 font-mono text-[10px] bg-slate-950 text-slate-200">
+                <pre class="overflow-x-auto">${escapeHtml(args)}</pre>
+                <pre class="text-emerald-300 overflow-x-auto">${escapeHtml(result)}</pre>
               </div>
-            </details>
-          `;
-        }).join("");
-
-        toolHtml = `<div class="mb-2 space-y-1">${pills}</div>`;
+            </details>`;
+        }).join("") + `</div>`;
       }
 
-      const parsedMarkdown = marked.parse(text || "");
-
-      msgDiv.innerHTML = `
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-indigo-800 text-white p-1 shrink-0 flex items-center justify-center shadow-md shadow-indigo-500/20">
-          <svg viewBox="0 0 100 100" class="w-full h-full">
-            <polygon points="50,4 92,25 92,75 50,96 8,75 8,25" fill="#0f172a" stroke="#ffffff" stroke-width="2.5"/>
-            <polygon points="28,26 18,5 42,22" fill="#1e293b" stroke="#38bdf8"/>
-            <polygon points="72,26 82,5 58,22" fill="#1e293b" stroke="#38bdf8"/>
-            <polygon points="50,22 36,36 50,48 64,36" fill="#0f172a"/>
-            <polygon points="50,48 40,64 50,82 60,64" fill="#1e293b" stroke="#38bdf8"/>
-            <polygon points="35,46 45,47 38,51" fill="#38bdf8"/>
-            <polygon points="65,46 55,47 62,51" fill="#38bdf8"/>
-          </svg>
-        </div>
-        <div class="space-y-1 w-full">
-          <div class="flex items-center gap-1.5">
-            <span class="font-bold text-xs text-slate-900 dark:text-white">WOLF</span>
-            <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono font-semibold">Autonomous Engineer</span>
-          </div>
-          <div class="p-4 rounded-2xl rounded-tl-none glass-card text-slate-800 dark:text-slate-200 text-xs leading-relaxed space-y-2">
-            ${toolHtml}
-            <div class="prose prose-slate dark:prose-invert prose-xs max-w-none">
-              ${parsedMarkdown}
-            </div>
-          </div>
-        </div>
-      `;
-
-      chatContainer.appendChild(msgDiv);
-      lucide.createIcons();
-      scrollToBottom();
+      div.innerHTML = `
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-600 to-sky-500 text-white font-black text-[11px] flex items-center justify-center shrink-0">W</div>
+        <div class="w-full p-3.5 rounded-xl rounded-tl-none surface border text-xs leading-relaxed">
+          ${toolsHtml}
+          <div class="prose prose-slate dark:prose-invert max-w-none">${marked.parse(text || "")}</div>
+        </div>`;
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    // Loading State
     function appendLoadingIndicator() {
       const id = "loading-" + Date.now();
       const div = document.createElement("div");
       div.id = id;
-      div.className = "flex items-start gap-3 max-w-xs";
-      div.innerHTML = `
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-500 text-white p-1 shrink-0 flex items-center justify-center animate-pulse">
-          <i data-lucide="loader-2" class="w-4 h-4 text-white animate-spin"></i>
-        </div>
-        <div class="p-3 rounded-2xl rounded-tl-none glass-card text-slate-600 dark:text-slate-300 text-xs flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
-          <span>Wolf is reasoning with MCP...</span>
-        </div>
-      `;
+      div.className = "flex items-center gap-2 text-xs text-slate-500 font-mono";
+      div.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-indigo-500"></i><span>Processing...</span>`;
       chatContainer.appendChild(div);
       lucide.createIcons();
-      scrollToBottom();
+      chatContainer.scrollTop = chatContainer.scrollHeight;
       return id;
     }
 
@@ -1947,325 +892,72 @@
       if (el) el.remove();
     }
 
-    function scrollToBottom() {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+    function escapeHtml(s) {
+      if (typeof s !== "string") return s;
+      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
 
-    function escapeHtml(string) {
-      if (typeof string !== 'string') return string;
-      return string.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    }
-
-    // ==========================================================
-    // 1. Virtual IDE View Toggle (Editor vs Unified Git Diff)
-    // ==========================================================
-    function setIdeView(mode) {
-      const codeView = document.getElementById("ide-code-view");
-      const diffView = document.getElementById("ide-diff-view");
-      const btnEditor = document.getElementById("view-editor-btn");
-      const btnDiff = document.getElementById("view-diff-btn");
-
-      if (!codeView || !diffView) return;
-
-      if (mode === "diff") {
-        codeView.classList.add("hidden");
-        diffView.classList.remove("hidden");
-        if (btnDiff) btnDiff.className = "px-2 py-0.5 rounded bg-indigo-600 text-white font-semibold transition";
-        if (btnEditor) btnEditor.className = "px-2 py-0.5 rounded text-slate-400 hover:text-white transition";
-      } else {
-        diffView.classList.add("hidden");
-        codeView.classList.remove("hidden");
-        if (btnEditor) btnEditor.className = "px-2 py-0.5 rounded bg-indigo-600 text-white font-semibold transition";
-        if (btnDiff) btnDiff.className = "px-2 py-0.5 rounded text-slate-400 hover:text-white transition";
-      }
-    }
-
-    // ==========================================================
-    // 2. Live Autonomous Stepper Animation (4-Step Pipeline)
-    // ==========================================================
-    async function animateHealingStepper() {
-      const s1 = document.getElementById("step-node-1");
-      const s2 = document.getElementById("step-node-2");
-      const s3 = document.getElementById("step-node-3");
-      const s4 = document.getElementById("step-node-4");
-
-      if (!s1 || !s2 || !s3 || !s4) return;
-
-      // Reset
-      [s1, s2, s3, s4].forEach(s => s.className = "p-1 rounded border border-slate-800 bg-slate-900/60 text-slate-400 text-center flex items-center justify-center gap-1 transition");
-
-      s1.className = "p-1 rounded border border-indigo-500 bg-indigo-950/60 text-indigo-300 text-center flex items-center justify-center gap-1 transition step-active";
-      await new Promise(r => setTimeout(r, 350));
-      s1.className = "p-1 rounded border border-emerald-500/80 bg-emerald-950/40 text-emerald-300 text-center flex items-center justify-center gap-1 transition step-done";
-
-      s2.className = "p-1 rounded border border-rose-500 bg-rose-950/60 text-rose-300 text-center flex items-center justify-center gap-1 transition step-active";
-      await new Promise(r => setTimeout(r, 400));
-      s2.className = "p-1 rounded border border-emerald-500/80 bg-emerald-950/40 text-emerald-300 text-center flex items-center justify-center gap-1 transition step-done";
-
-      s3.className = "p-1 rounded border border-sky-500 bg-sky-950/60 text-sky-300 text-center flex items-center justify-center gap-1 transition step-active";
-      await new Promise(r => setTimeout(r, 450));
-      s3.className = "p-1 rounded border border-emerald-500/80 bg-emerald-950/40 text-emerald-300 text-center flex items-center justify-center gap-1 transition step-done";
-
-      s4.className = "p-1 rounded border border-emerald-500 bg-emerald-900/60 text-emerald-200 text-center flex items-center justify-center gap-1 transition step-done font-bold";
-    }
-
-    // ==========================================================
-    // 3. Interactive Topology Node Inspector
-    // ==========================================================
-    function selectTopologyNode(nodeKey) {
-      const nameEl = document.getElementById("topo-name");
-      const descEl = document.getElementById("topo-desc");
-      if (!nameEl || !descEl) return;
-
-      const info = {
-        client: { name: "Node: Client HTTP / REST UI", desc: "Starlette async event loop • DevSecOps Studio" },
-        langgraph: { name: "Node: LangGraph StateGraph Loop", desc: "Cyclic multi-turn memory graph • 12ms router" },
-        mcp: { name: "Node: FastMCP Protocol Bridge", desc: "JSON-RPC 2.0 stdio protocol • Groq-powered Tech Search" },
-        doctor: { name: "Node: Autonomous Code Doctor", desc: "Stage 1: Real repo AST/test diagnosis & surgical patching" },
-        codebase: { name: "Node: OWASP/CWE SAST Auditor", desc: "Stage 2: 6-rule cybersecurity vulnerability scanner" }
-      };
-
-      const selected = info[nodeKey] || info.langgraph;
-      nameEl.innerText = selected.name;
-      descEl.innerText = selected.desc;
-    }
-
-    // ==========================================================
-    // 4. Omni Command Palette (Ctrl + K / Cmd + K)
-    // ==========================================================
+    // Command Palette (Ctrl+K)
     const paletteActions = [
-      { id: "fix", title: "DevSecOps: Fix & Certify + SAST Audit", desc: "Run 2-stage pipeline (Bug Remediation + OWASP/CWE Audit)", icon: "sparkles", action: () => triggerBugAction('full_pipeline', '⚡ DevSecOps Pipeline Activated: Stage 1 (Bug Fix & QA) + Stage 2 (SAST Security Audit)...') },
-      { id: "sec", title: "DevSecOps: Run OWASP/CWE Security Audit", desc: "Scan active repository for injection, secrets, SQLi & crypto flaws", icon: "shield-alert", action: () => triggerBugAction('security_audit', '🛡️ Running OWASP Top 10 / CWE SAST cybersecurity audit...') },
-      { id: "scan", title: "DevSecOps: Scan Repository AST & Tests", desc: "Analyze Python AST, run tests, and check security posture", icon: "search", action: () => triggerBugAction('scan', '🔍 Scanning target repository for AST flaws and failing tests...') },
-      { id: "pitch", title: "Presentation: Open Executive Pitch Deck", desc: "Launch 3-slide client presentation mode", icon: "presentation", action: () => openPitchDeck() },
-      { id: "git", title: "FastMCP: List GitHub Repositories", desc: "Query connected GitHub read-only microservice", icon: "github", action: () => sendQuickPrompt('List my GitHub repositories using the GitHub MCP tool.') },
-      { id: "web", title: "FastMCP: Groq Technical Search", desc: "Search live docs & CVEs synthesized via Groq LPU", icon: "globe", action: () => sendQuickPrompt('Search the web for OWASP Top 10 Python security best practices.') },
-      { id: "math", title: "FastMCP: Safe Math AST Evaluator", desc: "Evaluate complex arithmetic expressions safely", icon: "calculator", action: () => sendQuickPrompt('Calculate (144 * 12) / (3.14159 * 2)') },
-      { id: "mem", title: "FastMCP: Permanent User Memory", desc: "Inspect long-term profile facts", icon: "database", action: () => sendQuickPrompt('What do you remember about my user profile and active projects?') },
-      { id: "dark", title: "Appearance: Toggle Twilight / Pearl Mode", desc: "Switch between Frosted Glass and Twilight Dark", icon: "sun-moon", action: () => toggleAtmosphere() },
-      { id: "tab_ide", title: "View: Switch to Code Lab", desc: "Inspect live source code and load target repository", icon: "code-2", action: () => switchRightTab('ide') },
-      { id: "tab_sec", title: "View: Switch to Security SAST Panel", desc: "Inspect OWASP/CWE controls, findings & live snippet auditor", icon: "shield-check", action: () => switchRightTab('sec') },
-      { id: "tab_qa", title: "View: Switch to QA Matrix", desc: "View production unit test quality checklist", icon: "check-square", action: () => switchRightTab('qa') },
-      { id: "tab_arch", title: "View: Switch to Architecture Topology", desc: "View interactive SVG data-flow diagram", icon: "layers", action: () => switchRightTab('arch') }
+      { id: "fix", title: "Fix & Certify Repository", desc: "Run Stage 1 Bug Fix + Stage 2 Security Scan", icon: "sparkles", action: () => runFixAndCertify() },
+      { id: "repo", title: "Execute Repo Link", desc: "Focus repository URL / folder path input", icon: "git-branch", action: () => focusRepoInput() },
+      { id: "sec", title: "Open Security Sandbox", desc: "Inspect OWASP/CWE report & audit inline code", icon: "shield-alert", action: () => switchRightTab("sec") },
+      { id: "code", title: "Open Code Viewer", desc: "Inspect fixed & flagged lines from last run", icon: "code-2", action: () => switchRightTab("code") },
+      { id: "cve", title: "Groq Tech / CVE Search", desc: "Search security fixes & docs via Groq", icon: "globe", action: () => sendQuickPrompt("Search for OWASP Top 10 Python vulnerability fixes") },
+      { id: "theme", title: "Toggle Light / Dark Theme", desc: "Switch studio color mode", icon: "sun-moon", action: () => toggleTheme() }
     ];
 
     function openCommandPalette() {
       const modal = document.getElementById("command-palette-modal");
       const input = document.getElementById("palette-search-input");
-      if (!modal || !input) return;
       modal.classList.remove("hidden");
       input.value = "";
       filterPaletteItems("");
-      setTimeout(() => input.focus(), 50);
-      lucide.createIcons();
+      setTimeout(() => input.focus(), 40);
     }
 
     function closeCommandPalette() {
-      const modal = document.getElementById("command-palette-modal");
-      if (modal) modal.classList.add("hidden");
-    }
-
-    function handlePaletteBackdropClick(e) {
-      closeCommandPalette();
+      document.getElementById("command-palette-modal").classList.add("hidden");
     }
 
     function filterPaletteItems(query) {
-      const listEl = document.getElementById("palette-items-list");
-      if (!listEl) return;
+      const list = document.getElementById("palette-items-list");
       const q = (query || "").toLowerCase().trim();
-      const filtered = paletteActions.filter(item => 
-        item.title.toLowerCase().includes(q) || 
-        item.desc.toLowerCase().includes(q) || 
-        item.id.includes(q)
-      );
-
-      if (filtered.length === 0) {
-        listEl.innerHTML = `<div class="p-4 text-center text-slate-500 font-mono text-xs">No matching commands found.</div>`;
-        return;
-      }
-
-      listEl.innerHTML = filtered.map((item, idx) => `
-        <div 
-          onclick="executePaletteAction('${item.id}')"
-          class="p-2.5 rounded-xl hover:bg-indigo-50 dark:hover:bg-slate-800/80 cursor-pointer flex items-center justify-between transition group border border-transparent hover:border-indigo-200 dark:hover:border-indigo-800/60"
-        >
-          <div class="flex items-center gap-2.5">
-            <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-              <i data-lucide="${item.icon}" class="w-4 h-4"></i>
-            </div>
-            <div>
-              <div class="font-semibold text-slate-900 dark:text-white text-xs">${item.title}</div>
-              <div class="text-[11px] text-slate-500">${item.desc}</div>
-            </div>
+      const items = paletteActions.filter(a => a.title.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q));
+      list.innerHTML = items.length ? items.map(a => `
+        <div onclick="executePaletteAction('${a.id}')" class="p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-800 cursor-pointer flex items-center gap-2.5">
+          <i data-lucide="${a.icon}" class="w-4 h-4 text-indigo-500 shrink-0"></i>
+          <div>
+            <div class="font-semibold text-slate-900 dark:text-white">${a.title}</div>
+            <div class="text-[11px] text-slate-500">${a.desc}</div>
           </div>
-          <span class="text-[10px] font-mono text-slate-400 group-hover:text-indigo-500 flex items-center gap-1">
-            <span>Run</span> ↵
-          </span>
-        </div>
-      `).join("");
+        </div>`).join("") : `<div class="p-3 text-center text-slate-500 font-mono">No matching commands.</div>`;
       lucide.createIcons();
     }
 
-    function executePaletteAction(actionId) {
-      const item = paletteActions.find(a => a.id === actionId);
-      if (item && item.action) {
-        closeCommandPalette();
-        item.action();
-      }
+    function executePaletteAction(id) {
+      const item = paletteActions.find(a => a.id === id);
+      if (item) { closeCommandPalette(); item.action(); }
     }
 
     function handlePaletteKeydown(e) {
-      if (e.key === "Escape") {
-        closeCommandPalette();
-      } else if (e.key === "Enter") {
-        const input = document.getElementById("palette-search-input");
-        const q = (input.value || "").toLowerCase().trim();
-        const filtered = paletteActions.filter(item => 
-          item.title.toLowerCase().includes(q) || 
-          item.desc.toLowerCase().includes(q) || 
-          item.id.includes(q)
-        );
-        if (filtered.length > 0) {
-          executePaletteAction(filtered[0].id);
-        }
+      if (e.key === "Escape") closeCommandPalette();
+      else if (e.key === "Enter") {
+        const q = (e.target.value || "").toLowerCase().trim();
+        const items = paletteActions.filter(a => a.title.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q));
+        if (items.length) executePaletteAction(items[0].id);
       }
     }
 
-    // Global Key Listener for Ctrl+K, Cmd+K, Escape, and Ctrl+P
-    window.addEventListener("keydown", (e) => {
+    window.addEventListener("keydown", e => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         const modal = document.getElementById("command-palette-modal");
-        if (modal && !modal.classList.contains("hidden")) {
-          closeCommandPalette();
-        } else {
-          openCommandPalette();
-        }
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") {
-        e.preventDefault();
-        openPitchDeck();
+        modal.classList.contains("hidden") ? openCommandPalette() : closeCommandPalette();
       } else if (e.key === "Escape") {
         closeCommandPalette();
-        closePitchDeck();
       }
     });
-
-    // ==========================================================
-    // 5. Executive Client Pitch Deck Carousel
-    // ==========================================================
-    let currentPitchSlide = 0;
-    const pitchSlides = [
-      {
-        tag: "Core Value Proposition",
-        title: "The Dual-Brain Enterprise Architecture",
-        desc: "Why choose between a conversational assistant and a code maintenance bot? WOLF combines both into one unified engine.",
-        metrics: [
-          { label: "Brain 1", val: "LangGraph Butler", sub: "Natural conversation & tool routing" },
-          { label: "Brain 2", val: "Autonomous Doctor", sub: "Self-healing AST traceback patcher" },
-          { label: "Business ROI", val: "Zero Downtime", sub: "Heals bugs before users notice" }
-        ],
-        badge: "Slide 1 of 3"
-      },
-      {
-        tag: "Ecosystem Interoperability",
-        title: "Multi-MCP Microservices & Zero Vendor Lock-In",
-        desc: "Built on Anthropic's open-standard Model Context Protocol. Easily switch LLM providers without rewriting code.",
-        metrics: [
-          { label: "Model Agnostic", val: "Gemini / GPT / Claude", sub: "1-line config switch" },
-          { label: "Security", val: "Read-Only MCP", sub: "Safeguarded sandbox execution" },
-          { label: "Memory", val: "SQLite Profile", sub: "Permanent multi-session persistence" }
-        ],
-        badge: "Slide 2 of 3"
-      },
-      {
-        tag: "Enterprise DevSecOps",
-        title: "2-Stage Autonomous Bug Remediation & Cybersecurity SAST",
-        desc: "Point WOLF at any real repository: Stage 1 heals functional bugs & verifies QA tests; Stage 2 runs OWASP Top 10 / CWE static security scanning.",
-        metrics: [
-          { label: "Stage 1", val: "Auto-Healer", sub: "Real repo AST & test patching" },
-          { label: "Stage 2", val: "OWASP SAST", sub: "6-rule CWE vulnerability audit" },
-          { label: "Security Gate", val: "Grade A+..F", sub: "Blocks exploits pre-deploy" }
-        ],
-        badge: "Slide 3 of 3"
-      }
-    ];
-
-    function openPitchDeck() {
-      const modal = document.getElementById("pitch-deck-modal");
-      if (!modal) return;
-      modal.classList.remove("hidden");
-      currentPitchSlide = 0;
-      renderPitchSlide();
-      lucide.createIcons();
-    }
-
-    function closePitchDeck() {
-      const modal = document.getElementById("pitch-deck-modal");
-      if (modal) modal.classList.add("hidden");
-    }
-
-    function renderPitchSlide() {
-      const slide = pitchSlides[currentPitchSlide];
-      const contentEl = document.getElementById("pitch-slide-content");
-      const dotsEl = document.getElementById("pitch-slide-dots");
-      const nextBtn = document.getElementById("pitch-next-btn");
-
-      if (!contentEl) return;
-
-      contentEl.innerHTML = `
-        <div class="space-y-4">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-mono uppercase tracking-wider text-indigo-500 font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800">
-              ${slide.tag}
-            </span>
-            <span class="text-xs font-mono text-slate-400">${slide.badge}</span>
-          </div>
-
-          <div class="space-y-1">
-            <h2 class="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">${slide.title}</h2>
-            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">${slide.desc}</p>
-          </div>
-
-          <div class="grid grid-cols-3 gap-3 pt-2">
-            ${slide.metrics.map(m => `
-              <div class="p-3 rounded-2xl glass-card space-y-1 border border-slate-200/80 dark:border-slate-800">
-                <div class="text-[10px] text-slate-400 uppercase font-mono font-bold">${m.label}</div>
-                <div class="text-sm font-extrabold text-indigo-600 dark:text-indigo-400 font-mono">${m.val}</div>
-                <div class="text-[10px] text-slate-500">${m.sub}</div>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-      `;
-
-      if (dotsEl) {
-        dotsEl.innerHTML = pitchSlides.map((_, i) => `
-          <span class="w-2.5 h-2.5 rounded-full transition ${i === currentPitchSlide ? 'bg-indigo-600 ring-2 ring-indigo-400/40' : 'bg-slate-300 dark:bg-slate-700'}"></span>
-        `).join("");
-      }
-
-      if (nextBtn) {
-        nextBtn.innerText = currentPitchSlide === pitchSlides.length - 1 ? "First Slide" : "Next Slide";
-      }
-
-      lucide.createIcons();
-    }
-
-    function nextPitchSlide() {
-      currentPitchSlide = (currentPitchSlide + 1) % pitchSlides.length;
-      renderPitchSlide();
-    }
-
-    function prevPitchSlide() {
-      currentPitchSlide = (currentPitchSlide - 1 + pitchSlides.length) % pitchSlides.length;
-      renderPitchSlide();
-    }
-
-    function launchDemoFromPitch() {
-      closePitchDeck();
-      focusRepoInput();
-      appendSystemMessage("🚀 Ready! Paste any GitHub repository URL or local path and click Fix & Certify.");
-    }
   </script>
 </body>
 </html>
