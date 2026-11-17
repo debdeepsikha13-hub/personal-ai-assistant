@@ -277,6 +277,54 @@ async def api_security_audit(request):
     return JSONResponse(report)
 
 
+async def api_platform_overview(request):
+    """Return Central Security Scanning Platform overview, Current State table, Missing Scan visibility, and report history."""
+    from core.central_platform import CentralSecurityPlatform
+    platform = CentralSecurityPlatform()
+    data = await asyncio.to_thread(platform.get_platform_overview)
+    return JSONResponse(data)
+
+
+async def api_platform_sync(request):
+    """Discover all repositories for a GitHub user/org (zero-touch, read-only) so missing scans become visible."""
+    from core.central_platform import CentralSecurityPlatform
+    try:
+        body = await request.json()
+        owner = str(body.get("owner", "")).strip() or None
+    except Exception:
+        owner = None
+
+    platform = CentralSecurityPlatform(github_owner=owner)
+    sync_res = await asyncio.to_thread(platform.sync_github_repositories, owner)
+    overview = await asyncio.to_thread(platform.get_platform_overview)
+    return JSONResponse({"sync": sync_res, "overview": overview})
+
+
+async def api_platform_scan_repo(request):
+    """Execute a zero-touch central security scan on a repository and persist the report in SQLite."""
+    from core.central_platform import CentralSecurityPlatform
+    try:
+        body = await request.json()
+        repo_name = str(body.get("repo_name", "")).strip()
+        local_path = str(body.get("local_path", "")).strip()
+    except Exception:
+        return JSONResponse({"error": "Invalid JSON payload"}, status_code=400)
+
+    platform = CentralSecurityPlatform()
+    if local_path and not repo_name:
+        reg = await asyncio.to_thread(platform.register_local_repository, Path(local_path).name, local_path)
+        if reg.get("status") == "error":
+            return JSONResponse(reg, status_code=400)
+        repo_name = reg["repo_name"]
+
+    if not repo_name:
+        return JSONResponse({"error": "repo_name or local_path is required"}, status_code=400)
+
+    report = await asyncio.to_thread(platform.scan_repository, repo_name)
+    overview = await asyncio.to_thread(platform.get_platform_overview)
+    return JSONResponse({"report": report, "overview": overview})
+
+
 # Define routes
 routes = [
     Route("/", homepage),
@@ -286,6 +334,9 @@ routes = [
     Route("/api/bug_status", api_bug_status),
     Route("/api/bug_action", api_bug_action, methods=["POST"]),
     Route("/api/security_audit", api_security_audit, methods=["GET", "POST"]),
+    Route("/api/platform/overview", api_platform_overview),
+    Route("/api/platform/sync", api_platform_sync, methods=["POST"]),
+    Route("/api/platform/scan_repo", api_platform_scan_repo, methods=["POST"]),
     Route("/api/chat", api_chat, methods=["POST"]),
 ]
 

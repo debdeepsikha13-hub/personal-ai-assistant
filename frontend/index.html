@@ -214,14 +214,10 @@
         <p class="text-[11px] text-slate-500">Central Security Scanning Platform &amp; Autonomous Bug Remediation</p>
       </div>
 
-      <!-- Live Neural Reasoning Waveform -->
-      <div class="hidden sm:flex items-center gap-1 pl-4 h-6 border-l border-slate-200/80 dark:border-slate-800">
-        <span class="wave-bar" style="animation-delay: 0.1s"></span>
-        <span class="wave-bar" style="animation-delay: 0.3s"></span>
-        <span class="wave-bar" style="animation-delay: 0.5s"></span>
-        <span class="wave-bar" style="animation-delay: 0.2s"></span>
-        <span class="wave-bar" style="animation-delay: 0.4s"></span>
-        <span class="text-[10px] font-mono text-slate-400 pl-1.5 font-medium">Neural AST</span>
+      <!-- Zero-Touch Engine Indicator -->
+      <div class="hidden sm:flex items-center gap-1.5 pl-4 h-6 border-l border-slate-200/80 dark:border-slate-800">
+        <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+        <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400 font-semibold">Zero-Touch SAST</span>
       </div>
     </div>
 
@@ -301,6 +297,12 @@
       <button onclick="triggerBugAction('full_pipeline', '⚡ DevSecOps Pipeline Activated: Stage 1 (Bug Fix & QA) + Stage 2 (OWASP/CWE Security Audit)...')" class="glass-dock-item shrink-0 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/20">
         <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
         <span>Fix &amp; Certify</span>
+      </button>
+
+      <!-- Central Platform Fleet Sync -->
+      <button onclick="syncCentralFleet()" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-semibold flex items-center gap-1.5">
+        <i data-lucide="radar" class="w-3.5 h-3.5 text-indigo-500"></i>
+        <span>Sync Fleet</span>
       </button>
 
       <!-- Security Audit Button (SAST) -->
@@ -438,33 +440,108 @@
 
     </section>
 
-    <!-- RIGHT STAGE: Interactive DevSecOps IDE, SAST Security & QA Studio -->
-    <aside class="w-[480px] glass-card flex flex-col justify-between hidden lg:flex z-10 shrink-0 border-l border-slate-200/80 dark:border-slate-800">
+    <!-- RIGHT STAGE: Central Security Scanning Platform, SAST, Code Lab & QA Studio -->
+    <aside class="w-[510px] glass-card flex flex-col justify-between hidden lg:flex z-10 shrink-0 border-l border-slate-200/80 dark:border-slate-800">
       
       <!-- Studio Tabs Header -->
       <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
         <div class="flex items-center gap-1 p-1 rounded-xl bg-slate-200/60 dark:bg-slate-800 text-[11px]">
-          <button id="tab-ide-btn" onclick="switchRightTab('ide')" class="px-2.5 py-1 rounded-lg font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition flex items-center gap-1 shadow-sm">
-            <i data-lucide="code-2" class="w-3.5 h-3.5 text-indigo-500"></i> Code Lab
+          <button id="tab-hub-btn" onclick="switchRightTab('hub')" class="px-2.5 py-1 rounded-lg font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition flex items-center gap-1 shadow-sm">
+            <i data-lucide="radar" class="w-3.5 h-3.5 text-indigo-500"></i> Central Hub
           </button>
           <button id="tab-sec-btn" onclick="switchRightTab('sec')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> Security
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> SAST
+          </button>
+          <button id="tab-ide-btn" onclick="switchRightTab('ide')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
+            <i data-lucide="code-2" class="w-3.5 h-3.5 text-sky-500"></i> Code
           </button>
           <button id="tab-qa-btn" onclick="switchRightTab('qa')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
             <i data-lucide="check-square" class="w-3.5 h-3.5 text-teal-500"></i> QA
           </button>
           <button id="tab-arch-btn" onclick="switchRightTab('arch')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
-            <i data-lucide="layers" class="w-3.5 h-3.5 text-sky-500"></i> Arch
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-purple-500"></i> Arch
           </button>
         </div>
 
-        <span id="matrix-pass-rate" class="px-2 py-0.5 text-[11px] font-bold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">
+        <span id="matrix-pass-rate" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">
           6/6 (100%)
         </span>
       </div>
 
+      <!-- TAB 0: Central Security Scanning Platform Hub (Default) -->
+      <div id="panel-hub-tab" class="flex-1 overflow-y-auto p-4 space-y-3">
+        <!-- Missing Scan Visibility Banner -->
+        <div id="hub-missing-banner" class="p-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/40 space-y-1">
+          <div class="flex items-center justify-between text-xs font-bold text-amber-800 dark:text-amber-300">
+            <span class="flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4 text-amber-500"></i> Missing Scan Visibility</span>
+            <span id="hub-coverage-pill" class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-200/70 dark:bg-amber-900 font-bold">Loading...</span>
+          </div>
+          <p id="hub-missing-desc" class="text-[11px] text-amber-700 dark:text-amber-400">
+            Every repository is discovered centrally without adding workflow files. Unscanned repos are flagged visibly below.
+          </p>
+        </div>
+
+        <!-- Zero-Touch GitHub Org / User Discovery Bar -->
+        <div class="p-2.5 rounded-xl glass-card border border-slate-200/80 dark:border-slate-800 space-y-1.5">
+          <div class="flex items-center justify-between text-[10px] font-mono uppercase text-slate-400 font-bold">
+            <span class="flex items-center gap-1"><i data-lucide="github" class="w-3 h-3 text-indigo-500"></i> Zero-Touch Org / Repo Discovery</span>
+            <span class="text-emerald-500 normal-case font-semibold">0 files added to repos</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <input
+              id="hub-org-input"
+              type="text"
+              value="debdeepsikha13-hub"
+              placeholder="GitHub org or username"
+              class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 text-[11px] font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+              onkeydown="if(event.key==='Enter'){ syncCentralFleet(); }"
+            />
+            <button onclick="syncCentralFleet()" id="hub-sync-btn" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold transition shrink-0 flex items-center gap-1">
+              <i data-lucide="refresh-cw" class="w-3 h-3"></i> Sync Repos
+            </button>
+          </div>
+        </div>
+
+        <!-- Fleet Repository Scan Coverage Matrix -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Fleet Scan Coverage (Missing Scans First)</span>
+            <span id="hub-repo-count" class="text-[10px] font-mono text-slate-400">0 repos</span>
+          </div>
+          <div id="hub-repos-list" class="space-y-1.5 text-xs">
+            <div class="p-3 rounded-xl glass-card text-slate-500 font-mono text-[11px]">Loading central repository inventory...</div>
+          </div>
+        </div>
+
+        <!-- Current State Governance Table (Item / Value Matrix) -->
+        <div class="space-y-1.5 pt-1">
+          <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Current State — Platform Governance</div>
+          <div class="rounded-xl glass-card border border-slate-200/80 dark:border-slate-800 overflow-hidden">
+            <table class="w-full text-left text-[11px]">
+              <thead class="bg-slate-100/80 dark:bg-slate-900/80 text-[10px] font-mono uppercase text-slate-500">
+                <tr>
+                  <th class="px-3 py-1.5">Item</th>
+                  <th class="px-3 py-1.5">Value</th>
+                </tr>
+              </thead>
+              <tbody id="hub-current-state-body" class="divide-y divide-slate-200/60 dark:divide-slate-800">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Centralized SQLite Report History -->
+        <div class="space-y-1.5 pt-1">
+          <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Central Audit Report Storage (SQLite)</div>
+          <div id="hub-reports-history" class="space-y-1 text-[11px]">
+            <div class="p-2.5 rounded-xl glass-card text-slate-500 font-mono">No stored scans yet. Click "Scan Now" on any repo above.</div>
+          </div>
+        </div>
+      </div>
+
       <!-- TAB 1: Live Code Lab & Target Repo Inspector -->
-      <div id="panel-ide-tab" class="flex-1 overflow-y-auto p-4 space-y-3">
+      <div id="panel-ide-tab" class="flex-1 overflow-y-auto p-4 space-y-3 hidden">
 
         <!-- Target Repository / File Path Selector -->
         <div class="p-2.5 rounded-xl glass-card border border-slate-200/80 dark:border-slate-800 space-y-1.5">
@@ -922,6 +999,7 @@
 
       lucide.createIcons();
       refreshCodebaseStatus();
+      refreshPlatformOverview();
     });
 
     function toggleAtmosphere() {
@@ -957,12 +1035,14 @@
 
     function switchRightTab(tab) {
       const panels = {
+        hub: document.getElementById("panel-hub-tab"),
         ide: document.getElementById("panel-ide-tab"),
         sec: document.getElementById("panel-sec-tab"),
         qa: document.getElementById("panel-qa-tab"),
         arch: document.getElementById("panel-arch-tab")
       };
       const btns = {
+        hub: document.getElementById("tab-hub-btn"),
         ide: document.getElementById("tab-ide-btn"),
         sec: document.getElementById("tab-sec-btn"),
         qa: document.getElementById("tab-qa-btn"),
@@ -977,10 +1057,189 @@
         if (btns[k]) btns[k].className = inactiveClass;
       });
 
-      const key = panels[tab] ? tab : "ide";
+      const key = panels[tab] ? tab : "hub";
       if (panels[key]) panels[key].classList.remove("hidden");
       if (btns[key]) btns[key].className = activeClass;
       lucide.createIcons();
+    }
+
+    // ==========================================================
+    // Central Security Scanning Platform Hub Logic
+    // ==========================================================
+    async function refreshPlatformOverview() {
+      try {
+        const res = await fetch("/api/platform/overview");
+        if (!res.ok) return;
+        const data = await res.json();
+        renderPlatformOverview(data);
+      } catch (err) {
+        console.error("Failed to fetch platform overview:", err);
+      }
+    }
+
+    function renderPlatformOverview(data) {
+      if (!data) return;
+      const cov = data.coverage || {};
+      const missing = cov.missing_scan_repos || 0;
+      const total = cov.total_repos || 0;
+      const scanned = cov.scanned_repos || 0;
+      const pct = cov.coverage_pct || 0;
+
+      // 1. Missing Scan Visibility Banner
+      const banner = document.getElementById("hub-missing-banner");
+      const covPill = document.getElementById("hub-coverage-pill");
+      const missingDesc = document.getElementById("hub-missing-desc");
+      if (banner && covPill && missingDesc) {
+        covPill.innerText = `${scanned}/${total} Scanned (${pct}%)`;
+        if (missing > 0) {
+          banner.className = "p-3 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/80 dark:bg-rose-950/40 space-y-1";
+          covPill.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-rose-600 text-white font-bold";
+          missingDesc.className = "text-[11px] text-rose-700 dark:text-rose-300";
+          missingDesc.innerHTML = `<strong>🚨 ${missing} repositor${missing === 1 ? 'y is' : 'ies are'} MISSING a security scan!</strong> Click <strong>Scan Now</strong> below to execute a Zero-Touch audit (0 files added).`;
+        } else {
+          banner.className = "p-3 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/80 dark:bg-emerald-950/40 space-y-1";
+          covPill.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-600 text-white font-bold";
+          missingDesc.className = "text-[11px] text-emerald-700 dark:text-emerald-300";
+          missingDesc.innerHTML = `<strong>✅ 100% Fleet Visibility:</strong> Zero missing scans. All ${total} tracked repositories have persisted central SAST reports.`;
+        }
+      }
+
+      const countEl = document.getElementById("hub-repo-count");
+      if (countEl) countEl.innerText = `${total} repo${total === 1 ? '' : 's'} tracked`;
+
+      // 2. Repository Inventory List (Missing Scans Surfaced First)
+      const listEl = document.getElementById("hub-repos-list");
+      if (listEl && Array.isArray(data.repositories)) {
+        listEl.innerHTML = data.repositories.map(r => {
+          let badgeCls = "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300";
+          let badgeText = `SCANNED • ${r.overall_grade}`;
+          let cardCls = "glass-card";
+          if (r.scan_status === "MISSING_SCAN") {
+            badgeCls = "bg-rose-600 text-white";
+            badgeText = "MISSING SCAN 🚨";
+            cardCls = "bg-rose-50/70 border-rose-200 dark:bg-rose-950/30 dark:border-rose-900";
+          } else if (r.scan_status === "VULNERABLE") {
+            badgeCls = "bg-amber-500 text-white";
+            badgeText = `${r.overall_grade} • ${r.vulnerabilities_count} VULN`;
+            cardCls = "bg-amber-50/70 border-amber-200 dark:bg-amber-950/30 dark:border-amber-900";
+          } else if (r.scan_status === "STALE_SCAN") {
+            badgeCls = "bg-orange-500 text-white";
+            badgeText = "STALE SCAN ⚠️";
+          }
+
+          const safeName = escapeHtml(r.repo_name);
+          const safeJsName = r.repo_name.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+          const subMeta = r.last_scanned_at
+            ? `${r.source.toUpperCase()} • ${r.files_scanned} files • Last: ${r.last_scanned_at.substring(0, 16).replace('T', ' ')} UTC`
+            : `${r.source.toUpperCase()} • Never scanned — gap visible`;
+
+          return `
+            <div class="p-2.5 rounded-xl border flex items-center justify-between gap-2 ${cardCls}">
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 dark:text-white text-[11px] truncate">${safeName}</div>
+                <div class="text-[10px] font-mono text-slate-500 truncate">${escapeHtml(subMeta)}</div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold ${badgeCls}">${badgeText}</span>
+                <button onclick="scanFleetRepository('${safeJsName}')" class="px-2 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-semibold transition">
+                  Scan Now
+                </button>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      // 3. Current State Governance Table
+      const stateBody = document.getElementById("hub-current-state-body");
+      if (stateBody && Array.isArray(data.current_state)) {
+        stateBody.innerHTML = data.current_state.map(row => `
+          <tr>
+            <td class="px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-200 whitespace-nowrap">${escapeHtml(row.item)}</td>
+            <td class="px-3 py-1.5 font-mono text-[10px] text-slate-600 dark:text-slate-300">${escapeHtml(row.value)}</td>
+          </tr>
+        `).join("");
+      }
+
+      // 4. Recent Stored Audit Reports
+      const histEl = document.getElementById("hub-reports-history");
+      if (histEl && Array.isArray(data.recent_reports)) {
+        if (data.recent_reports.length === 0) {
+          histEl.innerHTML = `<div class="p-2.5 rounded-xl glass-card text-slate-500 font-mono">No stored scans yet. Click "Scan Now" on any repo above to populate SQLite report storage.</div>`;
+        } else {
+          histEl.innerHTML = data.recent_reports.slice(0, 6).map(rep => `
+            <div class="p-2 rounded-lg glass-card flex items-center justify-between font-mono text-[10px]">
+              <span class="truncate text-slate-700 dark:text-slate-200"><strong>#${rep.id}</strong> ${escapeHtml(rep.repo_name)}</span>
+              <span class="shrink-0 ${rep.vulnerabilities_count > 0 ? 'text-rose-500 font-bold' : 'text-emerald-600 dark:text-emerald-400 font-bold'}">
+                Grade ${escapeHtml(rep.overall_grade)} (${rep.vulnerabilities_count}v • ${rep.duration_ms}ms)
+              </span>
+            </div>
+          `).join("");
+        }
+      }
+      lucide.createIcons();
+    }
+
+    async function syncCentralFleet() {
+      switchRightTab("hub");
+      const input = document.getElementById("hub-org-input");
+      const owner = input ? input.value.trim() : "debdeepsikha13-hub";
+      appendSystemMessage(`🌐 Zero-Touch Fleet Discovery: Syncing GitHub repositories for '${owner}' (0 files added)...`);
+      try {
+        const res = await fetch("/api/platform/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ owner: owner })
+        });
+        const data = await res.json();
+        if (data.overview) renderPlatformOverview(data.overview);
+        if (data.sync && data.sync.status === "synced") {
+          const cov = data.overview.coverage;
+          appendAgentMessage(
+            `🌐 **Central Fleet Discovery Complete (\`${data.sync.owner}\`)**\n` +
+            `- **Repositories Discovered**: ${data.sync.synced_count} (Zero-Touch — 0 files added to any repo)\n` +
+            `- **Missing Scans Surfaced**: **${cov.missing_scan_repos}** unscanned repositories are now visibly flagged in the **Central Hub** panel.\n` +
+            `- Click **Scan Now** on any repo to execute a central SAST audit and persist the report in SQLite.`,
+            []
+          );
+        } else {
+          appendAgentMessage(`⚠️ **Sync Notice**: ${(data.sync && data.sync.error) || 'Could not reach GitHub API.'}`, []);
+        }
+      } catch (err) {
+        console.error("Sync fleet error:", err);
+      }
+    }
+
+    async function scanFleetRepository(repoName) {
+      appendSystemMessage(`🛡️ Running Zero-Touch Central Security Scan on '${repoName}' (0 files modified/added)...`);
+      try {
+        const res = await fetch("/api/platform/scan_repo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ repo_name: repoName })
+        });
+        const data = await res.json();
+        if (data.overview) renderPlatformOverview(data.overview);
+        const rep = data.report || {};
+        if (rep.status === "error") {
+          appendAgentMessage(`❌ **Central Scan Failed for \`${repoName}\`**: ${rep.error}`, []);
+          return;
+        }
+        renderSecurityAudit(rep);
+        let msg = `🛡️ **Zero-Touch Central Scan Complete — \`${repoName}\`**\n` +
+          `- **Grade**: **${rep.overall_grade}** (${rep.score}/100) | **Files Scanned**: ${rep.files_scanned} | **Vulnerabilities**: ${rep.vulnerabilities_count}\n` +
+          `- **Report Persisted**: SQLite Audit ID \`#${rep.report_id}\` (${rep.duration_ms}ms) • **Per-Repo Files Added**: \`0\``;
+        if (rep.findings && rep.findings.length > 0) {
+          msg += "\n\n" + rep.findings.slice(0, 6).map(f =>
+            `- 🚨 **[${f.severity}] ${f.rule_id} (${f.cwe})** \`${f.file}:${f.line}\`: ${f.title}\n  - *Remediation*: ${f.remediation}`
+          ).join("\n");
+        } else {
+          msg += "\n- ✅ All 6 OWASP/CWE security controls passed.";
+        }
+        appendAgentMessage(msg, []);
+      } catch (err) {
+        console.error("Scan repo error:", err);
+      }
     }
 
     // Refresh Codebase QA Status, Source Snapshot & SAST Security Audit
