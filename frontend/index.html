@@ -293,9 +293,15 @@
     <div class="flex items-center gap-1.5 shrink-0 pr-2 border-r border-slate-200 dark:border-slate-800">
       <span class="text-[10px] uppercase font-mono text-slate-400 font-bold px-1">Repo Runner:</span>
       
+      <!-- Fix & Certify (runs on pasted repo link, or default codebase if empty) -->
+      <button onclick="runFixAndCertify()" class="glass-dock-item shrink-0 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/20">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+        <span>Fix &amp; Certify</span>
+      </button>
+
       <!-- Focus Repo URL Executor -->
-      <button onclick="focusRepoInput()" class="glass-dock-item shrink-0 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/20">
-        <i data-lucide="play" class="w-3.5 h-3.5 text-amber-300"></i>
+      <button onclick="focusRepoInput()" class="glass-dock-item shrink-0 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-semibold flex items-center gap-1.5">
+        <i data-lucide="git-branch" class="w-3.5 h-3.5 text-indigo-500"></i>
         <span>Execute Repo Link</span>
       </button>
 
@@ -1003,6 +1009,17 @@
       switchRightTab("hub");
       const el = document.getElementById("repo-link-input");
       if (el) el.focus();
+    }
+
+    function runFixAndCertify() {
+      switchRightTab("hub");
+      const input = document.getElementById("repo-link-input");
+      if (input && input.value.trim()) {
+        runOnDemandRepo();
+      } else {
+        if (input) input.value = "codebase/data_processor.py";
+        runOnDemandRepo();
+      }
     }
 
     // On-Demand 2-Stage Executor: Paste GitHub URL or Local Path -> Stage 1 (Fix Bugs) -> Stage 2 (Security Scan)
