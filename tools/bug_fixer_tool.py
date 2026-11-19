@@ -118,9 +118,14 @@ def run_bug_fixer_agent(action: str = "full_pipeline", target_path: str = "") ->
         v = result["verification_results"]
         sec = result["security_audit"]
 
+        loop_data = result.get("agent_loop", {})
+        loop_count = loop_data.get("total_iterations", 1)
+        loop_status = "RESOLVED ✅" if loop_data.get("resolved") else "RETRY / REVIEW ⚠️"
+
         lines = [
-            "🤖 **Autonomous DevSecOps Pipeline Executed (Bug Fix + SAST Audit)**",
-            f"- Target: `{result.get('target')}`\n"
+            "🤖 **Autonomous DevSecOps Pipeline Executed (Agent Loop + SAST Audit)**",
+            f"- Target: `{result.get('target')}`",
+            f"- **Agent Loop**: `{loop_status}` across **{loop_count}** iteration(s) (Find ➔ Understand ➔ Fix ➔ Run & Check)\n"
         ]
 
         if result["initial_bug_found"]:
@@ -212,12 +217,17 @@ def execute_repository_link(repo_url_or_path: str) -> str:
     s2 = res["stage2_security"]
     is_secure = s2.get("verdict") == "SECURE"
 
+    loop_info = s1.get("agent_loop", {})
+    loop_count = loop_info.get("total_iterations", 1)
+    loop_status = loop_info.get("status", "RESOLVED")
+
     lines = [
         f"🚀 **On-Demand Execution Complete — `{repo_label}`** ({res['duration_ms']}ms)",
         f"### {'🟢 SECURITY VERDICT: CODE IS SECURE ✅' if is_secure else '🔴 SECURITY VERDICT: INSECURE — ACTION REQUIRED 🚨'}",
         f"- **Grade**: **{s2['overall_grade']}** ({s2['score']}/100) | **Vulnerabilities**: **{s2['vulnerabilities_count']}**\n",
         "---",
-        "### Stage 1: Bug Detection & Autonomous Fixing",
+        f"### Stage 1: Autonomous Agent Loop ({loop_status} • {loop_count} iteration(s))",
+        f"- **Agent Pipeline**: `1. Find Bug` ➔ `2. Understand Concept` ➔ `3. Apply Fix` ➔ `4. Run & Check` (loops if broken)",
         f"- Python Files Analyzed: `{s1['files_analyzed']}`",
         f"- Bugs Detected: **{s1['bugs_found_count']}** | Auto-Fixed: **{s1['bugs_fixed_count']}** | Needs Manual Review: **{s1['remaining_bugs_count']}**"
     ]

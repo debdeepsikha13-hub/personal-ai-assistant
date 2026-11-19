@@ -171,192 +171,258 @@ class OnDemandRepoExecutor:
         except ValueError:
             return str(file_path)
 
-    def _scan_and_fix_bugs(self, root: Path) -> Dict[str, Any]:
+    def _scan_and_fix_bugs(self, root: Path, max_iterations: int = 3) -> Dict[str, Any]:
         """
-        STAGE 1: Scan all Python files for real bugs, auto-fix safe deterministic bugs,
-        and run any discovered unittest suites.
+        STAGE 1: Autonomous Agent Loop (Find -> Understand -> Fix -> Run & Check -> Loop if needed).
+        Iteratively identifies bugs, applies targeted patches, and runs test suites until healthy
+        or max_iterations reached.
         """
         py_files = self._collect_py_files(root)
-        bugs_detected: List[Dict[str, Any]] = []
-        fixes_applied: List[Dict[str, Any]] = []
+        all_bugs_detected: List[Dict[str, Any]] = []
+        all_fixes_applied: List[Dict[str, Any]] = []
+        all_modified_files: List[str] = []
+        loop_history: List[Dict[str, Any]] = []
+        last_test_results: Dict[str, Any] = {"all_passed": True, "total_tests": 0}
         remaining_bugs: List[Dict[str, Any]] = []
-        modified_files: List[str] = []
 
-        for py_file in py_files:
-            rel_name = self._rel(py_file, root)
-            try:
-                original = py_file.read_text(encoding="utf-8", errors="ignore")
-            except Exception as e:
-                bug = {
-                    "file": rel_name, "line": 1, "severity": "HIGH",
-                    "bug_type": "IOError", "description": f"Could not read file: {e}",
-                    "auto_fixed": False
-                }
-                bugs_detected.append(bug)
-                remaining_bugs.append(bug)
-                continue
+        for iteration in range(1, max_iterations + 1):
+            iteration_bugs: List[Dict[str, Any]] = []
+            iteration_fixes: List[Dict[str, Any]] = []
+            iteration_remaining: List[Dict[str, Any]] = []
 
-            updated = original
-            file_fixes: List[str] = []
+            logger.info(f"🔄 [AGENT LOOP ITERATION {iteration}/{max_iterations}] Step 1: Finding bugs in target...")
 
-            # --- First pass: AST syntax & structural bug inspection ---
-            try:
-                tree = ast.parse(updated, filename=rel_name)
-                parse_ok = True
-            except SyntaxError as e:
-                parse_ok = False
-                bug = {
-                    "file": rel_name,
-                    "line": e.lineno or 1,
-                    "severity": "CRITICAL",
-                    "bug_type": "SyntaxError",
-                    "description": f"Python SyntaxError: {e.msg} ({(e.text or '').strip()})",
-                    "auto_fixed": False
-                }
-                bugs_detected.append(bug)
-                remaining_bugs.append(bug)
-
-            if parse_ok:
-                # 1. Detect & auto-fix bare `except:` -> `except Exception:`
-                bare_except_lines = [
-                    node.lineno for node in ast.walk(tree)
-                    if isinstance(node, ast.ExceptHandler) and node.type is None
-                ]
-                if bare_except_lines:
-                    bare_re = re.compile(r"^([ \t]*)except\s*:\s*$", re.MULTILINE)
-                    if bare_re.search(updated):
-                        updated = bare_re.sub(r"\1except Exception:", updated)
-                        for ln in bare_except_lines:
-                            bug = {
-                                "file": rel_name, "line": ln, "severity": "MEDIUM",
-                                "bug_type": "BareExcept",
-                                "description": "Bare `except:` swallows SystemExit/KeyboardInterrupt.",
-                                "auto_fixed": True,
-                                "fix": "Replaced bare `except:` with `except Exception:`."
-                            }
-                            bugs_detected.append(bug)
-                            fixes_applied.append(bug)
-                            file_fixes.append(f"Line {ln}: bare except -> except Exception")
-
-                # 2. Detect & auto-fix unguarded sum(numbers) / len(numbers) ZeroDivisionError
-                div_re = re.compile(
-                    r"(def calculate_average\([^\)]*\)(?:\s*->\s*[^:]+)?:\s*\n(?:[ \t]*\"\"\"[\s\S]*?\"\"\"[ \t]*\n)?)"
-                    r"(?![ \t]*if not numbers:)"
-                    r"([ \t]+)(?:#[^\n]*\n\2)?return\s+round\(sum\(numbers\)\s*/\s*len\(numbers\),\s*2\)"
-                )
-                if div_re.search(updated):
-                    updated = div_re.sub(
-                        r"\1\2if not numbers:\n\2    return 0.0\n\2return round(sum(numbers) / len(numbers), 2)",
-                        updated
-                    )
-                    bug = {
-                        "file": rel_name, "line": 1, "severity": "CRITICAL",
-                        "bug_type": "ZeroDivisionError",
-                        "description": "Missing empty-list guard before `sum(numbers) / len(numbers)`.",
-                        "auto_fixed": True,
-                        "fix": "Inserted `if not numbers: return 0.0` guard clause."
-                    }
-                    bugs_detected.append(bug)
-                    fixes_applied.append(bug)
-                    file_fixes.append("Added ZeroDivisionError guard in calculate_average()")
-
-                # 3. Detect & auto-fix `== None` / `!= None` identity comparisons
-                none_eq_re = re.compile(r"(?<![=!<>])==\s*None\b")
-                none_neq_re = re.compile(r"!=\s*None\b")
-                if none_eq_re.search(updated) or none_neq_re.search(updated):
-                    updated = none_eq_re.sub("is None", updated)
-                    updated = none_neq_re.sub("is not None", updated)
-                    bug = {
-                        "file": rel_name, "line": 1, "severity": "LOW",
-                        "bug_type": "NoneComparisonBug",
-                        "description": "Using `== None` or `!= None` instead of identity check `is None` / `is not None`.",
-                        "auto_fixed": True,
-                        "fix": "Normalized `== None` / `!= None` to `is None` / `is not None`."
-                    }
-                    bugs_detected.append(bug)
-                    fixes_applied.append(bug)
-                    file_fixes.append("Normalized None identity checks")
-
-                # 4. Detect & auto-fix `yaml.unsafe_load(` -> `yaml.safe_load(`
-                if "yaml.unsafe_load(" in updated:
-                    updated = updated.replace("yaml.unsafe_load(", "yaml.safe_load(")
+            for py_file in py_files:
+                rel_name = self._rel(py_file, root)
+                try:
+                    original = py_file.read_text(encoding="utf-8", errors="ignore")
+                except Exception as e:
                     bug = {
                         "file": rel_name, "line": 1, "severity": "HIGH",
-                        "bug_type": "UnsafeYamlLoad",
-                        "description": "Unsafe YAML deserialization `yaml.unsafe_load()`.",
-                        "auto_fixed": True,
-                        "fix": "Replaced `yaml.unsafe_load()` with `yaml.safe_load()`."
+                        "bug_type": "IOError", "description": f"Could not read file: {e}",
+                        "auto_fixed": False
                     }
-                    bugs_detected.append(bug)
-                    fixes_applied.append(bug)
-                    file_fixes.append("yaml.unsafe_load -> yaml.safe_load")
+                    iteration_bugs.append(bug)
+                    iteration_remaining.append(bug)
+                    continue
 
-                # 5. Detect mutable default arguments (report clearly for review)
-                for node in ast.walk(tree):
-                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                        for default in node.args.defaults + [d for d in node.args.kw_defaults if d is not None]:
-                            if isinstance(default, (ast.List, ast.Dict, ast.Set)):
+                updated = original
+                file_fixes: List[str] = []
+
+                # Step 1: Finding bugs via syntax & grammar analysis
+                try:
+                    tree = ast.parse(updated, filename=rel_name)
+                    parse_ok = True
+                except SyntaxError as e:
+                    parse_ok = False
+                    bug = {
+                        "file": rel_name,
+                        "line": e.lineno or 1,
+                        "severity": "CRITICAL",
+                        "bug_type": "SyntaxError",
+                        "description": f"Python SyntaxError: {e.msg} ({(e.text or '').strip()})",
+                        "auto_fixed": False
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_remaining.append(bug)
+
+                if parse_ok:
+                    # 1. Bare `except:` -> `except Exception:`
+                    bare_except_lines = [
+                        node.lineno for node in ast.walk(tree)
+                        if isinstance(node, ast.ExceptHandler) and node.type is None
+                    ]
+                    if bare_except_lines:
+                        bare_re = re.compile(r"^([ \t]*)except\s*:\s*$", re.MULTILINE)
+                        if bare_re.search(updated):
+                            updated = bare_re.sub(r"\1except Exception:", updated)
+                            for ln in bare_except_lines:
                                 bug = {
-                                    "file": rel_name,
-                                    "line": node.lineno,
-                                    "severity": "MEDIUM",
-                                    "bug_type": "MutableDefaultArg",
-                                    "description": f"Mutable default argument in `{node.name}()` leaks state across calls.",
-                                    "auto_fixed": False,
-                                    "fix": "Change default to `None` and initialize inside the function body."
+                                    "file": rel_name, "line": ln, "severity": "MEDIUM",
+                                    "bug_type": "BareExcept",
+                                    "description": "Bare `except:` swallows SystemExit/KeyboardInterrupt.",
+                                    "auto_fixed": True,
+                                    "fix": "Replaced bare `except:` with `except Exception:`."
                                 }
-                                bugs_detected.append(bug)
-                                remaining_bugs.append(bug)
+                                iteration_bugs.append(bug)
+                                iteration_fixes.append(bug)
+                                file_fixes.append(f"Line {ln}: bare except -> except Exception")
 
-                    # 6. Detect duplicate keys in dict literals
-                    if isinstance(node, ast.Dict):
-                        seen_keys = set()
-                        for k in node.keys:
-                            if isinstance(k, ast.Constant) and k.value in seen_keys:
-                                bug = {
-                                    "file": rel_name,
-                                    "line": getattr(k, "lineno", node.lineno),
-                                    "severity": "MEDIUM",
-                                    "bug_type": "DuplicateDictKey",
-                                    "description": f"Duplicate dictionary key `{k.value!r}` silently overwrites earlier value.",
-                                    "auto_fixed": False,
-                                    "fix": "Remove or rename the duplicate dictionary key."
-                                }
-                                bugs_detected.append(bug)
-                                remaining_bugs.append(bug)
-                            elif isinstance(k, ast.Constant):
-                                seen_keys.add(k.value)
+                    # 2. Missing empty-list guard before sum(numbers) / len(numbers)
+                    div_re = re.compile(
+                        r"(def calculate_average\([^\)]*\)(?:\s*->\s*[^:]+)?:\s*\n(?:[ \t]*\"\"\"[\s\S]*?\"\"\"[ \t]*\n)?)"
+                        r"(?![ \t]*if not numbers:)"
+                        r"([ \t]+)(?:#[^\n]*\n\2)?return\s+round\(sum\(numbers\)\s*/\s*len\(numbers\),\s*2\)"
+                    )
+                    if div_re.search(updated):
+                        updated = div_re.sub(
+                            r"\1\2if not numbers:\n\2    return 0.0\n\2return round(sum(numbers) / len(numbers), 2)",
+                            updated
+                        )
+                        bug = {
+                            "file": rel_name, "line": 1, "severity": "CRITICAL",
+                            "bug_type": "ZeroDivisionError",
+                            "description": "Missing empty-list guard before `sum(numbers) / len(numbers)`.",
+                            "auto_fixed": True,
+                            "fix": "Inserted `if not numbers: return 0.0` guard clause."
+                        }
+                        iteration_bugs.append(bug)
+                        iteration_fixes.append(bug)
+                        file_fixes.append("Added ZeroDivisionError guard in calculate_average()")
 
-            if updated != original:
-                py_file.write_text(updated, encoding="utf-8")
-                modified_files.append(rel_name)
+                    # 3. `== None` / `!= None` -> `is None` / `is not None`
+                    none_eq_re = re.compile(r"(?<![=!<>])==\s*None\b")
+                    none_neq_re = re.compile(r"!=\s*None\b")
+                    if none_eq_re.search(updated) or none_neq_re.search(updated):
+                        updated = none_eq_re.sub("is None", updated)
+                        updated = none_neq_re.sub("is not None", updated)
+                        bug = {
+                            "file": rel_name, "line": 1, "severity": "LOW",
+                            "bug_type": "NoneComparisonBug",
+                            "description": "Using `== None` or `!= None` instead of identity check `is None` / `is not None`.",
+                            "auto_fixed": True,
+                            "fix": "Normalized `== None` / `!= None` to `is None` / `is not None`."
+                        }
+                        iteration_bugs.append(bug)
+                        iteration_fixes.append(bug)
+                        file_fixes.append("Normalized None identity checks")
 
-        # Run discovered unit tests (if any) in target repo
-        test_results = self._run_repo_tests(root)
-        if not test_results["all_passed"] and test_results["failures"]:
-            for fail in test_results["failures"]:
-                last_line = [ln.strip() for ln in fail["traceback"].splitlines() if ln.strip()]
-                bug = {
-                    "file": fail["test"],
-                    "line": 0,
-                    "severity": "HIGH",
-                    "bug_type": "TestFailure",
-                    "description": last_line[-1] if last_line else "Unit test assertion/runtime failure.",
-                    "auto_fixed": False
-                }
-                bugs_detected.append(bug)
-                remaining_bugs.append(bug)
+                    # 4. `yaml.unsafe_load(` -> `yaml.safe_load(`
+                    if "yaml.unsafe_load(" in updated:
+                        updated = updated.replace("yaml.unsafe_load(", "yaml.safe_load(")
+                        bug = {
+                            "file": rel_name, "line": 1, "severity": "HIGH",
+                            "bug_type": "UnsafeYamlLoad",
+                            "description": "Unsafe YAML deserialization `yaml.unsafe_load()`.",
+                            "auto_fixed": True,
+                            "fix": "Replaced `yaml.unsafe_load()` with `yaml.safe_load()`."
+                        }
+                        iteration_bugs.append(bug)
+                        iteration_fixes.append(bug)
+                        file_fixes.append("yaml.unsafe_load -> yaml.safe_load")
+
+                    # 5. Detect mutable default arguments
+                    for node in ast.walk(tree):
+                        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            for default in node.args.defaults + [d for d in node.args.kw_defaults if d is not None]:
+                                if isinstance(default, (ast.List, ast.Dict, ast.Set)):
+                                    bug = {
+                                        "file": rel_name,
+                                        "line": node.lineno,
+                                        "severity": "MEDIUM",
+                                        "bug_type": "MutableDefaultArg",
+                                        "description": f"Mutable default argument in `{node.name}()` leaks state across calls.",
+                                        "auto_fixed": False,
+                                        "fix": "Change default to `None` and initialize inside the function body."
+                                    }
+                                    iteration_bugs.append(bug)
+                                    iteration_remaining.append(bug)
+
+                        # 6. Detect duplicate keys in dict literals
+                        if isinstance(node, ast.Dict):
+                            seen_keys = set()
+                            for k in node.keys:
+                                if isinstance(k, ast.Constant) and k.value in seen_keys:
+                                    bug = {
+                                        "file": rel_name,
+                                        "line": getattr(k, "lineno", node.lineno),
+                                        "severity": "MEDIUM",
+                                        "bug_type": "DuplicateDictKey",
+                                        "description": f"Duplicate dictionary key `{k.value!r}` silently overwrites earlier value.",
+                                        "auto_fixed": False,
+                                        "fix": "Remove or rename the duplicate dictionary key."
+                                    }
+                                    iteration_bugs.append(bug)
+                                    iteration_remaining.append(bug)
+                                elif isinstance(k, ast.Constant):
+                                    seen_keys.add(k.value)
+
+                # Step 3: Write fix to disk if updated
+                if updated != original:
+                    py_file.write_text(updated, encoding="utf-8")
+                    if rel_name not in all_modified_files:
+                        all_modified_files.append(rel_name)
+
+            # Step 4: Run discovered unit tests and check if it passes
+            logger.info(f"🧪 [AGENT LOOP ITERATION {iteration}/{max_iterations}] Step 4: Running tests and checking if code runs...")
+            test_results = self._run_repo_tests(root)
+            last_test_results = test_results
+
+            if not test_results["all_passed"] and test_results["failures"]:
+                for fail in test_results["failures"]:
+                    last_line = [ln.strip() for ln in fail["traceback"].splitlines() if ln.strip()]
+                    bug = {
+                        "file": fail["test"],
+                        "line": 0,
+                        "severity": "HIGH",
+                        "bug_type": "TestFailure",
+                        "description": last_line[-1] if last_line else "Unit test assertion/runtime failure.",
+                        "auto_fixed": False
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_remaining.append(bug)
+
+            all_bugs_detected.extend(iteration_bugs)
+            all_fixes_applied.extend(iteration_fixes)
+            remaining_bugs = iteration_remaining
+
+            # Step 5: Check if all bugs resolved and tests pass
+            if test_results["all_passed"] and len(iteration_fixes) == 0 and len(iteration_bugs) == 0:
+                logger.info(f"✅ [AGENT LOOP ITERATION {iteration}/{max_iterations}] Code is completely healthy!")
+                loop_history.append({
+                    "iteration": iteration,
+                    "status": "CLEAN",
+                    "step_summary": "All code is clean and tests pass."
+                })
+                break
+            elif test_results["all_passed"] and len(iteration_fixes) > 0:
+                logger.info(f"🎉 [AGENT LOOP ITERATION {iteration}/{max_iterations}] All applied patches verified! Tests passing.")
+                loop_history.append({
+                    "iteration": iteration,
+                    "status": "RESOLVED",
+                    "step_summary": f"Fixed {len(iteration_fixes)} bug(s). Verification passed."
+                })
+                break
+            else:
+                logger.warning(f"🔁 [AGENT LOOP ITERATION {iteration}/{max_iterations}] Tests or unhandled bugs remain. Looping back...")
+                loop_history.append({
+                    "iteration": iteration,
+                    "status": "RETRYING",
+                    "step_summary": f"Detected {len(iteration_bugs)} bug(s), applied {len(iteration_fixes)} fix(es). Re-evaluating..."
+                })
+
+        # Deduplicate bugs detected & fixes
+        unique_detected = []
+        seen_det = set()
+        for b in all_bugs_detected:
+            key = (b.get("file"), b.get("line"), b.get("bug_type"))
+            if key not in seen_det:
+                seen_det.add(key)
+                unique_detected.append(b)
+
+        unique_fixes = []
+        seen_fix = set()
+        for f in all_fixes_applied:
+            key = (f.get("file"), f.get("line"), f.get("bug_type"))
+            if key not in seen_fix:
+                seen_fix.add(key)
+                unique_fixes.append(f)
 
         return {
+            "agent_loop": {
+                "total_iterations": len(loop_history),
+                "status": "RESOLVED" if last_test_results.get("all_passed") and len(remaining_bugs) == 0 else "PARTIALLY_RESOLVED",
+                "loop_history": loop_history
+            },
             "files_analyzed": len(py_files),
-            "bugs_found_count": len(bugs_detected),
-            "bugs_fixed_count": len(fixes_applied),
+            "bugs_found_count": len(unique_detected),
+            "bugs_fixed_count": len(unique_fixes),
             "remaining_bugs_count": len(remaining_bugs),
-            "modified_files": modified_files,
-            "bugs_detected": bugs_detected,
-            "fixes_applied": fixes_applied,
+            "modified_files": all_modified_files,
+            "bugs_detected": unique_detected,
+            "fixes_applied": unique_fixes,
             "remaining_bugs": remaining_bugs,
-            "tests": test_results
+            "tests": last_test_results
         }
 
     def _run_repo_tests(self, root: Path) -> Dict[str, Any]:

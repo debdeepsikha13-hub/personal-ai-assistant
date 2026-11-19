@@ -436,14 +436,28 @@
           <div class="flex items-center justify-between">
             <span class="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
               <span class="w-5 h-5 rounded-md bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] flex items-center justify-center font-black">1</span>
-              Stage 1 — Bug Detection &amp; Auto-Fix
+              Stage 1 — Autonomous Agent Loop
             </span>
             <span id="stage1-pill" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 font-bold">0 Fixed</span>
           </div>
-          <div class="grid grid-cols-3 gap-2 text-center font-mono text-[10px]">
+          <!-- 4-Step Agent Loop Pipeline Visualization -->
+          <div class="p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-[10px] font-mono flex items-center justify-between gap-1 text-slate-400">
+            <span class="text-sky-400 font-bold">1. Find Bug</span>
+            <span>➔</span>
+            <span class="text-indigo-400 font-bold">2. Understand</span>
+            <span>➔</span>
+            <span class="text-emerald-400 font-bold">3. Apply Fix</span>
+            <span>➔</span>
+            <span class="text-amber-400 font-bold">4. Run &amp; Check</span>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5 text-center font-mono text-[10px]">
             <div class="p-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/70">
               <div id="s1-files" class="text-sm font-black text-slate-800 dark:text-white">0</div>
               <div class="text-[9px] text-slate-400">PY FILES</div>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/70">
+              <div id="s1-loop" class="text-sm font-black text-indigo-500">1x</div>
+              <div class="text-[9px] text-slate-400">AGENT LOOP</div>
             </div>
             <div class="p-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/70">
               <div id="s1-fixed" class="text-sm font-black text-emerald-600">0</div>
@@ -846,16 +860,24 @@
       document.getElementById("s1-files").innerText = s1.files_analyzed;
       document.getElementById("s1-fixed").innerText = s1.bugs_fixed_count;
       document.getElementById("s1-remaining").innerText = s1.remaining_bugs_count;
-      document.getElementById("stage1-pill").innerText = `${s1.bugs_fixed_count} Fixed / ${s1.bugs_found_count} Found`;
+
+      const loopInfo = s1.agent_loop || {};
+      const loopIter = loopInfo.total_iterations || 1;
+      const loopStatus = loopInfo.status || "RESOLVED";
+      const s1LoopEl = document.getElementById("s1-loop");
+      if (s1LoopEl) s1LoopEl.innerText = `${loopIter}x`;
+      document.getElementById("stage1-pill").innerText = `Loop: ${loopIter}x • ${s1.bugs_fixed_count} Fixed`;
 
       const s1Details = document.getElementById("stage1-details");
       if (s1.bugs_found_count === 0) {
-        s1Details.innerHTML = `<div class="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300">✅ No syntax or static bugs found across ${s1.files_analyzed} Python file(s).</div>`;
+        s1Details.innerHTML = `<div class="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300">✅ <strong>Clean Codebase</strong>: Agent completed check in 1 loop — 0 syntax or runtime bugs found across ${s1.files_analyzed} file(s).</div>`;
       } else {
-        let html = "";
+        let html = `<div class="p-2 rounded-lg bg-indigo-950/40 border border-indigo-800/60 text-[10px] text-indigo-300 font-mono">
+          🔄 <strong>Autonomous Agent Loop</strong>: Completed in <strong>${loopIter} iteration(s)</strong> (${escapeHtml(loopStatus)}).
+        </div>`;
         (s1.fixes_applied || []).forEach(fx => {
           html += `<div class="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900">
-            <div class="font-bold text-emerald-800 dark:text-emerald-300">🛠️ FIXED: ${escapeHtml(fx.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(fx.file)}:${fx.line})</span></div>
+            <div class="font-bold text-emerald-800 dark:text-emerald-300">🛠️ FIXED (Pass ${loopIter}): ${escapeHtml(fx.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(fx.file)}:${fx.line})</span></div>
             <div class="text-slate-600 dark:text-slate-300">${escapeHtml(fx.fix || fx.description)}</div>
           </div>`;
         });
@@ -895,7 +917,9 @@
       msg += isSecure
         ? `### 🟢 VERDICT: CODE IS SECURE ✅ (Grade ${s2.overall_grade} — 0 Vulnerabilities)\n\n`
         : `### 🔴 VERDICT: INSECURE CODE DETECTED 🚨 (Grade ${s2.overall_grade} — ${s2.vulnerabilities_count} Vulnerability(s))\n\n`;
-      msg += `**Stage 1 — Bug Remediation**: Analyzed \`${s1.files_analyzed}\` file(s) • Found: **${s1.bugs_found_count}** • Auto-Fixed: **${s1.bugs_fixed_count}** • Review: **${s1.remaining_bugs_count}**\n`;
+      msg += `🔄 **Stage 1 — Autonomous Agent Loop (${loopIter} iteration(s))**: ` +
+             `Analyzed \`${s1.files_analyzed}\` file(s) • Found: **${s1.bugs_found_count}** • Auto-Fixed: **${s1.bugs_fixed_count}** • Review: **${s1.remaining_bugs_count}**\n` +
+             `*Loop Pipeline: 1. Find Bug ➔ 2. Understand Concept ➔ 3. Apply Fix ➔ 4. Run & Check (Loops if broken)*\n`;
       if (s1.fixes_applied && s1.fixes_applied.length > 0) {
         msg += s1.fixes_applied.slice(0, 5).map(fx => `- 🛠️ Fixed \`${fx.file}:${fx.line}\` (${fx.bug_type}): ${fx.fix || fx.description}`).join("\n") + "\n";
       }

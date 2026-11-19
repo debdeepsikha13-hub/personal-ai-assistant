@@ -417,11 +417,11 @@ class GeneralCodeBugFixerAgent:
         }
         return self.last_fix
 
-    def run_full_pipeline(self, target_path: Optional[str] = None) -> Dict[str, Any]:
+    def run_full_pipeline(self, target_path: Optional[str] = None, max_iterations: int = 3) -> Dict[str, Any]:
         """
-        End-to-end 2-Stage DevSecOps Pipeline on the user-provided target:
-          STAGE 1: Scan AST & Tests -> Diagnose -> Apply Fix -> Verify Tests
-          STAGE 2: OWASP/CWE SAST Security Audit
+        Autonomous Agentic DevSecOps Pipeline on user-provided target:
+          STAGE 1 - Autonomous Agent Loop (Find -> Understand -> Fix -> Run & Check -> Loop if needed)
+          STAGE 2 - OWASP/CWE SAST Cybersecurity Audit
         """
         effective_path = self._resolve_target(target_path)
         if not effective_path:
@@ -430,30 +430,90 @@ class GeneralCodeBugFixerAgent:
                 "error": "No target repository or file path provided."
             }
 
-        scan_result = self.scan_for_bugs(effective_path)
-        initial_had_bug = scan_result["bug_found"]
-        diagnosis = scan_result.get("diagnosis", None)
+        logger.info(f"Starting Autonomous DevSecOps Agent Loop on: {effective_path} (max iterations: {max_iterations})")
+        
+        loop_history: List[Dict[str, Any]] = []
+        last_fix_result = None
+        last_diagnosis = None
+        initial_had_bug = False
+        all_checks_passed = False
 
-        fix_result = None
-        if initial_had_bug:
+        for iteration in range(1, max_iterations + 1):
+            logger.info(f"🔄 [AGENT LOOP ITERATION {iteration}/{max_iterations}] Step 1: Finding bugs...")
+            scan_result = self.scan_for_bugs(effective_path)
+            
+            if iteration == 1:
+                initial_had_bug = scan_result["bug_found"]
+
+            if not scan_result["bug_found"]:
+                logger.info(f"✅ [AGENT LOOP ITERATION {iteration}/{max_iterations}] No bugs or failing tests found. Code is healthy!")
+                all_checks_passed = True
+                loop_history.append({
+                    "iteration": iteration,
+                    "step": "CHECK",
+                    "status": "CLEAN",
+                    "summary": "All tests and AST grammar checks are passing cleanly."
+                })
+                break
+
+            # Step 2: Understand the concept / diagnose root cause
+            diagnosis = scan_result.get("diagnosis")
+            last_diagnosis = diagnosis
+            logger.info(f"🧠 [AGENT LOOP ITERATION {iteration}/{max_iterations}] Step 2: Diagnosed bug -> {diagnosis.get('bug_title') if diagnosis else 'Unknown'}")
+
+            # Step 3: Try to apply the fix
+            logger.info(f"🔧 [AGENT LOOP ITERATION {iteration}/{max_iterations}] Step 3: Applying targeted autonomous patch...")
             fix_result = self.apply_fix(effective_path)
+            last_fix_result = fix_result
 
-        verification_tests = self.run_tests(effective_path)
+            # Step 4: Run and check verification tests
+            logger.info(f"🧪 [AGENT LOOP ITERATION {iteration}/{max_iterations}] Step 4: Running tests and checking if fix worked...")
+            verification = self.run_tests(effective_path)
+
+            if verification["all_passed"]:
+                logger.info(f"🎉 [AGENT LOOP ITERATION {iteration}/{max_iterations}] Fix verified! All tests passed.")
+                all_checks_passed = True
+                loop_history.append({
+                    "iteration": iteration,
+                    "step_1_find": scan_result.get("diagnosis", {}).get("bug_title", "Bugs detected"),
+                    "step_2_understand": diagnosis.get("root_cause", "") if diagnosis else "",
+                    "step_3_fix": fix_result.get("fix_applied", ""),
+                    "step_4_check": f"PASSED ({verification['passed_count']}/{verification['total_tests']} tests)",
+                    "status": "RESOLVED"
+                })
+                break
+            else:
+                logger.warning(f"🔁 [AGENT LOOP ITERATION {iteration}/{max_iterations}] Tests still failing. Looping back to re-diagnose...")
+                loop_history.append({
+                    "iteration": iteration,
+                    "step_1_find": scan_result.get("diagnosis", {}).get("bug_title", "Bugs detected"),
+                    "step_2_understand": diagnosis.get("root_cause", "") if diagnosis else "",
+                    "step_3_fix": fix_result.get("fix_applied", ""),
+                    "step_4_check": f"FAILED ({verification['failed_count']} failure(s))",
+                    "status": "RETRYING"
+                })
+
+        final_verification = self.run_tests(effective_path)
         security_audit = self.run_security_audit(effective_path)
 
         return {
             "pipeline_status": "COMPLETED",
             "target": effective_path,
+            "agent_loop": {
+                "total_iterations": len(loop_history),
+                "resolved": all_checks_passed,
+                "history": loop_history
+            },
             "initial_bug_found": initial_had_bug,
-            "diagnosis": diagnosis,
-            "fix_applied": fix_result,
+            "diagnosis": last_diagnosis,
+            "fix_applied": last_fix_result,
             "verification_results": {
-                "all_passed": verification_tests["all_passed"],
-                "total_tests": verification_tests["total_tests"],
-                "passed_count": verification_tests["passed_count"],
-                "failed_count": verification_tests["failed_count"],
-                "pass_rate": verification_tests["pass_rate"],
-                "checklist": verification_tests["checklist"]
+                "all_passed": final_verification["all_passed"],
+                "total_tests": final_verification["total_tests"],
+                "passed_count": final_verification["passed_count"],
+                "failed_count": final_verification["failed_count"],
+                "pass_rate": final_verification["pass_rate"],
+                "checklist": final_verification["checklist"]
             },
             "security_audit": security_audit
         }
