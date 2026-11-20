@@ -4,47 +4,57 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WOLF // Autonomous DevSecOps &amp; AI Engineering System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    * {
+      font-family: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    code, pre, kbd, .font-mono, [data-mono] {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+    }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.25); border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.6); }
 
-    /* Luminous Prismatic Aurora & Cyber DevSecOps Cockpit Theme */
+    /* Cyber DevSecOps Cockpit Theme - Obsidian Velvet by Default */
     :root {
+      --canvas-bg: #07090e;
+      --card-bg: rgba(13, 17, 26, 0.94);
+      --card-border: rgba(56, 189, 248, 0.22);
+      --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(99, 102, 241, 0.2);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body.mode-pearl {
       --canvas-bg: #f8fafc;
-      --card-bg: rgba(255, 255, 255, 0.90);
-      --card-border: rgba(203, 213, 225, 0.85);
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --card-border: rgba(203, 213, 225, 0.9);
       --card-shadow: 0 4px 24px -2px rgba(99, 102, 241, 0.12), 0 2px 8px -1px rgba(0, 0, 0, 0.05);
       --text-main: #0f172a;
       --text-muted: #64748b;
     }
 
-    body.mode-twilight {
-      --canvas-bg: #07090e;
-      --card-bg: rgba(13, 19, 33, 0.92);
-      --card-border: rgba(56, 189, 248, 0.25);
-      --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(99, 102, 241, 0.25);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-    }
-
     body {
       background-color: var(--canvas-bg);
       background-image:
-        radial-gradient(circle at 10% 12%, rgba(99, 102, 241, 0.22) 0%, transparent 45%),
-        radial-gradient(circle at 90% 8%, rgba(6, 182, 212, 0.20) 0%, transparent 45%),
-        radial-gradient(circle at 50% 92%, rgba(236, 72, 153, 0.14) 0%, transparent 50%),
+        radial-gradient(circle at 8% 10%, rgba(99, 102, 241, 0.22) 0%, transparent 45%),
+        radial-gradient(circle at 92% 6%, rgba(6, 182, 212, 0.20) 0%, transparent 45%),
+        radial-gradient(circle at 50% 94%, rgba(236, 72, 153, 0.14) 0%, transparent 50%),
         radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.15) 0%, transparent 40%),
-        linear-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+        linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
       background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 28px 28px, 28px 28px;
       background-attachment: fixed;
       color: var(--text-main);
-      transition: background-color 0.4s ease, color 0.4s ease;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     .glass-card {
@@ -144,7 +154,7 @@
     .prose ul { list-style-type: disc; padding-left: 18px; margin: 4px 0; }
   </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden font-sans antialiased text-sm">
+<body class="h-screen flex flex-col overflow-hidden font-sans antialiased text-sm mode-twilight">
 
   <!-- ========================================================== -->
   <!-- TOP STUDIO HEADER: Prismatic Wolf Emblem & Controls        -->
@@ -341,7 +351,44 @@
   <div class="flex-1 flex overflow-hidden">
 
     <!-- LEFT STAGE: Conversational Engineering Stream -->
-    <section class="flex-1 flex flex-col h-full bg-transparent border-r border-slate-200/80 dark:border-slate-800 min-w-[360px]">
+    <section class="flex-1 flex flex-col h-full bg-transparent border-r border-slate-200/80 dark:border-slate-800 min-w-[360px] overflow-hidden">
+
+      <!-- EXECUTIVE ON-DEMAND REPOSITORY INGESTION DECK -->
+      <div class="px-6 py-3 border-b border-indigo-500/20 bg-slate-900/70 dark:bg-black/60 backdrop-blur-md shrink-0 space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-[10.5px] font-mono font-bold tracking-wider text-slate-200 uppercase">MISSION TARGET // ON-DEMAND EXECUTION</span>
+          </div>
+          <span class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-indigo-950/80 border border-indigo-700/60 text-indigo-300 font-bold">ISOLATED SANDBOX</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="relative flex-1">
+            <i data-lucide="git-branch" class="w-4 h-4 text-indigo-400 absolute left-3 top-2.5"></i>
+            <input
+              type="text"
+              id="top-repo-input"
+              placeholder="Paste GitHub repository URL (e.g. https://github.com/octocat/Hello-World) or local folder..."
+              class="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950/90 border border-indigo-500/30 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 shadow-inner"
+              onkeydown="if(event.key==='Enter'){ triggerTopRepoRun(); }"
+            />
+          </div>
+          <button
+            onclick="triggerTopRepoRun()"
+            id="top-run-btn"
+            class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 via-sky-600 to-indigo-600 hover:from-indigo-500 hover:to-sky-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-500/25 transition shrink-0"
+          >
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300 fill-amber-300"></i>
+            <span>Fix &amp; Certify</span>
+          </button>
+        </div>
+        <div class="flex items-center gap-2 text-[10px] font-mono text-slate-400 flex-wrap">
+          <span class="text-slate-500">Quick Test:</span>
+          <button onclick="fillTopRepo('https://github.com/octocat/Hello-World')" class="px-2 py-0.5 rounded-md bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 transition">octocat/Hello-World</button>
+          <button onclick="fillTopRepo('https://github.com/pallets/click')" class="px-2 py-0.5 rounded-md bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 transition">pallets/click</button>
+        </div>
+      </div>
+
       <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4">
 
         <!-- Executive Welcome Hero Card -->
@@ -756,10 +803,14 @@
     const threadId = "wolf-" + Math.random().toString(36).substring(2, 9);
 
     window.addEventListener("DOMContentLoaded", () => {
-      if (localStorage.getItem("wolf_atmosphere") === "twilight") {
+      const savedAtmosphere = localStorage.getItem("wolf_atmosphere");
+      const isTwilight = savedAtmosphere !== "pearl"; // Default to dark twilight mode
+      if (isTwilight) {
         document.body.classList.add("mode-twilight");
-        updateAtmosphereBtn(true);
+      } else {
+        document.body.classList.remove("mode-twilight");
       }
+      updateAtmosphereBtn(isTwilight);
       lucide.createIcons();
     });
 
@@ -772,6 +823,24 @@
     function updateAtmosphereBtn(isTwilight) {
       const label = document.getElementById("atmosphere-label");
       if (label) label.innerText = isTwilight ? "Twilight Dark" : "Pearl Light";
+    }
+
+    function triggerTopRepoRun() {
+      const topInput = document.getElementById("top-repo-input");
+      const repoInput = document.getElementById("repo-link-input");
+      const target = topInput ? topInput.value.trim() : "";
+      if (target && repoInput) {
+        repoInput.value = target;
+      }
+      runOnDemandRepo();
+    }
+
+    function fillTopRepo(url) {
+      const topInput = document.getElementById("top-repo-input");
+      const repoInput = document.getElementById("repo-link-input");
+      if (topInput) topInput.value = url;
+      if (repoInput) repoInput.value = url;
+      triggerTopRepoRun();
     }
 
     function switchRightTab(tab) {
@@ -822,29 +891,41 @@
     }
 
     function runFixAndCertify() {
-      switchRightTab("hub");
-      const input = document.getElementById("repo-link-input");
-      if (input && input.value.trim()) {
+      const topInput = document.getElementById("top-repo-input");
+      const repoInput = document.getElementById("repo-link-input");
+      let target = (topInput && topInput.value.trim()) || (repoInput && repoInput.value.trim());
+      if (target) {
+        if (topInput) topInput.value = target;
+        if (repoInput) repoInput.value = target;
         runOnDemandRepo();
       } else {
-        appendSystemMessage("📌 Paste a GitHub repository URL or local folder path into Execute Repo first, then click Fix & Certify.");
-        if (input) input.focus();
+        appendSystemMessage("📌 Paste a GitHub repository URL or local folder path into the bar first, then click Fix & Certify.");
+        if (topInput) topInput.focus();
+        else if (repoInput) repoInput.focus();
       }
     }
 
     async function runOnDemandRepo() {
       const input = document.getElementById("repo-link-input");
+      const topInput = document.getElementById("top-repo-input");
       const btn = document.getElementById("execute-repo-btn");
+      const topBtn = document.getElementById("top-run-btn");
       const btnLabel = document.getElementById("execute-repo-btn-label");
-      const target = input ? input.value.trim() : "";
+
+      let target = (input && input.value.trim()) || (topInput && topInput.value.trim());
 
       if (!target) {
         appendSystemMessage("📌 Paste a GitHub repository URL or local folder path first.");
-        if (input) input.focus();
+        if (topInput) topInput.focus();
+        else if (input) input.focus();
         return;
       }
 
+      if (input) input.value = target;
+      if (topInput) topInput.value = target;
+
       if (btn) btn.disabled = true;
+      if (topBtn) topBtn.disabled = true;
       if (btnLabel) btnLabel.innerText = "Running Stage 1 (Bug Fix) & Stage 2 (Security)...";
       appendSystemMessage(`⚡ Executing 2-Stage Pipeline on '${target}': Stage 1 (Bug Fix) -> Stage 2 (Security Scan)...`);
 
@@ -868,6 +949,7 @@
         appendAgentMessage("⚠️ **Network Error**: Could not reach WOLF backend.", []);
       } finally {
         if (btn) btn.disabled = false;
+        if (topBtn) topBtn.disabled = false;
         if (btnLabel) btnLabel.innerText = "Fix & Certify (Bug Fix + Security Scan)";
       }
     }
