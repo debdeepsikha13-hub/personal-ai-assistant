@@ -507,7 +507,54 @@ class OnDemandRepoExecutor:
                     iteration_bugs.append(bug)
                     iteration_fixes.append(bug)
 
-                # Bug 6: Empty catch blocks
+                # Bug 6 (FK-104): Order history sorted oldest first instead of newest first
+                if ".sort({ createdAt: 1 })" in updated:
+                    updated = updated.replace(".sort({ createdAt: 1 })", ".sort({ createdAt: -1 })")
+                    bug = {
+                        "file": rel_name, "line": 1, "severity": "LOW",
+                        "bug_type": "InvertedOrderHistorySort",
+                        "description": "Order history sorted oldest first (`createdAt: 1`) instead of newest first (`createdAt: -1`).",
+                        "auto_fixed": True,
+                        "fix": "Changed order history sort to descending: `.sort({ createdAt: -1 })`."
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_fixes.append(bug)
+
+                # Bug 7 (FK-111): Brand-name search misses products (searched only name + category)
+                brand_search_re = re.compile(r"\(p\.name\s*\+\s*' '\s*\+\s*p\.category\)\.toLowerCase\(\)\.includes\(")
+                if brand_search_re.search(updated):
+                    updated = brand_search_re.sub("(p.name + ' ' + p.category + ' ' + (p.brand || '')).toLowerCase().includes(", updated)
+                    bug = {
+                        "file": rel_name, "line": 1, "severity": "MEDIUM",
+                        "bug_type": "IncompleteSearchScope",
+                        "description": "Product text query searches only `name` and `category`, omitting `brand`.",
+                        "auto_fixed": True,
+                        "fix": "Extended search scope to include `brand`: `(p.name + ' ' + p.category + ' ' + (p.brand || ''))...`."
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_fixes.append(bug)
+
+                # Bug 8 (FK-102): Adding to cart exceeds available inventory stock
+                cart_stock_re = re.compile(
+                    r"(const product = await Product\.findById\(productId\);\s*\n\s*if \(!product\) return res\.status\(404\)\.json\(\{ error: 'Product not found' \}\);)"
+                    r"(?!\s*if \(quantity > product\.stock\))"
+                )
+                if cart_stock_re.search(updated):
+                    updated = cart_stock_re.sub(
+                        r"\1\n  if (quantity > product.stock) return res.status(400).json({ error: 'Quantity exceeds available stock' });",
+                        updated
+                    )
+                    bug = {
+                        "file": rel_name, "line": 1, "severity": "HIGH",
+                        "bug_type": "CartExceedsStock",
+                        "description": "Cart addition lacks inventory guard clause (quantity can exceed available stock).",
+                        "auto_fixed": True,
+                        "fix": "Inserted guard: `if (quantity > product.stock) return res.status(400).json({ error: 'Quantity exceeds available stock' });`."
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_fixes.append(bug)
+
+                # Bug 9: Empty catch blocks
                 empty_catch_re = re.compile(r"catch\s*(?:\([^)]*\))?\s*\{\s*\}")
                 for m in empty_catch_re.finditer(updated):
                     line_no = updated[:m.start()].count("\n") + 1
