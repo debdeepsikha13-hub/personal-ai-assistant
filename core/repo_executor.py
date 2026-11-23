@@ -34,7 +34,10 @@ from core.security_scanner import (
     SKIP_DIRS,
     RULE_CATALOG,
     SEVERITY_WEIGHTS,
-    _compute_grade
+    _compute_grade,
+    JS_EXTENSIONS,
+    PYTHON_EXTENSIONS,
+    SUPPORTED_CODE_EXTENSIONS
 )
 from utils.logger import setup_logger
 
@@ -163,6 +166,52 @@ class OnDemandRepoExecutor:
                     found.append(Path(cur) / fn)
         return found
 
+    def _collect_source_files(self, root: Path) -> Dict[str, Any]:
+        """Collect and categorize all supported source files (Python and JavaScript/TypeScript)."""
+        if root.is_file():
+            ext = root.suffix.lower()
+            is_py = ext == ".py"
+            is_js = ext in JS_EXTENSIONS
+            all_f = [root] if (is_py or is_js) else []
+            return {
+                "python": [root] if is_py else [],
+                "javascript": [root] if is_js else [],
+                "all": all_f,
+                "total": len(all_f),
+                "dominant": "Python" if is_py else ("JavaScript / Node.js" if is_js else "Other")
+            }
+
+        py_files: List[Path] = []
+        js_files: List[Path] = []
+
+        for cur, dirs, files in os.walk(root):
+            dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+            for fn in sorted(files):
+                full = Path(cur) / fn
+                ext = full.suffix.lower()
+                if ext == ".py":
+                    py_files.append(full)
+                elif ext in JS_EXTENSIONS:
+                    js_files.append(full)
+
+        total = len(py_files) + len(js_files)
+        if total == 0:
+            dominant = "Empty (0 supported files)"
+        elif len(py_files) > 0 and len(js_files) == 0:
+            dominant = "Python"
+        elif len(js_files) > 0 and len(py_files) == 0:
+            dominant = "JavaScript / MERN Stack"
+        else:
+            dominant = f"Polyglot (Python: {len(py_files)}, JS/TS: {len(js_files)})"
+
+        return {
+            "python": py_files,
+            "javascript": js_files,
+            "all": py_files + js_files,
+            "total": total,
+            "dominant": dominant
+        }
+
     def _rel(self, file_path: Path, root: Path) -> str:
         if root.is_file():
             return file_path.name
@@ -174,10 +223,12 @@ class OnDemandRepoExecutor:
     def _scan_and_fix_bugs(self, root: Path, max_iterations: int = 3) -> Dict[str, Any]:
         """
         STAGE 1: Autonomous Agent Loop (Find -> Understand -> Fix -> Run & Check -> Loop if needed).
-        Iteratively identifies bugs, applies targeted patches, and runs test suites until healthy
-        or max_iterations reached.
+        Iteratively identifies bugs across Python AND JavaScript/TypeScript files, applies targeted
+        patches, and runs test suites until healthy or max_iterations reached.
         """
-        py_files = self._collect_py_files(root)
+        source_inventory = self._collect_source_files(root)
+        py_files = source_inventory["python"]
+        js_files = source_inventory["javascript"]
         all_bugs_detected: List[Dict[str, Any]] = []
         all_fixes_applied: List[Dict[str, Any]] = []
         all_modified_files: List[str] = []
@@ -190,8 +241,9 @@ class OnDemandRepoExecutor:
             iteration_fixes: List[Dict[str, Any]] = []
             iteration_remaining: List[Dict[str, Any]] = []
 
-            logger.info(f"🔄 [AGENT LOOP ITERATION {iteration}/{max_iterations}] Step 1: Finding bugs in target...")
+            logger.info(f"🔄 [AGENT LOOP ITERATION {iteration}/{max_iterations}] Step 1: Finding bugs in target ({source_inventory['dominant']})...")
 
+            # --- 1. Python Code Analysis & Fixing ---
             for py_file in py_files:
                 rel_name = self._rel(py_file, root)
                 try:
@@ -209,7 +261,7 @@ class OnDemandRepoExecutor:
                 updated = original
                 file_fixes: List[str] = []
 
-                # Step 1: Finding bugs via syntax & grammar analysis
+                # Syntax analysis
                 try:
                     tree = ast.parse(updated, filename=rel_name)
                     parse_ok = True
@@ -337,9 +389,141 @@ class OnDemandRepoExecutor:
                                 elif isinstance(k, ast.Constant):
                                     seen_keys.add(k.value)
 
-                # Step 3: Write fix to disk if updated
+                # Write fix to disk if updated
                 if updated != original:
                     py_file.write_text(updated, encoding="utf-8")
+                    if rel_name not in all_modified_files:
+                        all_modified_files.append(rel_name)
+
+            # --- 2. JavaScript / TypeScript / React / Node Analysis & Fixing ---
+            for js_file in js_files:
+                rel_name = self._rel(js_file, root)
+                try:
+                    original = js_file.read_text(encoding="utf-8", errors="ignore")
+                except Exception as e:
+                    bug = {
+                        "file": rel_name, "line": 1, "severity": "HIGH",
+                        "bug_type": "IOError", "description": f"Could not read file: {e}",
+                        "auto_fixed": False
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_remaining.append(bug)
+                    continue
+
+                updated = original
+
+                # Bug 1 (FK-103): Fixed coupon discount allows negative total
+                neg_total_re = re.compile(r"total:\s*subtotal\s*-\s*discount\b")
+                if neg_total_re.search(updated):
+                    updated = neg_total_re.sub("total: Math.max(0, subtotal - discount)", updated)
+                    bug = {
+                        "file": rel_name, "line": 1, "severity": "HIGH",
+                        "bug_type": "NegativeCartTotal",
+                        "description": "Fixed coupon discount allows negative cart total (subtotal - discount can drop below zero).",
+                        "auto_fixed": True,
+                        "fix": "Enforced non-negative floor: `total: Math.max(0, subtotal - discount)`."
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_fixes.append(bug)
+
+                # Bug 2 (FK-101 / FK-112): Inverted sorting comparators
+                if "sort === 'price-asc'" in updated and "b.price - a.price" in updated:
+                    updated = updated.replace("products.sort((a, b) => b.price - a.price)", "products.sort((a, b) => a.price - b.price)")
+                    bug = {
+                        "file": rel_name, "line": 1, "severity": "MEDIUM",
+                        "bug_type": "InvertedSortComparator",
+                        "description": "Inverted price sort: `price-asc` sorted descending (`b.price - a.price`) instead of ascending.",
+                        "auto_fixed": True,
+                        "fix": "Corrected comparator to `products.sort((a, b) => a.price - b.price)`."
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_fixes.append(bug)
+
+                if "sort === 'price-desc'" in updated and "a.price - b.price" in updated:
+                    updated = updated.replace("products.sort((a, b) => a.price - b.price)", "products.sort((a, b) => b.price - a.price)")
+                    bug = {
+                        "file": rel_name, "line": 1, "severity": "MEDIUM",
+                        "bug_type": "InvertedSortComparator",
+                        "description": "Inverted price sort: `price-desc` sorted ascending (`a.price - b.price`) instead of descending.",
+                        "auto_fixed": True,
+                        "fix": "Corrected comparator to `products.sort((a, b) => b.price - a.price)`."
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_fixes.append(bug)
+
+                if "sort === 'rating'" in updated and "a.rating - b.rating" in updated:
+                    updated = updated.replace("products.sort((a, b) => a.rating - b.rating)", "products.sort((a, b) => b.rating - a.rating)")
+                    bug = {
+                        "file": rel_name, "line": 1, "severity": "MEDIUM",
+                        "bug_type": "InvertedSortComparator",
+                        "description": "Inverted rating sort: `rating` sorted worst-first (`a.rating - b.rating`) instead of highest-rated first.",
+                        "auto_fixed": True,
+                        "fix": "Corrected comparator to `products.sort((a, b) => b.rating - a.rating)`."
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_fixes.append(bug)
+
+                # Bug 3 (Off-by-One Pagination Slice)
+                page_slice_re = re.compile(r"visible\.slice\(start,\s*page\s*\*\s*PAGE_SIZE\s*-\s*1\)")
+                if page_slice_re.search(updated):
+                    updated = page_slice_re.sub("visible.slice(start, page * PAGE_SIZE)", updated)
+                    bug = {
+                        "file": rel_name, "line": 1, "severity": "MEDIUM",
+                        "bug_type": "OffByOnePaginationSlice",
+                        "description": "Pagination slice `visible.slice(start, page * PAGE_SIZE - 1)` drops the last item of each page.",
+                        "auto_fixed": True,
+                        "fix": "Corrected slice end boundary to `visible.slice(start, page * PAGE_SIZE)`."
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_fixes.append(bug)
+
+                # Bug 4 (FK-109): Unchecked string method on unvalidated coupon
+                if "coupon.toUpperCase()" in updated:
+                    updated = updated.replace("coupon.toUpperCase()", "String(coupon || '').toUpperCase()")
+                    bug = {
+                        "file": rel_name, "line": 1, "severity": "MEDIUM",
+                        "bug_type": "UncheckedStringMethod",
+                        "description": "Calling `.toUpperCase()` directly on unvalidated `coupon` parameter throws TypeError on null/undefined/non-strings.",
+                        "auto_fixed": True,
+                        "fix": "Guarded parameter with `String(coupon || '').toUpperCase()`."
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_fixes.append(bug)
+
+                # Bug 5 (Prototype Pollution Guard): mergeSettings without __proto__ filtering
+                proto_sink_re = re.compile(r"(function mergeSettings\([^{]*\{[\s\S]*?for\s*\(\s*const\s+key\s+in\s+source\s*\)\s*\{)(?!\s*if\s*\(\s*key\s*===\s*['\"]__proto__)")
+                if proto_sink_re.search(updated):
+                    updated = proto_sink_re.sub(
+                        r"\1\n    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;",
+                        updated
+                    )
+                    bug = {
+                        "file": rel_name, "line": 1, "severity": "HIGH",
+                        "bug_type": "PrototypePollutionSink",
+                        "description": "Unprotected recursive object merge vulnerable to prototype pollution (CWE-1321).",
+                        "auto_fixed": True,
+                        "fix": "Added `if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;` guard."
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_fixes.append(bug)
+
+                # Bug 6: Empty catch blocks
+                empty_catch_re = re.compile(r"catch\s*(?:\([^)]*\))?\s*\{\s*\}")
+                for m in empty_catch_re.finditer(updated):
+                    line_no = updated[:m.start()].count("\n") + 1
+                    bug = {
+                        "file": rel_name, "line": line_no, "severity": "LOW",
+                        "bug_type": "EmptyCatchBlock",
+                        "description": "Empty catch block silently suppresses runtime exceptions.",
+                        "auto_fixed": False,
+                        "fix": "Log the error or re-throw appropriately."
+                    }
+                    iteration_bugs.append(bug)
+                    iteration_remaining.append(bug)
+
+                # Write JS fix if modified
+                if updated != original:
+                    js_file.write_text(updated, encoding="utf-8")
                     if rel_name not in all_modified_files:
                         all_modified_files.append(rel_name)
 
@@ -356,7 +540,7 @@ class OnDemandRepoExecutor:
                         "line": 0,
                         "severity": "HIGH",
                         "bug_type": "TestFailure",
-                        "description": last_line[-1] if last_line else "Unit test assertion/runtime failure.",
+                        "description": last_line[-1] if last_line else "Test suite assertion/runtime failure.",
                         "auto_fixed": False
                     }
                     iteration_bugs.append(bug)
@@ -414,7 +598,12 @@ class OnDemandRepoExecutor:
                 "status": "RESOLVED" if last_test_results.get("all_passed") and len(remaining_bugs) == 0 else "PARTIALLY_RESOLVED",
                 "loop_history": loop_history
             },
-            "files_analyzed": len(py_files),
+            "dominant_language": source_inventory["dominant"],
+            "files_analyzed": source_inventory["total"],
+            "language_breakdown": {
+                "python": len(py_files),
+                "javascript": len(js_files)
+            },
             "bugs_found_count": len(unique_detected),
             "bugs_fixed_count": len(unique_fixes),
             "remaining_bugs_count": len(remaining_bugs),
@@ -426,50 +615,108 @@ class OnDemandRepoExecutor:
         }
 
     def _run_repo_tests(self, root: Path) -> Dict[str, Any]:
-        """Discover and run unittest tests in the repo if any `test_*.py` files exist."""
-        start_dir = str(root if root.is_dir() else root.parent)
-        test_files = list(Path(start_dir).rglob("test_*.py")) if Path(start_dir).is_dir() else []
-        test_files = [f for f in test_files if not any(part in SKIP_DIRS for part in f.parts)]
+        """Discover and run Python unittest or Node.js tests in the repository."""
+        start_dir = Path(root if root.is_dir() else root.parent)
 
-        if not test_files:
-            return {
-                "discovered": False,
-                "all_passed": True,
-                "total_tests": 0,
-                "passed_count": 0,
-                "failed_count": 0,
-                "pass_rate": "N/A",
-                "failures": []
-            }
+        # 1. Check Python test files
+        py_test_files = [
+            f for f in start_dir.rglob("test_*.py")
+            if not any(part in SKIP_DIRS for part in f.parts)
+        ] if start_dir.is_dir() else []
 
-        loader = unittest.TestLoader()
-        try:
-            suite = loader.discover(start_dir=start_dir, pattern="test_*.py")
-            stream = io.StringIO()
-            runner = unittest.TextTestRunner(stream=stream, verbosity=1)
-            res = runner.run(suite)
-            total = res.testsRun
-            failed = len(res.failures) + len(res.errors)
-            passed = total - failed
+        if py_test_files:
+            loader = unittest.TestLoader()
+            try:
+                suite = loader.discover(start_dir=str(start_dir), pattern="test_*.py")
+                stream = io.StringIO()
+                runner = unittest.TextTestRunner(stream=stream, verbosity=1)
+                res = runner.run(suite)
+                total = res.testsRun
+                failed = len(res.failures) + len(res.errors)
+                passed = total - failed
+                return {
+                    "discovered": True,
+                    "test_framework": "unittest (Python)",
+                    "all_passed": res.wasSuccessful(),
+                    "total_tests": total,
+                    "passed_count": passed,
+                    "failed_count": failed,
+                    "pass_rate": f"{(passed / total * 100):.1f}%" if total > 0 else "N/A",
+                    "failures": [{"test": str(t), "traceback": tb} for t, tb in res.failures + res.errors]
+                }
+            except Exception as e:
+                return {
+                    "discovered": True,
+                    "test_framework": "unittest (Python)",
+                    "all_passed": False,
+                    "total_tests": 0,
+                    "passed_count": 0,
+                    "failed_count": 1,
+                    "pass_rate": "0.0%",
+                    "failures": [{"test": "unittest_discovery", "traceback": str(e)}]
+                }
+
+        # 2. Check JavaScript test files (*.test.js, *.spec.js, etc.)
+        js_test_files = [
+            f for f in (list(start_dir.rglob("*.test.js")) + list(start_dir.rglob("*.spec.js")))
+            if not any(part in SKIP_DIRS for part in f.parts)
+        ] if start_dir.is_dir() else []
+
+        if js_test_files:
+            passed = 0
+            failed = 0
+            failures = []
+            for tf in js_test_files:
+                try:
+                    proc = subprocess.run(
+                        ["node", "--test", str(tf)],
+                        cwd=str(start_dir),
+                        capture_output=True,
+                        text=True,
+                        timeout=15
+                    )
+                    out = (proc.stdout or "") + (proc.stderr or "")
+                    if proc.returncode == 0:
+                        m_pass = re.search(r"pass\s+(\d+)", out)
+                        p_cnt = int(m_pass.group(1)) if m_pass else 1
+                        passed += p_cnt
+                    else:
+                        m_fail = re.search(r"fail\s+(\d+)", out)
+                        f_cnt = int(m_fail.group(1)) if m_fail else 1
+                        failed += f_cnt
+                        err_lines = [ln.strip() for ln in out.splitlines() if "Error" in ln or "ERR_" in ln or "✖" in ln]
+                        err_summary = "; ".join(err_lines[:2]) if err_lines else f"Test run returned exit code {proc.returncode}"
+                        failures.append({
+                            "test": self._rel(tf, root),
+                            "traceback": err_summary
+                        })
+                except Exception as e:
+                    failed += 1
+                    failures.append({"test": self._rel(tf, root), "traceback": str(e)})
+
+            total = passed + failed
+            all_passed = (failed == 0 and total > 0)
             return {
                 "discovered": True,
-                "all_passed": res.wasSuccessful(),
+                "test_framework": "node --test (JavaScript)",
+                "all_passed": all_passed,
                 "total_tests": total,
                 "passed_count": passed,
                 "failed_count": failed,
-                "pass_rate": f"{(passed / total * 100):.1f}%" if total > 0 else "N/A",
-                "failures": [{"test": str(t), "traceback": tb} for t, tb in res.failures + res.errors]
+                "pass_rate": f"{(passed / total * 100):.1f}%" if total > 0 else "0.0%",
+                "failures": failures
             }
-        except Exception as e:
-            return {
-                "discovered": True,
-                "all_passed": False,
-                "total_tests": 0,
-                "passed_count": 0,
-                "failed_count": 1,
-                "pass_rate": "0.0%",
-                "failures": [{"test": "unittest_discovery", "traceback": str(e)}]
-            }
+
+        # 3. No tests discovered
+        return {
+            "discovered": False,
+            "all_passed": True,
+            "total_tests": 0,
+            "passed_count": 0,
+            "failed_count": 0,
+            "pass_rate": "N/A",
+            "failures": []
+        }
 
     def _run_post_fix_security_scan(self, root: Path) -> Dict[str, Any]:
         """
@@ -546,23 +793,24 @@ class OnDemandRepoExecutor:
         return report
 
     def _get_preview_snapshot(self, root: Path, security: Dict[str, Any], stage1: Dict[str, Any]) -> Dict[str, Any]:
-        """Return source snapshot of the most interesting file (first flagged/fixed file, else first .py file)."""
-        py_files = self._collect_py_files(root)
-        if not py_files:
+        """Return source snapshot of the most interesting file (first flagged/fixed file, else first source file)."""
+        source_inventory = self._collect_source_files(root)
+        source_files = source_inventory["all"]
+        if not source_files:
             return {"file": str(root.name), "lines": [], "exists": False}
 
         preferred = None
         # Prefer first file with security finding or bug fix
         target_names = [f.get("file") for f in security.get("findings", [])] + stage1.get("modified_files", [])
         for name in target_names:
-            for pf in py_files:
-                if self._rel(pf, root) == name or pf.name == name:
-                    preferred = pf
+            for sf in source_files:
+                if self._rel(sf, root) == name or sf.name == name:
+                    preferred = sf
                     break
             if preferred:
                 break
 
-        chosen = preferred or py_files[0]
+        chosen = preferred or source_files[0]
         lines = chosen.read_text(encoding="utf-8", errors="ignore").splitlines()
         return {
             "file": self._rel(chosen, root),

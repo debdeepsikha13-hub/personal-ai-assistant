@@ -114,6 +114,53 @@ class TestSecurityVulnerabilityScanner(unittest.TestCase):
             self.assertIn("Cybersecurity SAST Audit", out)
             self.assertIn("Grade", out)
 
+    def test_09_detect_javascript_code_and_command_injection_sec01(self):
+        """SEC-01 must flag eval, new Function, and child_process.exec in JavaScript/TypeScript."""
+        js_code = (
+            "const userInput = req.body.code;\n"
+            "eval(userInput);\n"
+            "const fn = new Function('a', 'b', 'return a + b');\n"
+            "child_process.exec('rm -rf ' + req.query.dir);\n"
+        )
+        report = self.scanner.scan_code(js_code, filename="server.js")
+        rule_ids = [f["rule_id"] for f in report["findings"]]
+        self.assertGreaterEqual(rule_ids.count("SEC-01"), 3)
+        self.assertFalse(report["is_secure"])
+
+    def test_10_detect_javascript_secrets_and_db_creds_sec02(self):
+        """SEC-02 must flag hardcoded API tokens and database credentials in JavaScript files."""
+        js_code = (
+            "const jwtSecret = 'super_secret_jwt_signature_key_999';\n"
+            "const dbUri = 'mongodb+srv://admin_user:production_password_2026@cluster.mongodb.net/prod';\n"
+        )
+        report = self.scanner.scan_code(js_code, filename="config.js")
+        rule_ids = [f["rule_id"] for f in report["findings"]]
+        self.assertGreaterEqual(rule_ids.count("SEC-02"), 2)
+
+    def test_11_detect_javascript_prototype_pollution_sec04(self):
+        """SEC-04 must flag unvalidated recursive object merge functions in JavaScript."""
+        js_code = (
+            "function mergeSettings(target, source) {\n"
+            "  for (const key in source) {\n"
+            "    target[key] = source[key];\n"
+            "  }\n"
+            "  return target;\n"
+            "}\n"
+        )
+        report = self.scanner.scan_code(js_code, filename="account.js")
+        rule_ids = [f["rule_id"] for f in report["findings"]]
+        self.assertIn("SEC-04", rule_ids)
+
+    def test_12_detect_javascript_weak_crypto_and_insecure_cors_sec05(self):
+        """SEC-05 must flag MD5 hashing and wildcard CORS policies in JavaScript."""
+        js_code = (
+            "const hash = crypto.createHash('md5').update(password).digest('hex');\n"
+            "app.use(cors({ origin: '*' }));\n"
+        )
+        report = self.scanner.scan_code(js_code, filename="app.js")
+        rule_ids = [f["rule_id"] for f in report["findings"]]
+        self.assertGreaterEqual(rule_ids.count("SEC-05"), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

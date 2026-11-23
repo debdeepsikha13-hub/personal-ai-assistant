@@ -85,6 +85,45 @@ class TestOnDemandRepoExecutor(unittest.TestCase):
             self.assertEqual(res["stage2_security"]["verdict"], "SECURE")
             self.assertEqual(res["stage2_security"]["overall_grade"], "A+")
 
+    def test_04_javascript_mern_repo_detection_and_fixing(self):
+        """JavaScript/MERN repository must be detected, bugs patched, and security flaws audited."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "mern_repo"
+            repo.mkdir()
+            (repo / "pricing.js").write_text(
+                "export function summarizeCart(items, coupon = '') {\n"
+                "  const subtotal = 50;\n"
+                "  let discount = 100;\n"
+                "  if (coupon.toUpperCase() === 'FLAT100') discount = 100;\n"
+                "  return { subtotal, discount, total: subtotal - discount };\n"
+                "}\n",
+                encoding="utf-8"
+            )
+            (repo / "server.js").write_text(
+                "const express = require('express');\n"
+                "const jwtSecret = 'hardcoded_production_token_999';\n"
+                "eval(req.body.customCode);\n",
+                encoding="utf-8"
+            )
+
+            res = self.executor.execute(str(repo))
+            self.assertEqual(res["status"], "completed")
+
+            # Check multi-language detection
+            s1 = res["stage1_bugs"]
+            self.assertEqual(s1["dominant_language"], "JavaScript / MERN Stack")
+            self.assertEqual(s1["files_analyzed"], 2)
+            self.assertGreaterEqual(s1["bugs_found_count"], 1)
+
+            # Verify patch applied to pricing.js
+            patched_pricing = (repo / "pricing.js").read_text(encoding="utf-8")
+            self.assertIn("Math.max(0, subtotal - discount)", patched_pricing)
+
+            # Check Stage 2 security audit flagged eval and jwtSecret
+            s2 = res["stage2_security"]
+            self.assertEqual(s2["verdict"], "INSECURE")
+            self.assertGreaterEqual(s2["vulnerabilities_count"], 2)
+
 
 if __name__ == "__main__":
     unittest.main()

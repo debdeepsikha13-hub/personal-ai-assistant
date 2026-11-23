@@ -27,6 +27,11 @@ SKIP_DIRS = {
     ".pytest_cache", ".mypy_cache", "dist", "build", ".tox", ".eggs"
 }
 
+JS_EXTENSIONS = {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}
+PYTHON_EXTENSIONS = {".py"}
+SUPPORTED_CODE_EXTENSIONS = {".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}
+SENSITIVE_FILENAMES = {".env", ".env.production", ".env.local", ".env.development", "id_rsa", "credentials.json"}
+
 SEVERITY_WEIGHTS = {
     "CRITICAL": 30,
     "HIGH": 20,
@@ -146,6 +151,16 @@ class SecurityVulnerabilityScanner:
     """
 
     def scan_code(self, source_code: str, filename: str = "<inline>") -> Dict[str, Any]:
+        """
+        Analyze Python or JavaScript/TypeScript source string and return structured vulnerability
+        findings, CWE/OWASP metadata, per-rule checklist status, score, and security grade.
+        """
+        ext = Path(filename).suffix.lower() if filename != "<inline>" else ""
+        if ext in JS_EXTENSIONS:
+            return self.scan_javascript_code(source_code, filename=filename)
+        return self.scan_python_code(source_code, filename=filename)
+
+    def scan_python_code(self, source_code: str, filename: str = "<inline>") -> Dict[str, Any]:
         """
         Analyze a Python source string and return structured vulnerability findings,
         CWE/OWASP metadata, per-rule checklist status, score, and security grade.
@@ -432,8 +447,248 @@ class SecurityVulnerabilityScanner:
 
         return self._build_report(findings, files_scanned=1, target=filename)
 
+    def scan_javascript_code(self, source_code: str, filename: str = "<inline>") -> Dict[str, Any]:
+        """
+        Enterprise Static Application Security Testing (SAST) for JavaScript, TypeScript, Node.js, and React.
+        Covers OWASP Top 10 and CWE benchmarks:
+          - SEC-01 [CWE-94 / CWE-78]  : Code injection (eval, Function), OS command execution (child_process.exec)
+          - SEC-02 [CWE-798]          : Hardcoded secrets, API tokens, JWT keys, and database credentials
+          - SEC-03 [CWE-89 / CWE-943] : SQL injection (unparameterized template literals) & NoSQL injection ($where)
+          - SEC-04 [CWE-502 / CWE-1321]: Insecure deserialization & prototype pollution sinks
+          - SEC-05 [CWE-327 / CWE-295]: Weak hashing (MD5/SHA1), disabled TLS, permissive wildcard CORS
+          - SEC-06 [CWE-22 / CWE-400] : Path traversal (.. in file access) & unbounded fetch missing timeout
+        """
+        findings: List[Dict[str, Any]] = []
+        lines = source_code.splitlines()
+
+        js_secret_assign_re = re.compile(
+            r"""(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*['"`]([^'"`\s]{6,})['"`]""",
+            re.IGNORECASE
+        )
+        conn_string_cred_re = re.compile(
+            r"""(?:mongodb(?:\+srv)?|postgres(?:ql)?|mysql)://([^:\s'"`]+):([^@\s'"`]+)@""",
+            re.IGNORECASE
+        )
+        sql_template_re = re.compile(
+            r"""`[^`]*\b(SELECT|INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM)\b[^`]*\$\{[^}]+\}""",
+            re.IGNORECASE
+        )
+        sql_concat_re = re.compile(
+            r"""['"][^'"]*\b(SELECT|INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM)\b[^'"]*['"]\s*\+\s*[a-zA-Z0-9_$]+""",
+            re.IGNORECASE
+        )
+
+        for idx, line in enumerate(lines, start=1):
+            stripped = line.strip()
+            if stripped.startswith("//") or stripped.startswith("/*") or stripped.startswith("*"):
+                continue
+
+            # SEC-02: Structured tokens (Google, Groq, OpenAI, AWS, Private Key)
+            for pattern, secret_label in SECRET_PATTERNS:
+                if re.search(pattern, line):
+                    findings.append({
+                        "rule_id": "SEC-02",
+                        "cwe": "CWE-798",
+                        "owasp": "A07:2021 Auth Failures",
+                        "severity": "CRITICAL",
+                        "title": f"Hardcoded {secret_label} Detected",
+                        "file": filename,
+                        "line": idx,
+                        "snippet": stripped[:120],
+                        "remediation": "Remove hardcoded secret immediately and load via process.env or secret manager."
+                    })
+
+            # SEC-02: Hardcoded credentials assigned to sensitive variables
+            for m in js_secret_assign_re.finditer(line):
+                var_name, val = m.group(1).lower(), m.group(2)
+                if var_name in SENSITIVE_VAR_NAMES or any(k in var_name for k in ("secret", "token", "password", "apikey", "api_key")):
+                    lower_val = val.lower()
+                    if not any(p in lower_val for p in ("your_", "placeholder", "example", "changeme", "xxx", "dummy", "<", "localhost", "bearer", "basic")):
+                        findings.append({
+                            "rule_id": "SEC-02",
+                            "cwe": "CWE-798",
+                            "owasp": "A07:2021 Auth Failures",
+                            "severity": "HIGH",
+                            "title": f"Hardcoded Credential Assigned to `{m.group(1)}`",
+                            "file": filename,
+                            "line": idx,
+                            "snippet": stripped[:120],
+                            "remediation": f"Load `{m.group(1)}` from environment variables (`process.env.{m.group(1).upper()}`) instead of hardcoding."
+                        })
+
+            # SEC-02: Database connection strings with embedded plaintext credentials
+            if conn_string_cred_re.search(line):
+                findings.append({
+                    "rule_id": "SEC-02",
+                    "cwe": "CWE-798",
+                    "owasp": "A07:2021 Auth Failures",
+                    "severity": "CRITICAL",
+                    "title": "Plaintext Database Credentials in Connection String",
+                    "file": filename,
+                    "line": idx,
+                    "snippet": stripped[:120],
+                    "remediation": "Store database URI with credentials in environment variables or an external secret vault."
+                })
+
+            # SEC-01: eval() code execution
+            if re.search(r"\beval\s*\((?!\s*['\"][a-zA-Z0-9_\-.]+['\"])", line):
+                findings.append({
+                    "rule_id": "SEC-01",
+                    "cwe": "CWE-94",
+                    "owasp": "A03:2021 Injection",
+                    "severity": "CRITICAL",
+                    "title": "Arbitrary JavaScript Code Execution via `eval()`",
+                    "file": filename,
+                    "line": idx,
+                    "snippet": stripped[:120],
+                    "remediation": "Remove eval(). Parse JSON using JSON.parse() or use explicit mapping functions."
+                })
+
+            # SEC-01: Function constructor dynamic execution
+            if re.search(r"\bnew\s+Function\s*\(", line) or re.search(r"\bFunction\s*\([^)]*,\s*['\"`]", line):
+                findings.append({
+                    "rule_id": "SEC-01",
+                    "cwe": "CWE-94",
+                    "owasp": "A03:2021 Injection",
+                    "severity": "CRITICAL",
+                    "title": "Dynamic Code Execution via `new Function()`",
+                    "file": filename,
+                    "line": idx,
+                    "snippet": stripped[:120],
+                    "remediation": "Do not construct functions dynamically from runtime strings."
+                })
+
+            # SEC-01: child_process command injection
+            if re.search(r"\b(?:child_process\.)?(?:exec|execSync)\s*\(", line):
+                findings.append({
+                    "rule_id": "SEC-01",
+                    "cwe": "CWE-78",
+                    "owasp": "A03:2021 Injection",
+                    "severity": "CRITICAL",
+                    "title": "OS Command Injection Risk via `child_process.exec()`",
+                    "file": filename,
+                    "line": idx,
+                    "snippet": stripped[:120],
+                    "remediation": "Use `child_process.execFile()` or `spawn()` with an argument array instead of a shell string."
+                })
+
+            # SEC-03: SQL Injection via unparameterized template strings or concatenation
+            if sql_template_re.search(line) or sql_concat_re.search(line):
+                findings.append({
+                    "rule_id": "SEC-03",
+                    "cwe": "CWE-89",
+                    "owasp": "A03:2021 Injection",
+                    "severity": "CRITICAL",
+                    "title": "SQL Injection via Dynamic String Interpolation",
+                    "file": filename,
+                    "line": idx,
+                    "snippet": stripped[:120],
+                    "remediation": "Use parameterized queries ($1, $2 or ?) rather than string templates or concatenation."
+                })
+
+            # SEC-03: MongoDB $where clause
+            if re.search(r"['\"]?\$where['\"]?\s*:", line):
+                findings.append({
+                    "rule_id": "SEC-03",
+                    "cwe": "CWE-943",
+                    "owasp": "A03:2021 Injection",
+                    "severity": "HIGH",
+                    "title": "NoSQL Injection Risk via MongoDB `$where` Expression",
+                    "file": filename,
+                    "line": idx,
+                    "snippet": stripped[:120],
+                    "remediation": "Avoid `$where` JavaScript expressions in MongoDB; use standard declarative query operators."
+                })
+
+            # SEC-04: Insecure deserialization via node-serialize
+            if re.search(r"\bunserialize\s*\(", line):
+                findings.append({
+                    "rule_id": "SEC-04",
+                    "cwe": "CWE-502",
+                    "owasp": "A08:2021 Integrity Failures",
+                    "severity": "CRITICAL",
+                    "title": "Insecure Deserialization Sink via `unserialize()`",
+                    "file": filename,
+                    "line": idx,
+                    "snippet": stripped[:120],
+                    "remediation": "Do not deserialize arbitrary objects using node-serialize. Use schema-validated JSON."
+                })
+
+            # SEC-05: Weak hashing (MD5 / SHA1)
+            if re.search(r"createHash\s*\(\s*['\"](?:md5|sha1)['\"]\s*\)", line, re.IGNORECASE):
+                findings.append({
+                    "rule_id": "SEC-05",
+                    "cwe": "CWE-327",
+                    "owasp": "A02:2021 Cryptographic Failures",
+                    "severity": "MEDIUM",
+                    "title": "Weak Cryptographic Hash Function (`createHash('md5'|'sha1')`)",
+                    "file": filename,
+                    "line": idx,
+                    "snippet": stripped[:120],
+                    "remediation": "Upgrade hashing algorithm to SHA-256 (`crypto.createHash('sha256')`) or argon2/bcrypt."
+                })
+
+            # SEC-05: Disabled TLS certificate validation
+            if re.search(r"rejectUnauthorized\s*:\s*false", line):
+                findings.append({
+                    "rule_id": "SEC-05",
+                    "cwe": "CWE-295",
+                    "owasp": "A02:2021 Cryptographic Failures",
+                    "severity": "HIGH",
+                    "title": "TLS Certificate Verification Disabled (`rejectUnauthorized: false`)",
+                    "file": filename,
+                    "line": idx,
+                    "snippet": stripped[:120],
+                    "remediation": "Remove `rejectUnauthorized: false` to protect against Man-in-the-Middle (MitM) attacks."
+                })
+
+            # SEC-05: Permissive CORS wildcard configuration
+            if re.search(r"cors\s*\(\s*\{\s*origin\s*:\s*['\"]\*['\"]", line) or re.search(r"['\"]Access-Control-Allow-Origin['\"]\s*:\s*['\"]\*['\"]", line):
+                findings.append({
+                    "rule_id": "SEC-05",
+                    "cwe": "CWE-942",
+                    "owasp": "A05:2021 Security Misconfiguration",
+                    "severity": "MEDIUM",
+                    "title": "Overly Permissive Wildcard CORS Policy (`origin: '*'`)",
+                    "file": filename,
+                    "line": idx,
+                    "snippet": stripped[:120],
+                    "remediation": "Restrict allowed CORS origins to specific trusted domains instead of wildcard `*`."
+                })
+
+            # SEC-06: Path traversal in file system operations
+            if re.search(r"(?:readFile|readFileSync|createReadStream|writeFile|writeFileSync)\s*\([^)]*\.\.[^)]*\)", line):
+                findings.append({
+                    "rule_id": "SEC-06",
+                    "cwe": "CWE-22",
+                    "owasp": "A01:2021 Broken Access Control",
+                    "severity": "HIGH",
+                    "title": "Potential Path Traversal in File Access (`..` in path)",
+                    "file": filename,
+                    "line": idx,
+                    "snippet": stripped[:120],
+                    "remediation": "Resolve paths against an absolute root using `path.resolve()` and verify path containment."
+                })
+
+        # Prototype pollution sink: recursive object merge without __proto__ filtering
+        if ("for (const key in " in source_code or "for (let key in " in source_code or "for (var key in " in source_code) and "target[key]" in source_code:
+            if not re.search(r"['\"]__proto__['\"]|__proto__", source_code):
+                findings.append({
+                    "rule_id": "SEC-04",
+                    "cwe": "CWE-1321",
+                    "owasp": "A08:2021 Integrity Failures",
+                    "severity": "HIGH",
+                    "title": "Prototype Pollution Sink in Recursive Object Merge",
+                    "file": filename,
+                    "line": 1,
+                    "snippet": "Recursive object merge traverses source properties without guarding `__proto__` / `constructor`.",
+                    "remediation": "Filter dangerous keys: `if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;`"
+                })
+
+        return self._build_report(findings, files_scanned=1, target=filename)
+
     def scan_file(self, filepath: str) -> Dict[str, Any]:
-        """Scan a single Python file on disk."""
+        """Scan a single Python or JavaScript source file on disk."""
         path = Path(filepath)
         if not path.exists() or not path.is_file():
             return {
@@ -469,7 +724,7 @@ class SecurityVulnerabilityScanner:
             }
 
     def scan_directory(self, dirpath: str) -> Dict[str, Any]:
-        """Recursively scan all Python files in a directory/repository."""
+        """Recursively scan all Python and JavaScript files in a directory/repository."""
         root = Path(dirpath)
         if not root.exists():
             return {
@@ -495,9 +750,11 @@ class SecurityVulnerabilityScanner:
         for current_root, dirs, files in os.walk(root):
             dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
             for fname in sorted(files):
-                if fname.endswith(".py"):
-                    full_path = Path(current_root) / fname
-                    rel_path = str(full_path.relative_to(root)).replace("\\", "/")
+                full_path = Path(current_root) / fname
+                rel_path = str(full_path.relative_to(root)).replace("\\", "/")
+                ext = full_path.suffix.lower()
+
+                if ext in SUPPORTED_CODE_EXTENSIONS:
                     try:
                         content = full_path.read_text(encoding="utf-8", errors="ignore")
                         file_report = self.scan_code(content, filename=rel_path)
@@ -505,6 +762,19 @@ class SecurityVulnerabilityScanner:
                         files_scanned += 1
                     except Exception as e:
                         logger.warning(f"Skipping unreadable file {full_path}: {e}")
+                elif fname in SENSITIVE_FILENAMES:
+                    all_findings.append({
+                        "rule_id": "SEC-02",
+                        "cwe": "CWE-798",
+                        "owasp": "A07:2021 Auth Failures",
+                        "severity": "CRITICAL",
+                        "title": f"Sensitive Environment/Key File Committed: {fname}",
+                        "file": rel_path,
+                        "line": 1,
+                        "snippet": f"Sensitive file `{fname}` committed to repository.",
+                        "remediation": f"Remove `{fname}` from version control, add to `.gitignore`, and rotate any leaked credentials."
+                    })
+                    files_scanned += 1
 
         return self._build_report(all_findings, files_scanned=files_scanned, target=str(root))
 

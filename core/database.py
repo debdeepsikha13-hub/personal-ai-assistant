@@ -168,3 +168,4 @@ def get_audit_db() -> AuditDatabase:
     if _db_instance is None:
         _db_instance = AuditDatabase()
     return _db_instance
+
