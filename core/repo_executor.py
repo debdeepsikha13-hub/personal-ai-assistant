@@ -590,7 +590,7 @@ class OnDemandRepoExecutor:
         source = self._get_preview_snapshot(root, stage2, stage1)
         duration_ms = int((time.perf_counter() - t0) * 1000)
 
-        return {
+        result = {
             "status": "completed",
             "repo": meta,
             "duration_ms": duration_ms,
@@ -598,4 +598,15 @@ class OnDemandRepoExecutor:
             "stage2_security": stage2,
             "source": source
         }
+
+        # Persist full execution audit trail into SQLite relational database
+        try:
+            from core.database import get_audit_db
+            db = get_audit_db()
+            db_id = db.save_audit_report(result)
+            result["audit_db_id"] = db_id
+        except Exception as e:
+            logger.warning(f"Could not persist audit record to SQLite database: {e}")
+
+        return result
 

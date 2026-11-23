@@ -214,11 +214,24 @@ async def api_chat(request):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
+async def api_reports(request):
+    """Return historical audit reports persisted in the SQLite relational database."""
+    from core.database import get_audit_db
+    try:
+        limit = int(request.query_params.get("limit", 15))
+    except (ValueError, TypeError):
+        limit = 15
+    db = get_audit_db()
+    reports = await asyncio.to_thread(db.get_recent_reports, limit)
+    return JSONResponse(reports)
+
+
 routes = [
     Route("/", homepage),
     Route("/api/status", api_status),
     Route("/api/memory", api_memory),
     Route("/api/tools", api_tools),
+    Route("/api/reports", api_reports),
     Route("/api/execute_repo", api_execute_repo, methods=["POST"]),
     Route("/api/security_audit", api_security_audit, methods=["GET", "POST"]),
     Route("/api/chat", api_chat, methods=["POST"]),
