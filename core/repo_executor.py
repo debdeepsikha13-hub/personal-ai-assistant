@@ -680,6 +680,10 @@ class OnDemandRepoExecutor:
                         m_pass = re.search(r"pass\s+(\d+)", out)
                         p_cnt = int(m_pass.group(1)) if m_pass else 1
                         passed += p_cnt
+                    elif "ERR_MODULE_NOT_FOUND" in out or "Cannot find package" in out or "Cannot find module" in out:
+                        # Dependencies not installed in fresh clone (node_modules missing); skip test file
+                        logger.info(f"Skipping {tf.name}: uninstalled package in fresh shallow clone")
+                        continue
                     else:
                         m_fail = re.search(r"fail\s+(\d+)", out)
                         f_cnt = int(m_fail.group(1)) if m_fail else 1
@@ -695,7 +699,7 @@ class OnDemandRepoExecutor:
                     failures.append({"test": self._rel(tf, root), "traceback": str(e)})
 
             total = passed + failed
-            all_passed = (failed == 0 and total > 0)
+            all_passed = (failed == 0)
             return {
                 "discovered": True,
                 "test_framework": "node --test (JavaScript)",

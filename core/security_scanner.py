@@ -559,7 +559,7 @@ class SecurityVulnerabilityScanner:
                 })
 
             # SEC-01: child_process command injection
-            if re.search(r"\b(?:child_process\.)?(?:exec|execSync)\s*\(", line):
+            if re.search(r"\b(?:child_process|childProcess|cp)\.(?:exec|execSync)\s*\(", line) or re.search(r"\bexecSync\s*\(", line):
                 findings.append({
                     "rule_id": "SEC-01",
                     "cwe": "CWE-78",

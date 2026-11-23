@@ -453,7 +453,7 @@
           <div class="grid grid-cols-4 gap-1.5 text-center font-mono text-[10px]">
             <div class="p-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/70">
               <div id="s1-files" class="text-sm font-black text-slate-800 dark:text-white">0</div>
-              <div class="text-[9px] text-slate-400">PY FILES</div>
+              <div id="s1-files-label" class="text-[9px] text-slate-400">ANALYZED</div>
             </div>
             <div class="p-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/70">
               <div id="s1-loop" class="text-sm font-black text-indigo-500">1x</div>
@@ -817,6 +817,7 @@
     }
 
     function renderOnDemandResult(data) {
+      switchRightTab("hub");
       const repoLabel = data.repo.repo_label;
       const s1 = data.stage1_bugs;
       const s2 = data.stage2_security;
@@ -887,6 +888,14 @@
             <div class="text-slate-600 dark:text-slate-300">${escapeHtml(rb.description)}</div>
           </div>`;
         });
+        if (s1.modified_files && s1.modified_files.length > 0) {
+          html += `<div class="p-2.5 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-800 dark:text-emerald-300">
+            <div class="font-bold flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-500"></i> Patched Files in Local Workspace:</div>
+            <ul class="list-disc pl-4 text-[10px] font-mono mt-1 space-y-0.5 text-slate-700 dark:text-slate-300">
+              ${s1.modified_files.map(f => `<li>${escapeHtml(f)}</li>`).join("")}
+            </ul>
+          </div>`;
+        }
         s1Details.innerHTML = html;
       }
 
