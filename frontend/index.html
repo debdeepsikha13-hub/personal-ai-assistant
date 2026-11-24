@@ -404,16 +404,107 @@
             type="text"
             placeholder="https://github.com/owner/repo  or  C:\path\to\project"
             class="w-full px-3 py-2.5 rounded-xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-            onkeydown="if(event.key==='Enter'){ runOnDemandRepo(); }"
+            onkeydown="if(event.key==='Enter'){ runDecodeRepo(); }"
           />
-          <button
-            id="execute-repo-btn"
-            onclick="runOnDemandRepo()"
-            class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-bold transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
-            <span id="execute-repo-btn-label">Fix &amp; Certify (Bug Fix + Security Scan)</span>
-          </button>
+          <!-- 2-Step Workflow Action Buttons -->
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button
+              id="decode-repo-btn"
+              onclick="runDecodeRepo()"
+              class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 hover:text-sky-300 border border-sky-500/30 text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
+              title="Inspect and decode bugs and security flaws in original unpatched code"
+            >
+              <i data-lucide="search-code" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span id="decode-repo-btn-label">1. Decode Errors</span>
+            </button>
+            <button
+              id="execute-repo-btn"
+              onclick="runFixAndCertify()"
+              class="py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-bold transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-1.5 disabled:opacity-50"
+              title="Autonomously patch bugs, verify tests, and certify security"
+            >
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-300"></i>
+              <span id="execute-repo-btn-label">2. Fix &amp; Certify</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CYBERNETIC ROBOTIC WOLF MASCOT HUD -->
+        <div id="wolf-mascot-hud" class="p-4 rounded-2xl border border-slate-700/80 bg-slate-900/90 text-white relative overflow-hidden transition-all duration-300 shadow-xl">
+          <!-- Background Cyber Grid Pattern -->
+          <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+          
+          <div class="relative z-10 flex items-center gap-3.5">
+            <!-- Cybernetic Wolf Face SVG with Glowing Eyes -->
+            <div id="wolf-avatar-wrap" class="relative shrink-0 w-16 h-16 rounded-2xl bg-slate-950/90 border border-cyan-500/40 flex items-center justify-center shadow-inner transition-colors duration-300">
+              <svg id="wolf-svg" viewBox="0 0 100 100" class="w-12 h-12 transition-all duration-500">
+                <defs>
+                  <filter id="wolf-glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <filter id="wolf-glow-amber" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <filter id="wolf-glow-emerald" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+                <!-- Mecha Forehead Plate -->
+                <polygon points="50,14 32,28 36,40 50,34 64,40 68,28" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" class="wolf-mecha-stroke" />
+                <!-- Left Ear Mecha Wing -->
+                <polygon points="32,28 16,8 24,36" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" class="wolf-mecha-stroke" />
+                <polyline points="20,18 24,30" stroke="#38bdf8" stroke-width="1" stroke-dasharray="2,2" class="wolf-mecha-stroke" />
+                <!-- Right Ear Mecha Wing -->
+                <polygon points="68,28 84,8 76,36" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" class="wolf-mecha-stroke" />
+                <polyline points="80,18 76,30" stroke="#38bdf8" stroke-width="1" stroke-dasharray="2,2" class="wolf-mecha-stroke" />
+                <!-- Cheek & Jaw Armor Plates -->
+                <polygon points="24,36 18,54 32,68 50,56 36,40" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" class="wolf-mecha-stroke" />
+                <polygon points="76,36 82,54 68,68 50,56 64,40" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" class="wolf-mecha-stroke" />
+                <!-- Snout & Nose Center Shield -->
+                <polygon points="50,34 40,58 50,78 60,58" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" class="wolf-mecha-stroke" />
+                <polygon id="wolf-nose-tip" points="46,72 50,78 54,72" fill="#38bdf8" />
+                <!-- Lower Jaw Armor -->
+                <polygon points="44,80 50,92 56,80 50,78" fill="#1e293b" stroke="#38bdf8" stroke-width="1" class="wolf-mecha-stroke" />
+                <!-- Laser Optic Eyes -->
+                <polygon id="wolf-eye-l" points="33,45 42,47 37,51" fill="#38bdf8" filter="url(#wolf-glow-cyan)" />
+                <polygon id="wolf-eye-r" points="67,45 58,47 63,51" fill="#38bdf8" filter="url(#wolf-glow-cyan)" />
+                <!-- Brow Sensor Lines -->
+                <line x1="32" y1="41" x2="43" y2="44" stroke="#67e8f9" stroke-width="1.5" class="wolf-mecha-line" />
+                <line x1="68" y1="41" x2="57" y2="44" stroke="#67e8f9" stroke-width="1.5" class="wolf-mecha-line" />
+              </svg>
+              <div id="wolf-radar-pulse" class="absolute inset-0 rounded-2xl border border-cyan-500/40 animate-ping opacity-25 pointer-events-none"></div>
+            </div>
+
+            <!-- Wolf Telemetry & Status Text -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-1">
+                <span id="wolf-telemetry-tag" class="text-[9px] font-mono font-bold tracking-widest text-cyan-400 uppercase flex items-center gap-1.5">
+                  <span id="wolf-pulse-dot" class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> WOLF CYBERNETIC ENGINE
+                </span>
+                <span id="wolf-phase-badge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-800 text-slate-300">
+                  STANDBY
+                </span>
+              </div>
+              <div id="wolf-headline" class="text-xs font-black text-white truncate mt-0.5">
+                Waiting for Repository Input
+              </div>
+              <p id="wolf-subtext" class="text-[11px] text-slate-300 line-clamp-2 mt-0.5">
+                Paste any GitHub repository link or local folder above. Click <strong>1. Decode Errors</strong> to inspect broken code, then <strong>2. Fix &amp; Certify</strong> to patch and certify.
+              </p>
+            </div>
+          </div>
         </div>
 
         <!-- BIG SECURITY VERDICT INDICATOR BANNER -->
@@ -752,21 +843,130 @@
       if (el) el.focus();
     }
 
-    function runFixAndCertify() {
-      switchRightTab("hub");
-      const input = document.getElementById("repo-link-input");
-      if (input && input.value.trim()) {
-        runOnDemandRepo();
+    function updateWolfMascot(phase, isSecure, repoLabel, s1, s2) {
+      const hud = document.getElementById("wolf-mascot-hud");
+      const avatar = document.getElementById("wolf-avatar-wrap");
+      const eyeL = document.getElementById("wolf-eye-l");
+      const eyeR = document.getElementById("wolf-eye-r");
+      const nose = document.getElementById("wolf-nose-tip");
+      const tag = document.getElementById("wolf-telemetry-tag");
+      const badge = document.getElementById("wolf-phase-badge");
+      const headline = document.getElementById("wolf-headline");
+      const subtext = document.getElementById("wolf-subtext");
+      const radar = document.getElementById("wolf-radar-pulse");
+      const strokes = document.querySelectorAll(".wolf-mecha-stroke");
+      const lines = document.querySelectorAll(".wolf-mecha-line");
+      const fixBtn = document.getElementById("execute-repo-btn");
+
+      if (!hud) return;
+
+      if (phase === "decoded") {
+        // PHASE 1: Target Decoded - Flaws Found (UNSECURE)
+        hud.className = "p-4 rounded-2xl border-2 border-rose-500 bg-gradient-to-r from-slate-950 via-rose-950/40 to-slate-950 text-white relative overflow-hidden transition-all duration-300 shadow-xl shadow-rose-950/50";
+        if (avatar) avatar.className = "relative shrink-0 w-16 h-16 rounded-2xl bg-rose-950/90 border-2 border-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/30";
+        if (eyeL) {
+          eyeL.setAttribute("fill", "#ef4444");
+          eyeL.setAttribute("filter", "url(#wolf-glow-amber)");
+        }
+        if (eyeR) {
+          eyeR.setAttribute("fill", "#ef4444");
+          eyeR.setAttribute("filter", "url(#wolf-glow-amber)");
+        }
+        if (nose) nose.setAttribute("fill", "#ef4444");
+        strokes.forEach(s => s.setAttribute("stroke", "#f87171"));
+        lines.forEach(l => l.setAttribute("stroke", "#fca5a5"));
+
+        if (radar) radar.className = "absolute inset-0 rounded-2xl border-2 border-rose-500 animate-ping opacity-75 pointer-events-none";
+        if (tag) {
+          tag.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> WOLF SENSORS: THREAT DETECTED`;
+          tag.className = "text-[9px] font-mono font-bold tracking-widest text-rose-400 uppercase flex items-center gap-1.5";
+        }
+        if (badge) {
+          badge.innerText = `PHASE 1: UNSECURE ⚠️`;
+          badge.className = "px-2.5 py-0.5 rounded text-[10px] font-mono font-black bg-rose-600 text-white animate-pulse";
+        }
+        if (headline) {
+          headline.innerHTML = `🚨 UNSECURE — ${s1.bugs_found_count} Bug(s) &amp; ${s2.vulnerabilities_count} Flaw(s) Decoded`;
+        }
+        if (subtext) {
+          subtext.innerHTML = `Original unpatched code inspected for <strong>${escapeHtml(repoLabel)}</strong>. Real bugs &amp; security flaws exposed below. Click <strong>2. Fix &amp; Certify</strong> to trigger WOLF's autonomous repair!`;
+        }
+        if (fixBtn) {
+          fixBtn.classList.add("ring-4", "ring-emerald-500/60", "animate-pulse");
+        }
+      } else if (phase === "certified") {
+        // PHASE 2: Code Fixed & Certified Secure
+        hud.className = "p-4 rounded-2xl border-2 border-emerald-500 bg-gradient-to-r from-slate-950 via-emerald-950/40 to-slate-950 text-white relative overflow-hidden transition-all duration-300 shadow-xl shadow-emerald-950/50";
+        if (avatar) avatar.className = "relative shrink-0 w-16 h-16 rounded-2xl bg-emerald-950/90 border-2 border-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30";
+        if (eyeL) {
+          eyeL.setAttribute("fill", "#10b981");
+          eyeL.setAttribute("filter", "url(#wolf-glow-emerald)");
+        }
+        if (eyeR) {
+          eyeR.setAttribute("fill", "#10b981");
+          eyeR.setAttribute("filter", "url(#wolf-glow-emerald)");
+        }
+        if (nose) nose.setAttribute("fill", "#10b981");
+        strokes.forEach(s => s.setAttribute("stroke", "#34d399"));
+        lines.forEach(l => l.setAttribute("stroke", "#6ee7b7"));
+
+        if (radar) radar.className = "absolute inset-0 rounded-2xl border-2 border-emerald-500 animate-ping opacity-40 pointer-events-none";
+        if (tag) {
+          tag.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> WOLF PROTOCOL: VERIFIED &amp; SECURE`;
+          tag.className = "text-[9px] font-mono font-bold tracking-widest text-emerald-400 uppercase flex items-center gap-1.5";
+        }
+        if (badge) {
+          badge.innerText = `PHASE 2: CERTIFIED GRADE A+`;
+          badge.className = "px-2.5 py-0.5 rounded text-[10px] font-mono font-black bg-emerald-600 text-white";
+        }
+        if (headline) {
+          headline.innerHTML = `🛡️ WOLF CERTIFIED SECURE &amp; AUTONOMOUSLY FIXED ✅`;
+        }
+        if (subtext) {
+          subtext.innerHTML = `All <strong>${s1.bugs_fixed_count}</strong> bug(s) repaired across <strong>${s1.modified_files ? s1.modified_files.length : 0}</strong> file(s). 0 vulnerabilities remaining. Certified for production!`;
+        }
+        if (fixBtn) {
+          fixBtn.classList.remove("ring-4", "ring-emerald-500/60", "animate-pulse");
+        }
       } else {
-        appendSystemMessage("📌 Paste a GitHub repository URL or local folder path into Execute Repo first, then click Fix & Certify.");
-        if (input) input.focus();
+        // Standby Mode
+        hud.className = "p-4 rounded-2xl border border-slate-700/80 bg-slate-900/90 text-white relative overflow-hidden transition-all duration-300 shadow-xl";
+        if (avatar) avatar.className = "relative shrink-0 w-16 h-16 rounded-2xl bg-slate-950/90 border border-cyan-500/40 flex items-center justify-center shadow-inner";
+        if (eyeL) {
+          eyeL.setAttribute("fill", "#38bdf8");
+          eyeL.setAttribute("filter", "url(#wolf-glow-cyan)");
+        }
+        if (eyeR) {
+          eyeR.setAttribute("fill", "#38bdf8");
+          eyeR.setAttribute("filter", "url(#wolf-glow-cyan)");
+        }
+        if (nose) nose.setAttribute("fill", "#38bdf8");
+        strokes.forEach(s => s.setAttribute("stroke", "#38bdf8"));
+        lines.forEach(l => l.setAttribute("stroke", "#67e8f9"));
+        if (radar) radar.className = "absolute inset-0 rounded-2xl border border-cyan-500/40 animate-ping opacity-25 pointer-events-none";
+        if (tag) {
+          tag.innerHTML = `<span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> WOLF CYBERNETIC ENGINE`;
+          tag.className = "text-[9px] font-mono font-bold tracking-widest text-cyan-400 uppercase flex items-center gap-1.5";
+        }
+        if (badge) {
+          badge.innerText = `STANDBY`;
+          badge.className = "px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-800 text-slate-300";
+        }
+        if (headline) headline.innerText = `Waiting for Repository Input`;
+        if (subtext) {
+          subtext.innerHTML = `Paste any GitHub repository link or local folder above. Click <strong>1. Decode Errors</strong> to inspect broken code, then <strong>2. Fix &amp; Certify</strong> to patch and certify.`;
+        }
+        if (fixBtn) {
+          fixBtn.classList.remove("ring-4", "ring-emerald-500/60", "animate-pulse");
+        }
       }
     }
 
-    async function runOnDemandRepo() {
+    async function runDecodeRepo() {
+      switchRightTab("hub");
       const input = document.getElementById("repo-link-input");
-      const btn = document.getElementById("execute-repo-btn");
-      const btnLabel = document.getElementById("execute-repo-btn-label");
+      const btn = document.getElementById("decode-repo-btn");
+      const btnLabel = document.getElementById("decode-repo-btn-label");
       const target = input ? input.value.trim() : "";
 
       if (!target) {
@@ -776,8 +976,49 @@
       }
 
       if (btn) btn.disabled = true;
-      if (btnLabel) btnLabel.innerText = "Running Stage 1 (Bug Fix) & Stage 2 (Security)...";
-      appendSystemMessage(`⚡ Executing 2-Stage Pipeline on '${target}': Stage 1 (Bug Fix) -> Stage 2 (Security Scan)...`);
+      if (btnLabel) btnLabel.innerText = "Decoding Errors...";
+      appendSystemMessage(`🔍 [Phase 1] Inspecting & Decoding errors in '${target}' without modifying files...`);
+
+      try {
+        const res = await fetch("/api/decode_repo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ target: target })
+        });
+        const data = await res.json();
+
+        if (!res.ok || data.status !== "completed") {
+          renderExecutionError(data.error || "Decoding failed.");
+          appendAgentMessage(`❌ **Decoding Failed**: ${data.error || "Could not clone or read repository."}`, []);
+          return;
+        }
+
+        renderOnDemandResult(data);
+      } catch (err) {
+        renderExecutionError("Network error reaching WOLF backend.");
+        appendAgentMessage("⚠️ **Network Error**: Could not reach WOLF backend.", []);
+      } finally {
+        if (btn) btn.disabled = false;
+        if (btnLabel) btnLabel.innerText = "1. Decode Errors";
+      }
+    }
+
+    async function runFixAndCertify() {
+      switchRightTab("hub");
+      const input = document.getElementById("repo-link-input");
+      const btn = document.getElementById("execute-repo-btn");
+      const btnLabel = document.getElementById("execute-repo-btn-label");
+      const target = input ? input.value.trim() : "";
+
+      if (!target) {
+        appendSystemMessage("📌 Paste a GitHub repository URL or local folder path first, or click Decode Errors.");
+        if (input) input.focus();
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+      if (btnLabel) btnLabel.innerText = "Patching & Certifying...";
+      appendSystemMessage(`⚡ [Phase 2] Launching Autonomous Remediation Loop on '${target}'...`);
 
       try {
         const res = await fetch("/api/execute_repo", {
@@ -789,7 +1030,7 @@
 
         if (!res.ok || data.status !== "completed") {
           renderExecutionError(data.error || "Execution failed.");
-          appendAgentMessage(`❌ **Execution Failed**: ${data.error || "Could not clone or read repository."}`, []);
+          appendAgentMessage(`❌ **Execution Failed**: ${data.error || "Could not clone or patch repository."}`, []);
           return;
         }
 
@@ -799,8 +1040,13 @@
         appendAgentMessage("⚠️ **Network Error**: Could not reach WOLF backend.", []);
       } finally {
         if (btn) btn.disabled = false;
-        if (btnLabel) btnLabel.innerText = "Fix & Certify (Bug Fix + Security Scan)";
+        if (btnLabel) btnLabel.innerText = "2. Fix & Certify";
       }
+    }
+
+    function runOnDemandRepo() {
+      // Default action: decode first if not yet analyzed
+      runDecodeRepo();
     }
 
     function renderExecutionError(errorMsg) {
@@ -821,7 +1067,9 @@
       const repoLabel = data.repo.repo_label;
       const s1 = data.stage1_bugs;
       const s2 = data.stage2_security;
-      const isSecure = s2.verdict === "SECURE";
+      const phase = data.phase || (s1.bugs_fixed_count > 0 ? "certified" : "decoded");
+      const isCertified = phase === "certified";
+      const isSecure = s2.verdict === "SECURE" && isCertified;
 
       const heroLbl = document.getElementById("hero-target-label");
       if (heroLbl) heroLbl.innerText = repoLabel;
@@ -829,8 +1077,13 @@
       renderLiveSourceCode(data.source, s2);
       renderSecurityAudit(s2);
 
-      studioStatusPill.innerText = isSecure ? `SECURE (${s2.overall_grade})` : `INSECURE (${s2.vulnerabilities_count})`;
-      studioStatusPill.className = isSecure
+      // Update Robotic Wolf Mascot
+      updateWolfMascot(phase, isSecure, repoLabel, s1, s2);
+
+      studioStatusPill.innerText = isCertified && isSecure
+        ? `SECURE (${s2.overall_grade})`
+        : `UNSECURE (${s1.bugs_found_count} bugs, ${s2.vulnerabilities_count} vulns)`;
+      studioStatusPill.className = isCertified && isSecure
         ? "px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 shrink-0"
         : "px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full bg-rose-600 text-white animate-pulse shrink-0";
 
@@ -839,22 +1092,22 @@
       const pill = document.getElementById("verdict-grade-pill");
       const desc = document.getElementById("verdict-desc");
 
-      if (isSecure) {
+      if (isCertified && isSecure) {
         banner.className = "p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50/90 dark:bg-emerald-950/50 space-y-1 shadow-md shadow-emerald-500/10";
         title.className = "text-xs font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5";
-        title.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i> 🟢 CODE IS SECURE ✅`;
+        title.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i> 🟢 WOLF CERTIFIED SECURE &amp; FIXED ✅`;
         pill.className = "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-emerald-600 text-white";
         pill.innerText = `GRADE ${s2.overall_grade} • 0 VULNS`;
         desc.className = "text-[11px] text-emerald-700 dark:text-emerald-300";
-        desc.innerHTML = `<strong>${escapeHtml(repoLabel)}</strong> passed Stage 1 bug verification and all 6 OWASP/CWE cybersecurity controls (${data.duration_ms}ms).`;
+        desc.innerHTML = `<strong>${escapeHtml(repoLabel)}</strong> passed Stage 1 autonomous remediation and all OWASP/CWE cybersecurity controls (${data.duration_ms}ms).`;
       } else {
         banner.className = "p-4 rounded-2xl border-2 border-rose-500 bg-rose-50/95 dark:bg-rose-950/60 space-y-1 shadow-md shadow-rose-500/20";
         title.className = "text-xs font-extrabold text-rose-800 dark:text-rose-200 flex items-center gap-1.5";
-        title.innerHTML = `<i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i> 🔴 SECURITY RISK DETECTED 🚨`;
+        title.innerHTML = `<i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i> 🔴 PHASE 1: UNSECURE CODE DETECTED 🚨`;
         pill.className = "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-rose-600 text-white animate-pulse";
-        pill.innerText = `GRADE ${s2.overall_grade} • ${s2.vulnerabilities_count} VULN(S)`;
+        pill.innerText = `GRADE ${s2.overall_grade} • ${s1.bugs_found_count} BUGS`;
         desc.className = "text-[11px] text-rose-700 dark:text-rose-300";
-        desc.innerHTML = `<strong>WARNING:</strong> <strong>${escapeHtml(repoLabel)}</strong> has <strong>${s2.vulnerabilities_count}</strong> vulnerability(s) (CRIT: ${s2.severity_counts.CRITICAL}, HIGH: ${s2.severity_counts.HIGH}). Remediate before deployment!`;
+        desc.innerHTML = `<strong>DECODED:</strong> <strong>${escapeHtml(repoLabel)}</strong> contains <strong>${s1.bugs_found_count}</strong> bug(s) and <strong>${s2.vulnerabilities_count}</strong> security flaw(s) in original unpatched state. Click <strong>[2. Fix &amp; Certify]</strong> above to resolve!`;
       }
 
       document.getElementById("stage1-card").classList.remove("hidden");
@@ -867,14 +1120,16 @@
       const loopStatus = loopInfo.status || "RESOLVED";
       const s1LoopEl = document.getElementById("s1-loop");
       if (s1LoopEl) s1LoopEl.innerText = `${loopIter}x`;
-      document.getElementById("stage1-pill").innerText = `Loop: ${loopIter}x • ${s1.bugs_fixed_count} Fixed`;
+      document.getElementById("stage1-pill").innerText = isCertified
+        ? `Loop: ${loopIter}x • ${s1.bugs_fixed_count} Fixed`
+        : `Decoded: ${s1.bugs_found_count} Found • 0 Fixed`;
 
       const s1Details = document.getElementById("stage1-details");
       if (s1.bugs_found_count === 0) {
         s1Details.innerHTML = `<div class="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300">✅ <strong>Clean Codebase</strong>: Agent completed check in 1 loop — 0 syntax or runtime bugs found across ${s1.files_analyzed} file(s).</div>`;
       } else {
         let html = `<div class="p-2 rounded-lg bg-indigo-950/40 border border-indigo-800/60 text-[10px] text-indigo-300 font-mono">
-          🔄 <strong>Autonomous Agent Loop</strong>: Completed in <strong>${loopIter} iteration(s)</strong> (${escapeHtml(loopStatus)}).
+          🔄 <strong>Autonomous Agent Loop</strong>: ${isCertified ? 'Remediation completed' : 'Inspection complete (read-only decode)'} in <strong>${loopIter} iteration(s)</strong> (${escapeHtml(loopStatus)}).
         </div>`;
         (s1.fixes_applied || []).forEach(fx => {
           html += `<div class="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900">
@@ -884,8 +1139,9 @@
         });
         (s1.remaining_bugs || []).forEach(rb => {
           html += `<div class="p-2.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
-            <div class="font-bold text-amber-800 dark:text-amber-300">⚠️ FLAGGED: ${escapeHtml(rb.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(rb.file)}:${rb.line})</span></div>
+            <div class="font-bold text-amber-800 dark:text-amber-300">⚠️ ${isCertified ? 'FLAGGED FOR REVIEW' : 'DECODED FLAW'}: ${escapeHtml(rb.bug_type)} <span class="font-mono text-[10px]">(${escapeHtml(rb.file)}:${rb.line})</span></div>
             <div class="text-slate-600 dark:text-slate-300">${escapeHtml(rb.description)}</div>
+            ${rb.fix ? `<div class="text-[10px] text-slate-500 mt-0.5"><strong>Remediation:</strong> ${escapeHtml(rb.fix)}</div>` : ''}
           </div>`;
         });
         if (s1.modified_files && s1.modified_files.length > 0) {
@@ -922,22 +1178,26 @@
         `).join("");
       }
 
-      let msg = `🚀 **On-Demand Execution Complete — \`${repoLabel}\`** (${data.duration_ms}ms)\n\n`;
-      msg += isSecure
-        ? `### 🟢 VERDICT: CODE IS SECURE ✅ (Grade ${s2.overall_grade} — 0 Vulnerabilities)\n\n`
-        : `### 🔴 VERDICT: INSECURE CODE DETECTED 🚨 (Grade ${s2.overall_grade} — ${s2.vulnerabilities_count} Vulnerability(s))\n\n`;
-      msg += `🔄 **Stage 1 — Autonomous Agent Loop (${loopIter} iteration(s))**: ` +
-             `Analyzed \`${s1.files_analyzed}\` file(s) • Found: **${s1.bugs_found_count}** • Auto-Fixed: **${s1.bugs_fixed_count}** • Review: **${s1.remaining_bugs_count}**\n` +
-             `*Loop Pipeline: 1. Find Bug ➔ 2. Understand Concept ➔ 3. Apply Fix ➔ 4. Run & Check (Loops if broken)*\n`;
+      let msg = isCertified
+        ? `🚀 **WOLF Autonomous Fix & Certification Complete — \`${repoLabel}\`** (${data.duration_ms}ms)\n\n`
+        : `🔍 **Phase 1: Target Inspection & Bug Decoding — \`${repoLabel}\`** (${data.duration_ms}ms)\n\n`;
+
+      if (isCertified && isSecure) {
+        msg += `### 🟢 VERDICT: CODE IS SECURE ✅ (Grade ${s2.overall_grade} — 0 Vulnerabilities)\n\n`;
+        msg += `All **${s1.bugs_fixed_count}** bug(s) repaired and verified. Repository is hardened and production-ready!`;
+      } else {
+        msg += `### 🔴 VERDICT: UNSECURE CODE DETECTED 🚨 (Grade ${s2.overall_grade} — ${s1.bugs_found_count} Bug(s), ${s2.vulnerabilities_count} Flaw(s))\n\n`;
+        msg += `Original code contains defects. Click **[2. Fix & Certify]** in the Hub tab to run WOLF's autonomous repair.\n\n`;
+      }
+
+      msg += `\n**Bugs Breakdown**: Found: **${s1.bugs_found_count}** • Auto-Fixed: **${s1.bugs_fixed_count}** • Remaining: **${s1.remaining_bugs_count}**\n`;
+      if (s1.remaining_bugs && s1.remaining_bugs.length > 0 && !isCertified) {
+        msg += s1.remaining_bugs.slice(0, 5).map(b => `- ⚠️ \`${b.file}:${b.line}\` (${b.bug_type}): ${b.description}`).join("\n") + "\n";
+      }
       if (s1.fixes_applied && s1.fixes_applied.length > 0) {
         msg += s1.fixes_applied.slice(0, 5).map(fx => `- 🛠️ Fixed \`${fx.file}:${fx.line}\` (${fx.bug_type}): ${fx.fix || fx.description}`).join("\n") + "\n";
       }
-      msg += `\n**Stage 2 — Post-Fix Security Scan**: Grade **${s2.overall_grade}** (${s2.score}/100) • CRIT: ${s2.severity_counts.CRITICAL} | HIGH: ${s2.severity_counts.HIGH} | MED: ${s2.severity_counts.MEDIUM} | LOW: ${s2.severity_counts.LOW}`;
-      if (!isSecure && s2.findings) {
-        msg += "\n" + s2.findings.slice(0, 5).map(f =>
-          `- 🚨 **[${f.severity}] ${f.cwe}** \`${f.file}:${f.line}\` — ${f.title}`
-        ).join("\n");
-      }
+
       appendAgentMessage(msg, []);
       lucide.createIcons();
     }

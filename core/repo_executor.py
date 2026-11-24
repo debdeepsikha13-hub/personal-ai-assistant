@@ -20,6 +20,7 @@ Never continuously scans or polls attached accounts in the background.
 
 import ast
 import io
+import json
 import os
 import re
 import shutil
@@ -220,11 +221,131 @@ class OnDemandRepoExecutor:
         except ValueError:
             return str(file_path)
 
-    def _scan_and_fix_bugs(self, root: Path, max_iterations: int = 3) -> Dict[str, Any]:
+    def _run_ai_semantic_scan(self, root: Path, source_files: List[Path], max_files: int = 4) -> List[Dict[str, Any]]:
+        """
+        Leverages Gemini LLM to inspect core source files for logic flaws,
+        runtime errors, unhandled edge cases, and algorithmic defects.
+        """
+        ai_bugs: List[Dict[str, Any]] = []
+        try:
+            from llm.factory import get_chat_model
+            model = get_chat_model()
+        except Exception as e:
+            logger.info(f"AI semantic scan model unavailable: {e}")
+            return ai_bugs
+
+        # Filter for non-test, non-config primary source files
+        target_files = []
+        for f in source_files:
+            name_low = f.name.lower()
+            if any(k in name_low for k in ["test", "spec", "config", "setup", "webpack", "vite", "babel", "package"]):
+                continue
+            if f.stat().st_size > 120_000:
+                continue
+            target_files.append(f)
+
+        def _rank_file(p: Path) -> int:
+            s = str(p).lower()
+            if any(k in s for k in ["controller", "service", "route", "handler", "api", "app", "index", "main", "core"]):
+                return 0
+            return 1
+
+        target_files.sort(key=_rank_file)
+        candidates = target_files[:max_files]
+
+        for cf in candidates:
+            rel_name = self._rel(cf, root)
+            try:
+                content = cf.read_text(encoding="utf-8", errors="ignore")
+            except Exception:
+                continue
+
+            if not content.strip() or len(content.strip()) < 30:
+                continue
+
+            sample_lines = content.splitlines()[:250]
+            sample_code = "\n".join(sample_lines)
+
+            prompt = (
+                f"You are an expert DevSecOps static code analysis engine.\n"
+                f"Analyze this file from a repository submitted by a developer.\n"
+                f"Identify REAL bugs, logic flaws, runtime exceptions, null pointer / undefined dereferences, "
+                f"off-by-one errors, infinite loops, or unhandled errors.\n"
+                f"File: {rel_name}\n\n"
+                f"```\n{sample_code}\n```\n\n"
+                f"Return ONLY a JSON array. If the file is healthy and has no real bugs, return [].\n"
+                f"If bugs are found, return objects with these exact keys:\n"
+                f'- "line": approximate line number (integer)\n'
+                f'- "severity": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW"\n'
+                f'- "bug_type": concise name (e.g. "NullDereference", "UnhandledException", "LogicFlaw")\n'
+                f'- "description": 1-2 sentence explanation of the bug and why it fails\n'
+                f'- "fix": 1 sentence explanation of how to fix it\n'
+                f'- "code_patch_target": optional exact snippet to replace (short, exact substring from the code above, or null)\n'
+                f'- "code_patch_replacement": optional replacement snippet (or null)\n'
+            )
+
+            try:
+                res = model.invoke(prompt)
+                raw = ""
+                if isinstance(res.content, str):
+                    raw = res.content
+                elif isinstance(res.content, list):
+                    for part in res.content:
+                        if isinstance(part, dict) and "text" in part:
+                            raw += part["text"]
+                        elif isinstance(part, str):
+                            raw += part
+
+                m = re.search(r"\[\s*\{[\s\S]*\}\s*\]", raw)
+                if m:
+                    parsed = json.loads(m.group(0))
+                    for item in parsed:
+                        if isinstance(item, dict) and item.get("bug_type"):
+                            ai_bugs.append({
+                                "file": rel_name,
+                                "line": int(item.get("line") or 1),
+                                "severity": str(item.get("severity") or "MEDIUM").upper(),
+                                "bug_type": f"[AI] {item.get('bug_type')}",
+                                "description": item.get("description", "Semantic defect detected by AI analyzer."),
+                                "fix": item.get("fix", "Review and remediate according to best practices."),
+                                "code_patch_target": item.get("code_patch_target"),
+                                "code_patch_replacement": item.get("code_patch_replacement"),
+                                "auto_fixed": False
+                            })
+            except Exception as e:
+                logger.debug(f"AI semantic analysis pass skipped for {rel_name}: {e}")
+
+        return ai_bugs
+
+    def _apply_ai_patch(self, root: Path, bug_info: Dict[str, Any]) -> bool:
+        try:
+            rel_file = bug_info.get("file")
+            target_str = bug_info.get("code_patch_target")
+            repl_str = bug_info.get("code_patch_replacement")
+            if not rel_file or not target_str or repl_str is None:
+                return False
+            fp = root / rel_file if not Path(rel_file).is_absolute() else Path(rel_file)
+            if not fp.exists() or not fp.is_file():
+                return False
+            content = fp.read_text(encoding="utf-8", errors="ignore")
+            if target_str in content:
+                new_content = content.replace(target_str, repl_str, 1)
+                if fp.suffix == ".py":
+                    try:
+                        ast.parse(new_content)
+                    except SyntaxError:
+                        return False
+                fp.write_text(new_content, encoding="utf-8")
+                return True
+        except Exception as e:
+            logger.debug(f"Failed to apply AI patch to {bug_info.get('file')}: {e}")
+        return False
+
+    def _scan_and_fix_bugs(self, root: Path, auto_fix: bool = True, max_iterations: int = 3) -> Dict[str, Any]:
         """
         STAGE 1: Autonomous Agent Loop (Find -> Understand -> Fix -> Run & Check -> Loop if needed).
         Iteratively identifies bugs across Python AND JavaScript/TypeScript files, applies targeted
-        patches, and runs test suites until healthy or max_iterations reached.
+        patches (when auto_fix=True), and runs test suites until healthy or max_iterations reached.
         """
         source_inventory = self._collect_source_files(root)
         py_files = source_inventory["python"]
@@ -236,12 +357,14 @@ class OnDemandRepoExecutor:
         last_test_results: Dict[str, Any] = {"all_passed": True, "total_tests": 0}
         remaining_bugs: List[Dict[str, Any]] = []
 
-        for iteration in range(1, max_iterations + 1):
+        actual_iterations = 1 if not auto_fix else max_iterations
+
+        for iteration in range(1, actual_iterations + 1):
             iteration_bugs: List[Dict[str, Any]] = []
             iteration_fixes: List[Dict[str, Any]] = []
             iteration_remaining: List[Dict[str, Any]] = []
 
-            logger.info(f"🔄 [AGENT LOOP ITERATION {iteration}/{max_iterations}] Step 1: Finding bugs in target ({source_inventory['dominant']})...")
+            logger.info(f"🔄 [AGENT LOOP ITERATION {iteration}/{actual_iterations}] Step 1: Finding bugs in target ({source_inventory['dominant']})...")
 
             # --- 1. Python Code Analysis & Fixing ---
             for py_file in py_files:
@@ -287,18 +410,22 @@ class OnDemandRepoExecutor:
                     if bare_except_lines:
                         bare_re = re.compile(r"^([ \t]*)except\s*:\s*$", re.MULTILINE)
                         if bare_re.search(updated):
-                            updated = bare_re.sub(r"\1except Exception:", updated)
+                            if auto_fix:
+                                updated = bare_re.sub(r"\1except Exception:", updated)
                             for ln in bare_except_lines:
                                 bug = {
                                     "file": rel_name, "line": ln, "severity": "MEDIUM",
                                     "bug_type": "BareExcept",
                                     "description": "Bare `except:` swallows SystemExit/KeyboardInterrupt.",
-                                    "auto_fixed": True,
+                                    "auto_fixed": auto_fix,
                                     "fix": "Replaced bare `except:` with `except Exception:`."
                                 }
                                 iteration_bugs.append(bug)
-                                iteration_fixes.append(bug)
-                                file_fixes.append(f"Line {ln}: bare except -> except Exception")
+                                if auto_fix:
+                                    iteration_fixes.append(bug)
+                                    file_fixes.append(f"Line {ln}: bare except -> except Exception")
+                                else:
+                                    iteration_remaining.append(bug)
 
                     # 2. Missing empty-list guard before sum(numbers) / len(numbers)
                     div_re = re.compile(
@@ -307,51 +434,63 @@ class OnDemandRepoExecutor:
                         r"([ \t]+)(?:#[^\n]*\n\2)?return\s+round\(sum\(numbers\)\s*/\s*len\(numbers\),\s*2\)"
                     )
                     if div_re.search(updated):
-                        updated = div_re.sub(
-                            r"\1\2if not numbers:\n\2    return 0.0\n\2return round(sum(numbers) / len(numbers), 2)",
-                            updated
-                        )
+                        if auto_fix:
+                            updated = div_re.sub(
+                                r"\1\2if not numbers:\n\2    return 0.0\n\2return round(sum(numbers) / len(numbers), 2)",
+                                updated
+                            )
                         bug = {
                             "file": rel_name, "line": 1, "severity": "CRITICAL",
                             "bug_type": "ZeroDivisionError",
                             "description": "Missing empty-list guard before `sum(numbers) / len(numbers)`.",
-                            "auto_fixed": True,
+                            "auto_fixed": auto_fix,
                             "fix": "Inserted `if not numbers: return 0.0` guard clause."
                         }
                         iteration_bugs.append(bug)
-                        iteration_fixes.append(bug)
-                        file_fixes.append("Added ZeroDivisionError guard in calculate_average()")
+                        if auto_fix:
+                            iteration_fixes.append(bug)
+                            file_fixes.append("Added ZeroDivisionError guard in calculate_average()")
+                        else:
+                            iteration_remaining.append(bug)
 
                     # 3. `== None` / `!= None` -> `is None` / `is not None`
                     none_eq_re = re.compile(r"(?<![=!<>])==\s*None\b")
                     none_neq_re = re.compile(r"!=\s*None\b")
                     if none_eq_re.search(updated) or none_neq_re.search(updated):
-                        updated = none_eq_re.sub("is None", updated)
-                        updated = none_neq_re.sub("is not None", updated)
+                        if auto_fix:
+                            updated = none_eq_re.sub("is None", updated)
+                            updated = none_neq_re.sub("is not None", updated)
                         bug = {
                             "file": rel_name, "line": 1, "severity": "LOW",
                             "bug_type": "NoneComparisonBug",
                             "description": "Using `== None` or `!= None` instead of identity check `is None` / `is not None`.",
-                            "auto_fixed": True,
+                            "auto_fixed": auto_fix,
                             "fix": "Normalized `== None` / `!= None` to `is None` / `is not None`."
                         }
                         iteration_bugs.append(bug)
-                        iteration_fixes.append(bug)
-                        file_fixes.append("Normalized None identity checks")
+                        if auto_fix:
+                            iteration_fixes.append(bug)
+                            file_fixes.append("Normalized None identity checks")
+                        else:
+                            iteration_remaining.append(bug)
 
                     # 4. `yaml.unsafe_load(` -> `yaml.safe_load(`
                     if "yaml.unsafe_load(" in updated:
-                        updated = updated.replace("yaml.unsafe_load(", "yaml.safe_load(")
+                        if auto_fix:
+                            updated = updated.replace("yaml.unsafe_load(", "yaml.safe_load(")
                         bug = {
                             "file": rel_name, "line": 1, "severity": "HIGH",
                             "bug_type": "UnsafeYamlLoad",
                             "description": "Unsafe YAML deserialization `yaml.unsafe_load()`.",
-                            "auto_fixed": True,
+                            "auto_fixed": auto_fix,
                             "fix": "Replaced `yaml.unsafe_load()` with `yaml.safe_load()`."
                         }
                         iteration_bugs.append(bug)
-                        iteration_fixes.append(bug)
-                        file_fixes.append("yaml.unsafe_load -> yaml.safe_load")
+                        if auto_fix:
+                            iteration_fixes.append(bug)
+                            file_fixes.append("yaml.unsafe_load -> yaml.safe_load")
+                        else:
+                            iteration_remaining.append(bug)
 
                     # 5. Detect mutable default arguments
                     for node in ast.walk(tree):
@@ -389,8 +528,8 @@ class OnDemandRepoExecutor:
                                 elif isinstance(k, ast.Constant):
                                     seen_keys.add(k.value)
 
-                # Write fix to disk if updated
-                if updated != original:
+                # Write fix to disk if updated and auto_fix is enabled
+                if auto_fix and updated != original:
                     py_file.write_text(updated, encoding="utf-8")
                     if rel_name not in all_modified_files:
                         all_modified_files.append(rel_name)
@@ -415,124 +554,160 @@ class OnDemandRepoExecutor:
                 # Bug 1 (FK-103): Fixed coupon discount allows negative total
                 neg_total_re = re.compile(r"total:\s*subtotal\s*-\s*discount\b")
                 if neg_total_re.search(updated):
-                    updated = neg_total_re.sub("total: Math.max(0, subtotal - discount)", updated)
+                    if auto_fix:
+                        updated = neg_total_re.sub("total: Math.max(0, subtotal - discount)", updated)
                     bug = {
                         "file": rel_name, "line": 1, "severity": "HIGH",
                         "bug_type": "NegativeCartTotal",
                         "description": "Fixed coupon discount allows negative cart total (subtotal - discount can drop below zero).",
-                        "auto_fixed": True,
+                        "auto_fixed": auto_fix,
                         "fix": "Enforced non-negative floor: `total: Math.max(0, subtotal - discount)`."
                     }
                     iteration_bugs.append(bug)
-                    iteration_fixes.append(bug)
+                    if auto_fix:
+                        iteration_fixes.append(bug)
+                    else:
+                        iteration_remaining.append(bug)
 
                 # Bug 2 (FK-101 / FK-112): Inverted sorting comparators
                 if "sort === 'price-asc'" in updated and "b.price - a.price" in updated:
-                    updated = updated.replace("products.sort((a, b) => b.price - a.price)", "products.sort((a, b) => a.price - b.price)")
+                    if auto_fix:
+                        updated = updated.replace("products.sort((a, b) => b.price - a.price)", "products.sort((a, b) => a.price - b.price)")
                     bug = {
                         "file": rel_name, "line": 1, "severity": "MEDIUM",
                         "bug_type": "InvertedSortComparator",
                         "description": "Inverted price sort: `price-asc` sorted descending (`b.price - a.price`) instead of ascending.",
-                        "auto_fixed": True,
+                        "auto_fixed": auto_fix,
                         "fix": "Corrected comparator to `products.sort((a, b) => a.price - b.price)`."
                     }
                     iteration_bugs.append(bug)
-                    iteration_fixes.append(bug)
+                    if auto_fix:
+                        iteration_fixes.append(bug)
+                    else:
+                        iteration_remaining.append(bug)
 
                 if "sort === 'price-desc'" in updated and "a.price - b.price" in updated:
-                    updated = updated.replace("products.sort((a, b) => a.price - b.price)", "products.sort((a, b) => b.price - a.price)")
+                    if auto_fix:
+                        updated = updated.replace("products.sort((a, b) => a.price - b.price)", "products.sort((a, b) => b.price - a.price)")
                     bug = {
                         "file": rel_name, "line": 1, "severity": "MEDIUM",
                         "bug_type": "InvertedSortComparator",
                         "description": "Inverted price sort: `price-desc` sorted ascending (`a.price - b.price`) instead of descending.",
-                        "auto_fixed": True,
+                        "auto_fixed": auto_fix,
                         "fix": "Corrected comparator to `products.sort((a, b) => b.price - a.price)`."
                     }
                     iteration_bugs.append(bug)
-                    iteration_fixes.append(bug)
+                    if auto_fix:
+                        iteration_fixes.append(bug)
+                    else:
+                        iteration_remaining.append(bug)
 
                 if "sort === 'rating'" in updated and "a.rating - b.rating" in updated:
-                    updated = updated.replace("products.sort((a, b) => a.rating - b.rating)", "products.sort((a, b) => b.rating - a.rating)")
+                    if auto_fix:
+                        updated = updated.replace("products.sort((a, b) => a.rating - b.rating)", "products.sort((a, b) => b.rating - a.rating)")
                     bug = {
                         "file": rel_name, "line": 1, "severity": "MEDIUM",
                         "bug_type": "InvertedSortComparator",
                         "description": "Inverted rating sort: `rating` sorted worst-first (`a.rating - b.rating`) instead of highest-rated first.",
-                        "auto_fixed": True,
+                        "auto_fixed": auto_fix,
                         "fix": "Corrected comparator to `products.sort((a, b) => b.rating - a.rating)`."
                     }
                     iteration_bugs.append(bug)
-                    iteration_fixes.append(bug)
+                    if auto_fix:
+                        iteration_fixes.append(bug)
+                    else:
+                        iteration_remaining.append(bug)
 
                 # Bug 3 (Off-by-One Pagination Slice)
                 page_slice_re = re.compile(r"visible\.slice\(start,\s*page\s*\*\s*PAGE_SIZE\s*-\s*1\)")
                 if page_slice_re.search(updated):
-                    updated = page_slice_re.sub("visible.slice(start, page * PAGE_SIZE)", updated)
+                    if auto_fix:
+                        updated = page_slice_re.sub("visible.slice(start, page * PAGE_SIZE)", updated)
                     bug = {
                         "file": rel_name, "line": 1, "severity": "MEDIUM",
                         "bug_type": "OffByOnePaginationSlice",
                         "description": "Pagination slice `visible.slice(start, page * PAGE_SIZE - 1)` drops the last item of each page.",
-                        "auto_fixed": True,
+                        "auto_fixed": auto_fix,
                         "fix": "Corrected slice end boundary to `visible.slice(start, page * PAGE_SIZE)`."
                     }
                     iteration_bugs.append(bug)
-                    iteration_fixes.append(bug)
+                    if auto_fix:
+                        iteration_fixes.append(bug)
+                    else:
+                        iteration_remaining.append(bug)
 
                 # Bug 4 (FK-109): Unchecked string method on unvalidated coupon
                 if "coupon.toUpperCase()" in updated:
-                    updated = updated.replace("coupon.toUpperCase()", "String(coupon || '').toUpperCase()")
+                    if auto_fix:
+                        updated = updated.replace("coupon.toUpperCase()", "String(coupon || '').toUpperCase()")
                     bug = {
                         "file": rel_name, "line": 1, "severity": "MEDIUM",
                         "bug_type": "UncheckedStringMethod",
                         "description": "Calling `.toUpperCase()` directly on unvalidated `coupon` parameter throws TypeError on null/undefined/non-strings.",
-                        "auto_fixed": True,
+                        "auto_fixed": auto_fix,
                         "fix": "Guarded parameter with `String(coupon || '').toUpperCase()`."
                     }
                     iteration_bugs.append(bug)
-                    iteration_fixes.append(bug)
+                    if auto_fix:
+                        iteration_fixes.append(bug)
+                    else:
+                        iteration_remaining.append(bug)
 
                 # Bug 5 (Prototype Pollution Guard): mergeSettings without __proto__ filtering
                 proto_sink_re = re.compile(r"(function mergeSettings\([^{]*\{[\s\S]*?for\s*\(\s*const\s+key\s+in\s+source\s*\)\s*\{)(?!\s*if\s*\(\s*key\s*===\s*['\"]__proto__)")
                 if proto_sink_re.search(updated):
-                    updated = proto_sink_re.sub(
-                        r"\1\n    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;",
-                        updated
-                    )
+                    if auto_fix:
+                        updated = proto_sink_re.sub(
+                            r"\1\n    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;",
+                            updated
+                        )
                     bug = {
                         "file": rel_name, "line": 1, "severity": "HIGH",
                         "bug_type": "PrototypePollutionSink",
                         "description": "Unprotected recursive object merge vulnerable to prototype pollution (CWE-1321).",
-                        "auto_fixed": True,
+                        "auto_fixed": auto_fix,
                         "fix": "Added `if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;` guard."
                     }
                     iteration_bugs.append(bug)
-                    iteration_fixes.append(bug)
+                    if auto_fix:
+                        iteration_fixes.append(bug)
+                    else:
+                        iteration_remaining.append(bug)
 
                 # Bug 6 (FK-104): Order history sorted oldest first instead of newest first
                 if ".sort({ createdAt: 1 })" in updated:
-                    updated = updated.replace(".sort({ createdAt: 1 })", ".sort({ createdAt: -1 })")
+                    if auto_fix:
+                        updated = updated.replace(".sort({ createdAt: 1 })", ".sort({ createdAt: -1 })")
                     bug = {
                         "file": rel_name, "line": 1, "severity": "LOW",
                         "bug_type": "InvertedOrderHistorySort",
                         "description": "Order history sorted oldest first (`createdAt: 1`) instead of newest first (`createdAt: -1`).",
-                        "auto_fixed": True,
+                        "auto_fixed": auto_fix,
                         "fix": "Changed order history sort to descending: `.sort({ createdAt: -1 })`."
                     }
                     iteration_bugs.append(bug)
-                    iteration_fixes.append(bug)
+                    if auto_fix:
+                        iteration_fixes.append(bug)
+                    else:
+                        iteration_remaining.append(bug)
 
                 # Bug 7 (FK-111): Brand-name search misses products (searched only name + category)
                 brand_search_re = re.compile(r"\(p\.name\s*\+\s*' '\s*\+\s*p\.category\)\.toLowerCase\(\)\.includes\(")
                 if brand_search_re.search(updated):
-                    updated = brand_search_re.sub("(p.name + ' ' + p.category + ' ' + (p.brand || '')).toLowerCase().includes(", updated)
+                    if auto_fix:
+                        updated = brand_search_re.sub("(p.name + ' ' + p.category + ' ' + (p.brand || '')).toLowerCase().includes(", updated)
                     bug = {
                         "file": rel_name, "line": 1, "severity": "MEDIUM",
                         "bug_type": "IncompleteSearchScope",
                         "description": "Product text query searches only `name` and `category`, omitting `brand`.",
-                        "auto_fixed": True,
+                        "auto_fixed": auto_fix,
                         "fix": "Extended search scope to include `brand`: `(p.name + ' ' + p.category + ' ' + (p.brand || ''))...`."
                     }
                     iteration_bugs.append(bug)
-                    iteration_fixes.append(bug)
+                    if auto_fix:
+                        iteration_fixes.append(bug)
+                    else:
+                        iteration_remaining.append(bug)
 
                 # Bug 8 (FK-102): Adding to cart exceeds available inventory stock
                 cart_stock_re = re.compile(
@@ -540,19 +715,23 @@ class OnDemandRepoExecutor:
                     r"(?!\s*if \(quantity > product\.stock\))"
                 )
                 if cart_stock_re.search(updated):
-                    updated = cart_stock_re.sub(
-                        r"\1\n  if (quantity > product.stock) return res.status(400).json({ error: 'Quantity exceeds available stock' });",
-                        updated
-                    )
+                    if auto_fix:
+                        updated = cart_stock_re.sub(
+                            r"\1\n  if (quantity > product.stock) return res.status(400).json({ error: 'Quantity exceeds available stock' });",
+                            updated
+                        )
                     bug = {
                         "file": rel_name, "line": 1, "severity": "HIGH",
                         "bug_type": "CartExceedsStock",
                         "description": "Cart addition lacks inventory guard clause (quantity can exceed available stock).",
-                        "auto_fixed": True,
+                        "auto_fixed": auto_fix,
                         "fix": "Inserted guard: `if (quantity > product.stock) return res.status(400).json({ error: 'Quantity exceeds available stock' });`."
                     }
                     iteration_bugs.append(bug)
-                    iteration_fixes.append(bug)
+                    if auto_fix:
+                        iteration_fixes.append(bug)
+                    else:
+                        iteration_remaining.append(bug)
 
                 # Bug 9: Empty catch blocks
                 empty_catch_re = re.compile(r"catch\s*(?:\([^)]*\))?\s*\{\s*\}")
@@ -568,8 +747,8 @@ class OnDemandRepoExecutor:
                     iteration_bugs.append(bug)
                     iteration_remaining.append(bug)
 
-                # Write JS fix if modified
-                if updated != original:
+                # Write JS fix if modified and auto_fix is enabled
+                if auto_fix and updated != original:
                     js_file.write_text(updated, encoding="utf-8")
                     if rel_name not in all_modified_files:
                         all_modified_files.append(rel_name)
@@ -639,10 +818,32 @@ class OnDemandRepoExecutor:
                 seen_fix.add(key)
                 unique_fixes.append(f)
 
+        # AI Semantic Scan Pass (LLM Inspection of primary source files)
+        # Executes during Phase 1 Decode (auto_fix=False) or when 0 bugs found in arbitrary repos
+        if (not auto_fix) or len(unique_detected) == 0:
+            logger.info("🧠 Running AI Semantic Code Analysis pass across core modules...")
+            ai_findings = self._run_ai_semantic_scan(root, source_inventory["all"])
+            for ab in ai_findings:
+                key = (ab.get("file"), ab.get("line"), ab.get("bug_type"))
+                if key in seen_det:
+                    continue
+                seen_det.add(key)
+                unique_detected.append(ab)
+                remaining_bugs.append(ab)
+
+        # Deduplicate remaining bugs
+        unique_remaining = []
+        seen_rem = set()
+        for r in remaining_bugs:
+            key = (r.get("file"), r.get("line"), r.get("bug_type"))
+            if key not in seen_rem and key not in seen_fix:
+                seen_rem.add(key)
+                unique_remaining.append(r)
+
         return {
             "agent_loop": {
                 "total_iterations": len(loop_history),
-                "status": "RESOLVED" if last_test_results.get("all_passed") and len(remaining_bugs) == 0 else "PARTIALLY_RESOLVED",
+                "status": "RESOLVED" if last_test_results.get("all_passed") and len(unique_remaining) == 0 else "PARTIALLY_RESOLVED",
                 "loop_history": loop_history
             },
             "dominant_language": source_inventory["dominant"],
@@ -653,11 +854,11 @@ class OnDemandRepoExecutor:
             },
             "bugs_found_count": len(unique_detected),
             "bugs_fixed_count": len(unique_fixes),
-            "remaining_bugs_count": len(remaining_bugs),
+            "remaining_bugs_count": len(unique_remaining),
             "modified_files": all_modified_files,
             "bugs_detected": unique_detected,
             "fixes_applied": unique_fixes,
-            "remaining_bugs": remaining_bugs,
+            "remaining_bugs": unique_remaining,
             "tests": last_test_results
         }
 
@@ -870,11 +1071,13 @@ class OnDemandRepoExecutor:
             "exists": True
         }
 
-    def execute(self, target: str) -> Dict[str, Any]:
+    def decode(self, target: str) -> Dict[str, Any]:
         """
-        Execute the full On-Demand 2-Stage Pipeline on a submitted GitHub URL or local path:
-          1. Stage 1: Bug Detection & Autonomous Fixing
-          2. Stage 2: Post-Fix Cybersecurity SAST Scan & SECURE/INSECURE Indicator
+        PHASE 1: On-Demand Target Inspection & Bug Decoding.
+        Analyzes the submitted repository in its ORIGINAL UNPATCHED STATE.
+        Detects syntax, runtime, and logic bugs (via AST, static rules, and AI semantic inspection)
+        plus OWASP/CWE cybersecurity vulnerabilities without modifying any files on disk.
+        Emits an unsecure/flawed verdict with detailed error breakdown.
         """
         t0 = time.perf_counter()
         root, meta = self._prepare_target(target)
@@ -884,18 +1087,83 @@ class OnDemandRepoExecutor:
                 "error": meta.get("error", "Could not prepare target repository.")
             }
 
-        stage1 = self._scan_and_fix_bugs(root)
+        # auto_fix=False guarantees zero file modifications on disk
+        stage1 = self._scan_and_fix_bugs(root, auto_fix=False, max_iterations=1)
         stage2 = self._run_post_fix_security_scan(root)
         source = self._get_preview_snapshot(root, stage2, stage1)
         duration_ms = int((time.perf_counter() - t0) * 1000)
 
+        total_bugs = stage1.get("bugs_found_count", 0)
+        total_vulns = stage2.get("vulnerabilities_count", 0)
+        tests_ok = stage1.get("tests", {}).get("all_passed", True)
+        has_defects = (total_bugs > 0) or (total_vulns > 0) or (not tests_ok)
+
+        is_secure = not has_defects
+        verdict = "CLEAN & SECURE" if is_secure else "UNSECURE / BUGS DETECTED"
+
+        # Compute unpatched security score & grade reflecting both SAST flaws and logic defects
+        penalty = total_vulns * 10 + total_bugs * 8
+        if not tests_ok:
+            penalty += 20
+        unpatched_score = max(20, 100 - penalty)
+        unpatched_grade = _compute_grade(unpatched_score)
+        if has_defects:
+            stage2["overall_grade"] = unpatched_grade
+            stage2["score"] = unpatched_score
+            stage2["is_secure"] = False
+            stage2["verdict"] = "INSECURE"
+            stage2["indicator"] = f"INSECURE — {total_bugs} Bug(s) & {total_vulns} Security Flaw(s) Decoded (Grade {unpatched_grade})"
+
         result = {
             "status": "completed",
+            "phase": "decoded",
             "repo": meta,
             "duration_ms": duration_ms,
             "stage1_bugs": stage1,
             "stage2_security": stage2,
-            "source": source
+            "source": source,
+            "verdict": verdict,
+            "is_secure": is_secure,
+            "can_fix": has_defects
+        }
+        return result
+
+    def execute(self, target: str, auto_fix: bool = True) -> Dict[str, Any]:
+        """
+        PHASE 2: Autonomous Bug Remediation + Post-Fix Security Certification.
+        Applies verified patches, re-runs unit tests, performs post-fix SAST scan,
+        and certifies the codebase with an audit trail saved in SQLite.
+        """
+        t0 = time.perf_counter()
+        root, meta = self._prepare_target(target)
+        if root is None:
+            return {
+                "status": "error",
+                "error": meta.get("error", "Could not prepare target repository.")
+            }
+
+        stage1 = self._scan_and_fix_bugs(root, auto_fix=auto_fix)
+        stage2 = self._run_post_fix_security_scan(root)
+        source = self._get_preview_snapshot(root, stage2, stage1)
+        duration_ms = int((time.perf_counter() - t0) * 1000)
+
+        is_secure = stage2.get("is_secure", False) and stage1.get("remaining_bugs_count", 0) == 0
+        verdict = (
+            "WOLF CERTIFIED SECURE & FIXED ✅"
+            if is_secure
+            else ("PARTIALLY FIXED — REVIEW REMAINING" if stage1.get("bugs_fixed_count", 0) > 0 else "INSECURE")
+        )
+
+        result = {
+            "status": "completed",
+            "phase": "certified",
+            "repo": meta,
+            "duration_ms": duration_ms,
+            "stage1_bugs": stage1,
+            "stage2_security": stage2,
+            "source": source,
+            "verdict": verdict,
+            "is_secure": is_secure
         }
 
         # Persist full execution audit trail into SQLite relational database

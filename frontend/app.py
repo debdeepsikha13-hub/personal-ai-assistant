@@ -114,9 +114,33 @@ async def api_tools(request):
     return JSONResponse(tools_data)
 
 
+async def api_decode_repo(request):
+    """
+    On-demand Phase 1: Target Inspection & Bug Decoding.
+    Runs strictly in read-only decode mode: identifies syntax, runtime, and logic bugs
+    plus OWASP/CWE cybersecurity vulnerabilities without modifying any files.
+    """
+    from core.repo_executor import OnDemandRepoExecutor
+    try:
+        body = await request.json()
+        target = str(body.get("target", "")).strip()
+    except Exception:
+        return JSONResponse({"status": "error", "error": "Invalid JSON payload."}, status_code=400)
+
+    if not target:
+        return JSONResponse(
+            {"status": "error", "error": "Please provide a GitHub repository URL or local folder path."},
+            status_code=400
+        )
+
+    executor = OnDemandRepoExecutor()
+    result = await asyncio.to_thread(executor.decode, target)
+    return JSONResponse(result, status_code=200 if result.get("status") == "completed" else 400)
+
+
 async def api_execute_repo(request):
     """
-    On-demand 2-stage repository executor:
+    On-demand 2-stage repository executor (Phase 2):
     Runs ONLY when the user submits a GitHub repo URL or local folder/file path.
       Stage 1: Detect & autonomously fix bugs
       Stage 2: Post-fix OWASP/CWE cybersecurity scan -> SECURE / INSECURE verdict
@@ -232,6 +256,7 @@ routes = [
     Route("/api/memory", api_memory),
     Route("/api/tools", api_tools),
     Route("/api/reports", api_reports),
+    Route("/api/decode_repo", api_decode_repo, methods=["POST"]),
     Route("/api/execute_repo", api_execute_repo, methods=["POST"]),
     Route("/api/security_audit", api_security_audit, methods=["GET", "POST"]),
     Route("/api/chat", api_chat, methods=["POST"]),

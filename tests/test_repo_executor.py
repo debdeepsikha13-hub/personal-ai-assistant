@@ -124,6 +124,40 @@ class TestOnDemandRepoExecutor(unittest.TestCase):
             self.assertEqual(s2["verdict"], "INSECURE")
             self.assertGreaterEqual(s2["vulnerabilities_count"], 2)
 
+    def test_05_decode_phase_inspects_without_modifying_files(self):
+        """Phase 1 decode() must detect bugs, declare UNSECURE, and NOT modify files on disk."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "unpatched_repo"
+            repo.mkdir()
+            app_py = repo / "main.py"
+            original_code = (
+                "def calculate_average(numbers):\n"
+                "    return round(sum(numbers) / len(numbers), 2)\n"
+            )
+            app_py.write_text(original_code, encoding="utf-8")
+
+            # Run Phase 1: decode
+            decode_res = self.executor.decode(str(repo))
+            self.assertEqual(decode_res["status"], "completed")
+            self.assertEqual(decode_res["phase"], "decoded")
+            self.assertEqual(decode_res["verdict"], "UNSECURE / BUGS DETECTED")
+            self.assertFalse(decode_res["is_secure"])
+            self.assertTrue(decode_res["can_fix"])
+            self.assertGreaterEqual(decode_res["stage1_bugs"]["bugs_found_count"], 1)
+
+            # Code MUST remain unpatched in Phase 1
+            current_code = app_py.read_text(encoding="utf-8")
+            self.assertEqual(current_code, original_code)
+            self.assertNotIn("if not numbers:", current_code)
+
+            # Now run Phase 2: execute (Fix & Certify)
+            exec_res = self.executor.execute(str(repo))
+            self.assertEqual(exec_res["status"], "completed")
+            self.assertEqual(exec_res["phase"], "certified")
+            self.assertTrue(exec_res["is_secure"])
+            self.assertIn("WOLF CERTIFIED SECURE", exec_res["verdict"])
+            self.assertIn("if not numbers:", app_py.read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()
