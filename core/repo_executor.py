@@ -269,8 +269,10 @@ class OnDemandRepoExecutor:
             prompt = (
                 f"You are an expert DevSecOps static code analysis engine.\n"
                 f"Analyze this file from a repository submitted by a developer.\n"
-                f"Identify REAL bugs, logic flaws, runtime exceptions, null pointer / undefined dereferences, "
+                f"Identify REAL software bugs, logic flaws, runtime exceptions, null pointer / undefined dereferences, "
                 f"off-by-one errors, infinite loops, or unhandled errors.\n"
+                f"IMPORTANT: Do NOT report cybersecurity SAST vulnerabilities like eval(), child_process.exec(), "
+                f"or hardcoded API keys/passwords, as those are handled separately by the Stage 2 security audit.\n"
                 f"File: {rel_name}\n\n"
                 f"```\n{sample_code}\n```\n\n"
                 f"Return ONLY a JSON array. If the file is healthy and has no real bugs, return [].\n"
@@ -819,17 +821,17 @@ class OnDemandRepoExecutor:
                 unique_fixes.append(f)
 
         # AI Semantic Scan Pass (LLM Inspection of primary source files)
-        # Executes during Phase 1 Decode (auto_fix=False) or when 0 bugs found in arbitrary repos
-        if (not auto_fix) or len(unique_detected) == 0:
-            logger.info("🧠 Running AI Semantic Code Analysis pass across core modules...")
-            ai_findings = self._run_ai_semantic_scan(root, source_inventory["all"])
-            for ab in ai_findings:
-                key = (ab.get("file"), ab.get("line"), ab.get("bug_type"))
-                if key in seen_det:
-                    continue
-                seen_det.add(key)
-                unique_detected.append(ab)
-                remaining_bugs.append(ab)
+        # Always runs in both Phase 1 (Decode) and Phase 2 (Execute) to guarantee
+        # that total bug discovery counts remain 100% consistent across phases.
+        logger.info("🧠 Running AI Semantic Code Analysis pass across core modules...")
+        ai_findings = self._run_ai_semantic_scan(root, source_inventory["all"])
+        for ab in ai_findings:
+            key = (ab.get("file"), ab.get("line"), ab.get("bug_type"))
+            if key in seen_det:
+                continue
+            seen_det.add(key)
+            unique_detected.append(ab)
+            remaining_bugs.append(ab)
 
         # Deduplicate remaining bugs
         unique_remaining = []
@@ -1147,12 +1149,22 @@ class OnDemandRepoExecutor:
         source = self._get_preview_snapshot(root, stage2, stage1)
         duration_ms = int((time.perf_counter() - t0) * 1000)
 
-        is_secure = stage2.get("is_secure", False) and stage1.get("remaining_bugs_count", 0) == 0
-        verdict = (
-            "WOLF CERTIFIED SECURE & FIXED ✅"
-            if is_secure
-            else ("PARTIALLY FIXED — REVIEW REMAINING" if stage1.get("bugs_fixed_count", 0) > 0 else "INSECURE")
-        )
+        has_security_flaws = not stage2.get("is_secure", False)
+        fixed_count = stage1.get("bugs_fixed_count", 0)
+        remaining_count = stage1.get("remaining_bugs_count", 0)
+
+        if not has_security_flaws and remaining_count == 0:
+            is_secure = True
+            verdict = "WOLF CERTIFIED SECURE & FIXED ✅"
+        elif not has_security_flaws and fixed_count > 0:
+            is_secure = True
+            verdict = f"WOLF CERTIFIED: {fixed_count} FIXED ✅ ({remaining_count} In Review)"
+        elif fixed_count > 0:
+            is_secure = False
+            verdict = f"PARTIALLY FIXED ({fixed_count} Fixed, {remaining_count} In Review)"
+        else:
+            is_secure = False
+            verdict = "INSECURE"
 
         result = {
             "status": "completed",

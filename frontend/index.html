@@ -547,8 +547,8 @@
               <div id="s1-files-label" class="text-[9px] text-slate-400">ANALYZED</div>
             </div>
             <div class="p-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/70">
-              <div id="s1-loop" class="text-sm font-black text-indigo-500">1x</div>
-              <div class="text-[9px] text-slate-400">AGENT LOOP</div>
+              <div id="s1-detected" class="text-sm font-black text-rose-500">0</div>
+              <div class="text-[9px] text-slate-400">TOTAL BUGS</div>
             </div>
             <div class="p-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/70">
               <div id="s1-fixed" class="text-sm font-black text-emerald-600">0</div>
@@ -556,7 +556,7 @@
             </div>
             <div class="p-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/70">
               <div id="s1-remaining" class="text-sm font-black text-amber-500">0</div>
-              <div class="text-[9px] text-slate-400">REVIEW</div>
+              <div class="text-[9px] text-slate-400">IN REVIEW</div>
             </div>
           </div>
           <div id="stage1-details" class="space-y-1.5 text-[11px]"></div>
@@ -1112,16 +1112,16 @@
 
       document.getElementById("stage1-card").classList.remove("hidden");
       document.getElementById("s1-files").innerText = s1.files_analyzed;
+      const s1DetEl = document.getElementById("s1-detected");
+      if (s1DetEl) s1DetEl.innerText = s1.bugs_found_count;
       document.getElementById("s1-fixed").innerText = s1.bugs_fixed_count;
       document.getElementById("s1-remaining").innerText = s1.remaining_bugs_count;
 
       const loopInfo = s1.agent_loop || {};
       const loopIter = loopInfo.total_iterations || 1;
       const loopStatus = loopInfo.status || "RESOLVED";
-      const s1LoopEl = document.getElementById("s1-loop");
-      if (s1LoopEl) s1LoopEl.innerText = `${loopIter}x`;
       document.getElementById("stage1-pill").innerText = isCertified
-        ? `Loop: ${loopIter}x • ${s1.bugs_fixed_count} Fixed`
+        ? `${s1.bugs_found_count} Total • ${s1.bugs_fixed_count} Fixed • ${s1.remaining_bugs_count} In Review`
         : `Decoded: ${s1.bugs_found_count} Found • 0 Fixed`;
 
       const s1Details = document.getElementById("stage1-details");
